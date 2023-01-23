@@ -22,8 +22,9 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ExecutorServiceClient interface {
-	/// Processes a batch
+	// / Processes a batch
 	ProcessBatch(ctx context.Context, in *ProcessBatchRequest, opts ...grpc.CallOption) (*ProcessBatchResponse, error)
+	ProcessBatchStream(ctx context.Context, opts ...grpc.CallOption) (ExecutorService_ProcessBatchStreamClient, error)
 }
 
 type executorServiceClient struct {
@@ -43,12 +44,44 @@ func (c *executorServiceClient) ProcessBatch(ctx context.Context, in *ProcessBat
 	return out, nil
 }
 
+func (c *executorServiceClient) ProcessBatchStream(ctx context.Context, opts ...grpc.CallOption) (ExecutorService_ProcessBatchStreamClient, error) {
+	stream, err := c.cc.NewStream(ctx, &ExecutorService_ServiceDesc.Streams[0], "/executor.v1.ExecutorService/ProcessBatchStream", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &executorServiceProcessBatchStreamClient{stream}
+	return x, nil
+}
+
+type ExecutorService_ProcessBatchStreamClient interface {
+	Send(*ProcessBatchRequest) error
+	Recv() (*ProcessBatchResponse, error)
+	grpc.ClientStream
+}
+
+type executorServiceProcessBatchStreamClient struct {
+	grpc.ClientStream
+}
+
+func (x *executorServiceProcessBatchStreamClient) Send(m *ProcessBatchRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *executorServiceProcessBatchStreamClient) Recv() (*ProcessBatchResponse, error) {
+	m := new(ProcessBatchResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ExecutorServiceServer is the server API for ExecutorService service.
 // All implementations must embed UnimplementedExecutorServiceServer
 // for forward compatibility
 type ExecutorServiceServer interface {
-	/// Processes a batch
+	// / Processes a batch
 	ProcessBatch(context.Context, *ProcessBatchRequest) (*ProcessBatchResponse, error)
+	ProcessBatchStream(ExecutorService_ProcessBatchStreamServer) error
 	mustEmbedUnimplementedExecutorServiceServer()
 }
 
@@ -58,6 +91,9 @@ type UnimplementedExecutorServiceServer struct {
 
 func (UnimplementedExecutorServiceServer) ProcessBatch(context.Context, *ProcessBatchRequest) (*ProcessBatchResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProcessBatch not implemented")
+}
+func (UnimplementedExecutorServiceServer) ProcessBatchStream(ExecutorService_ProcessBatchStreamServer) error {
+	return status.Errorf(codes.Unimplemented, "method ProcessBatchStream not implemented")
 }
 func (UnimplementedExecutorServiceServer) mustEmbedUnimplementedExecutorServiceServer() {}
 
@@ -90,6 +126,32 @@ func _ExecutorService_ProcessBatch_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExecutorService_ProcessBatchStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ExecutorServiceServer).ProcessBatchStream(&executorServiceProcessBatchStreamServer{stream})
+}
+
+type ExecutorService_ProcessBatchStreamServer interface {
+	Send(*ProcessBatchResponse) error
+	Recv() (*ProcessBatchRequest, error)
+	grpc.ServerStream
+}
+
+type executorServiceProcessBatchStreamServer struct {
+	grpc.ServerStream
+}
+
+func (x *executorServiceProcessBatchStreamServer) Send(m *ProcessBatchResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *executorServiceProcessBatchStreamServer) Recv() (*ProcessBatchRequest, error) {
+	m := new(ProcessBatchRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ExecutorService_ServiceDesc is the grpc.ServiceDesc for ExecutorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +164,13 @@ var ExecutorService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ExecutorService_ProcessBatch_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ProcessBatchStream",
+			Handler:       _ExecutorService_ProcessBatchStream_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
+	},
 	Metadata: "executor.proto",
 }

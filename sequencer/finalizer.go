@@ -300,7 +300,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 
 	f.processRequest.GlobalExitRoot = ger
 	f.processRequest.Transactions = tx.RawTx
-	result, err := f.executor.ProcessBatch(ctx, f.processRequest)
+	result, err := f.executor.ProcessBatch(ctx, f.processRequest, true)
 	if err != nil {
 		log.Errorf("failed to process transaction, err: %s", err)
 		return err
@@ -553,7 +553,7 @@ func (f *finalizer) reprocessBatch(ctx context.Context) error {
 		return err
 	}
 	processRequest.Caller = state.DiscardCallerLabel
-	result, err := f.executor.ProcessBatch(ctx, processRequest)
+	result, err := f.executor.ProcessBatch(ctx, processRequest, true)
 	if err != nil || (result != nil && result.ExecutorError != nil) {
 		if result != nil && result.ExecutorError != nil {
 			err = result.ExecutorError

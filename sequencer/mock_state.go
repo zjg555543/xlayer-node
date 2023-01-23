@@ -555,13 +555,13 @@ func (_m *StateMock) OpenBatch(ctx context.Context, processingContext state.Proc
 	return r0
 }
 
-// ProcessBatch provides a mock function with given fields: ctx, request
-func (_m *StateMock) ProcessBatch(ctx context.Context, request state.ProcessRequest) (*state.ProcessBatchResponse, error) {
-	ret := _m.Called(ctx, request)
+// ProcessBatch provides a mock function with given fields: ctx, request, useStream
+func (_m *StateMock) ProcessBatch(ctx context.Context, request state.ProcessRequest, useStream bool) (*state.ProcessBatchResponse, error) {
+	ret := _m.Called(ctx, request, useStream)
 
 	var r0 *state.ProcessBatchResponse
-	if rf, ok := ret.Get(0).(func(context.Context, state.ProcessRequest) *state.ProcessBatchResponse); ok {
-		r0 = rf(ctx, request)
+	if rf, ok := ret.Get(0).(func(context.Context, state.ProcessRequest, bool) *state.ProcessBatchResponse); ok {
+		r0 = rf(ctx, request, useStream)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*state.ProcessBatchResponse)
@@ -569,8 +569,8 @@ func (_m *StateMock) ProcessBatch(ctx context.Context, request state.ProcessRequ
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, state.ProcessRequest) error); ok {
-		r1 = rf(ctx, request)
+	if rf, ok := ret.Get(1).(func(context.Context, state.ProcessRequest, bool) error); ok {
+		r1 = rf(ctx, request, useStream)
 	} else {
 		r1 = ret.Error(1)
 	}

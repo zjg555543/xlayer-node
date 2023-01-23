@@ -68,12 +68,12 @@ var (
 type State struct {
 	cfg Config
 	*PostgresStorage
-	executorClient pb.ExecutorServiceClient
-	tree           *merkletree.StateTree
-
-	lastL2BlockSeen         types.Block
-	newL2BlockEvents        chan NewL2BlockEvent
-	newL2BlockEventHandlers []NewL2BlockEventHandler
+	executorClient              pb.ExecutorServiceClient
+	executorProcessStreamClient pb.ExecutorService_ProcessBatchStreamClient
+	tree                        *merkletree.StateTree
+	lastL2BlockSeen             types.Block
+	newL2BlockEvents            chan NewL2BlockEvent
+	newL2BlockEventHandlers     []NewL2BlockEventHandler
 }
 
 // NewState creates a new State
@@ -88,15 +88,20 @@ func NewState(cfg Config, storage *PostgresStorage, executorClient pb.ExecutorSe
 	} else if err != nil {
 		log.Fatalf("failed to load the last l2 block: %v", err)
 	}
+	stream, err := executorClient.ProcessBatchStream(context.Background())
+	if err != nil {
+		log.Fatalf("failed to create the process batch stream: %v", err)
+	}
 
 	s := &State{
-		cfg:                     cfg,
-		PostgresStorage:         storage,
-		executorClient:          executorClient,
-		tree:                    stateTree,
-		lastL2BlockSeen:         *lastL2Block,
-		newL2BlockEvents:        make(chan NewL2BlockEvent),
-		newL2BlockEventHandlers: []NewL2BlockEventHandler{},
+		cfg:                         cfg,
+		PostgresStorage:             storage,
+		executorClient:              executorClient,
+		executorProcessStreamClient: stream,
+		tree:                        stateTree,
+		lastL2BlockSeen:             *lastL2Block,
+		newL2BlockEvents:            make(chan NewL2BlockEvent),
+		newL2BlockEventHandlers:     []NewL2BlockEventHandler{},
 	}
 
 	go s.monitorNewL2Blocks()
@@ -440,7 +445,7 @@ func (s *State) ProcessSequencerBatch(ctx context.Context, batchNumber uint64, b
 	log.Debugf("*******************************************")
 	log.Debugf("ProcessSequencerBatch start")
 
-	processBatchResponse, err := s.processBatch(ctx, batchNumber, batchL2Data, caller, dbTx)
+	processBatchResponse, err := s.processBatch(ctx, batchNumber, batchL2Data, caller, dbTx, true)
 	if err != nil {
 		return nil, err
 	}
@@ -453,7 +458,7 @@ func (s *State) ProcessSequencerBatch(ctx context.Context, batchNumber uint64, b
 	return result, nil
 }
 
-func (s *State) ProcessBatch(ctx context.Context, request ProcessRequest) (*ProcessBatchResponse, error) {
+func (s *State) ProcessBatch(ctx context.Context, request ProcessRequest, useStream bool) (*ProcessBatchResponse, error) {
 	log.Debugf("*******************************************")
 	log.Debugf("ProcessBatch start")
 
@@ -469,7 +474,7 @@ func (s *State) ProcessBatch(ctx context.Context, request ProcessRequest) (*Proc
 		UpdateMerkleTree: cTrue,
 		ChainId:          s.cfg.ChainID,
 	}
-	res, err := s.sendBatchRequestToExecutor(ctx, processBatchRequest, request.Caller)
+	res, err := s.sendBatchRequestToExecutor(ctx, processBatchRequest, request.Caller, useStream)
 	if err != nil {
 		return nil, err
 	}
@@ -537,6 +542,7 @@ func (s *State) processBatch(
 	batchL2Data []byte,
 	caller CallerLabel,
 	dbTx pgx.Tx,
+	useStream bool,
 ) (*pb.ProcessBatchResponse, error) {
 	if dbTx == nil {
 		return nil, ErrDBTxNil
@@ -580,12 +586,10 @@ func (s *State) processBatch(
 		ChainId:          s.cfg.ChainID,
 	}
 
-	res, err := s.sendBatchRequestToExecutor(ctx, processBatchRequest, caller)
-
-	return res, err
+	return s.sendBatchRequestToExecutor(ctx, processBatchRequest, caller, useStream)
 }
 
-func (s *State) sendBatchRequestToExecutor(ctx context.Context, processBatchRequest *pb.ProcessBatchRequest, caller CallerLabel) (*pb.ProcessBatchResponse, error) {
+func (s *State) sendBatchRequestToExecutor(ctx context.Context, processBatchRequest *pb.ProcessBatchRequest, caller CallerLabel, useStream bool) (*pb.ProcessBatchResponse, error) {
 	// Send Batch to the Executor
 	log.Debugf("processBatch[processBatchRequest.OldBatchNum]: %v", processBatchRequest.OldBatchNum)
 	// log.Debugf("processBatch[processBatchRequest.BatchL2Data]: %v", hex.EncodeToHex(processBatchRequest.BatchL2Data))
@@ -598,7 +602,19 @@ func (s *State) sendBatchRequestToExecutor(ctx context.Context, processBatchRequ
 	log.Debugf("processBatch[processBatchRequest.UpdateMerkleTree]: %v", processBatchRequest.UpdateMerkleTree)
 	log.Debugf("processBatch[processBatchRequest.ChainId]: %v", processBatchRequest.ChainId)
 	now := time.Now()
-	res, err := s.executorClient.ProcessBatch(ctx, processBatchRequest)
+	var (
+		res *pb.ProcessBatchResponse
+		err error
+	)
+	if useStream {
+		if err := s.executorProcessStreamClient.Send(processBatchRequest); err != nil {
+			return nil, fmt.Errorf("failed to send request to executor process stream, err: %w", err)
+		}
+		res, err = s.executorProcessStreamClient.Recv()
+	} else {
+		res, err = s.executorClient.ProcessBatch(ctx, processBatchRequest)
+	}
+
 	if err != nil {
 		log.Errorf("Error s.executorClient.ProcessBatch: %v", err)
 		log.Errorf("Error s.executorClient.ProcessBatch: %s", err.Error())
@@ -748,7 +764,7 @@ func (s *State) ProcessAndStoreClosedBatch(
 	if err := s.OpenBatch(ctx, processingCtx, dbTx); err != nil {
 		return err
 	}
-	processed, err := s.processBatch(ctx, processingCtx.BatchNumber, encodedTxs, caller, dbTx)
+	processed, err := s.processBatch(ctx, processingCtx.BatchNumber, encodedTxs, caller, dbTx, false)
 	if err != nil {
 		return err
 	}
