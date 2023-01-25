@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"math/big"
 	"strconv"
 	"strings"
@@ -74,6 +75,7 @@ type State struct {
 	lastL2BlockSeen             types.Block
 	newL2BlockEvents            chan NewL2BlockEvent
 	newL2BlockEventHandlers     []NewL2BlockEventHandler
+	processBatchStreamCh        chan bool
 }
 
 // NewState creates a new State
@@ -102,6 +104,7 @@ func NewState(cfg Config, storage *PostgresStorage, executorClient pb.ExecutorSe
 		lastL2BlockSeen:             *lastL2Block,
 		newL2BlockEvents:            make(chan NewL2BlockEvent),
 		newL2BlockEventHandlers:     []NewL2BlockEventHandler{},
+		processBatchStreamCh:        make(chan bool),
 	}
 
 	go s.monitorNewL2Blocks()
@@ -607,11 +610,30 @@ func (s *State) sendBatchRequestToExecutor(ctx context.Context, processBatchRequ
 		res *pb.ProcessBatchResponse
 		err error
 	)
+
 	if useStream {
-		if err := s.executorProcessStreamClient.Send(processBatchRequest); err != nil {
-			return nil, fmt.Errorf("failed to send request to executor process stream, err: %w", err)
+		if err = s.executorProcessStreamClient.Send(processBatchRequest); err != nil {
+			log.Errorf("error sending request to executor, err: %v", err)
+		} else {
+			go func() {
+				for {
+					currRes, currErr := s.executorProcessStreamClient.Recv()
+					if err != nil {
+						if err == io.EOF {
+							s.processBatchStreamCh <- true
+							break
+						} else {
+							log.Errorf("error receiving response from executor, err: %v", err)
+						}
+					} else {
+						res = currRes
+						err = currErr
+					}
+				}
+
+			}()
+			<-s.processBatchStreamCh
 		}
-		res, err = s.executorProcessStreamClient.Recv()
 	} else {
 		res, err = s.executorClient.ProcessBatch(ctx, processBatchRequest)
 	}
