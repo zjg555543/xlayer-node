@@ -38,7 +38,7 @@ type finalizer struct {
 	processRequest     state.ProcessRequest
 	sharedResourcesMux *sync.RWMutex
 	lastGERHash        common.Hash
-	// closing signals
+	// closing signals            common.Hash
 	nextGER                   common.Hash
 	nextGERDeadline           int64
 	nextGERMux                *sync.RWMutex
@@ -128,6 +128,7 @@ func (f *finalizer) Start(ctx context.Context, batch *WipBatch, processingReq *s
 
 	// Closing signals receiver
 	go f.listenForClosingSignals(ctx)
+	f.setNextSendingToL1Deadline()
 
 	// Processing transactions and finalizing batches
 	f.finalizeBatches(ctx)
@@ -281,7 +282,7 @@ func (f *finalizer) newWIPBatch(ctx context.Context) (*WipBatch, error) {
 
 	// Reset nextSendingToL1Deadline
 	f.nextSendingToL1TimeoutMux.Lock()
-	f.nextSendingToL1Deadline = 0
+	f.setNextSendingToL1Deadline()
 	f.nextSendingToL1TimeoutMux.Unlock()
 
 	return f.openWIPBatch(ctx, lastBatchNumber+1, f.lastGERHash, stateRoot)
@@ -312,7 +313,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 	if tx != nil {
 		f.processRequest.Transactions = tx.RawTx
 	} else {
-		f.processRequest.Transactions = nil
+		f.processRequest.Transactions = []byte{}
 	}
 	result, err := f.executor.ProcessBatch(ctx, f.processRequest)
 	if err != nil {
@@ -332,6 +333,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 		}
 		return fmt.Errorf("failed processing transaction, err: %w", result.ExecutorError)
 	} else {
+		// TODO(fs): split this function in 2 (when tx processed and when empty batch)
 		err = f.handleSuccessfulTxProcessResp(ctx, tx, result)
 		if err != nil {
 			return err
@@ -343,21 +345,21 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 
 // handleSuccessfulTxProcessResp handles the response of a successful transaction processing.
 func (f *finalizer) handleSuccessfulTxProcessResp(ctx context.Context, tx *TxTracker, result *state.ProcessBatchResponse) error {
-	if tx == nil {
-		return nil
-	}
-
-	txResponse := result.Responses[0]
-	// Handle Transaction Error
-	if txResponse.RomError != nil {
-		f.handleTransactionError(ctx, txResponse, result, tx)
-		return txResponse.RomError
-	}
+	var txResponse *state.ProcessTransactionResponse
 
 	// Check remaining resources
-	err := f.checkRemainingResources(result, tx, txResponse)
-	if err != nil {
-		return err
+	if tx != nil {
+		txResponse = result.Responses[0]
+		// Handle Transaction Error
+		if txResponse.RomError != nil {
+			f.handleTransactionError(ctx, txResponse, result, tx)
+			return txResponse.RomError
+		}
+
+		err := f.checkRemainingResources(result, tx, txResponse)
+		if err != nil {
+			return err
+		}
 	}
 
 	// We have a successful processing if we are here, updating metadata
@@ -366,18 +368,20 @@ func (f *finalizer) handleSuccessfulTxProcessResp(ctx context.Context, tx *TxTra
 	f.batch.stateRoot = result.NewStateRoot
 	f.batch.localExitRoot = result.NewLocalExitRoot
 
-	// Store the processed transaction, add it to the batch and update status in the pool atomically
-	f.txsStore.Wg.Add(1)
-	f.txsStore.Ch <- &txToStore{
-		batchNumber:              f.batch.batchNumber,
-		txResponse:               txResponse,
-		previousL2BlockStateRoot: previousL2BlockStateRoot,
-	}
+	if tx != nil {
+		// Store the processed transaction, add it to the batch and update status in the pool atomically
+		f.txsStore.Wg.Add(1)
+		f.txsStore.Ch <- &txToStore{
+			batchNumber:              f.batch.batchNumber,
+			txResponse:               txResponse,
+			previousL2BlockStateRoot: previousL2BlockStateRoot,
+		}
 
-	start := time.Now()
-	f.worker.UpdateAfterSingleSuccessfulTxExecution(tx.From, result.ReadWriteAddresses)
-	metrics.WorkerProcessingTime(time.Since(start))
-	f.batch.countOfTxs += 1
+		start := time.Now()
+		f.worker.UpdateAfterSingleSuccessfulTxExecution(tx.From, result.ReadWriteAddresses)
+		metrics.WorkerProcessingTime(time.Since(start))
+		f.batch.countOfTxs += 1
+	}
 
 	return nil
 }
@@ -721,6 +725,7 @@ func (f *finalizer) checkRemainingResources(result *state.ProcessBatchResponse, 
 
 // isBatchAlmostFull checks if the current batch remaining resources are under the constraints threshold for most efficient moment to close a batch
 func (f *finalizer) isBatchAlmostFull() bool {
+	// REVIEW(fs): Threshold value by resource?
 	resources := f.batch.remainingResources
 	zkCounters := resources.zKCounters
 	if resources.bytes <= f.getConstraintThresholdUint64(f.batchConstraints.MaxBatchBytesSize) {
