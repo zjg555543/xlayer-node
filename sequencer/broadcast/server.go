@@ -9,6 +9,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/broadcast/pb"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/channelz/service"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -45,6 +46,9 @@ func (s *Server) Start() {
 
 	s.srv = grpc.NewServer()
 	pb.RegisterBroadcastServiceServer(s.srv, s)
+
+	// Channelz
+	service.RegisterChannelzServiceToServer(s.srv)
 
 	healthService := newHealthChecker()
 	grpc_health_v1.RegisterHealthServer(s.srv, healthService)
