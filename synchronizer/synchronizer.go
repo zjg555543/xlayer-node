@@ -279,12 +279,13 @@ func (s *ClientSynchronizer) syncTrustedState(latestSyncedBatch uint64) error {
 		return nil
 	}
 
-	broadcastClient, _, cancel, err := broadcast.NewClient(s.ctx, s.broadcastURI)
+	broadcastClient, conn, cancel, err := broadcast.NewClient(s.ctx, s.broadcastURI)
 	if err != nil {
 		log.Warn("error connecting to the broadcast. Error: ", err)
 		cancel()
 		return err
 	}
+	defer conn.Close()
 
 	log.Info("Getting trusted state info")
 	lastTrustedStateBatch, err := broadcastClient.GetLastBatch(s.ctx, &emptypb.Empty{})

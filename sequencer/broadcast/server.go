@@ -49,15 +49,18 @@ func (s *Server) Start() {
 	healthService := newHealthChecker()
 	grpc_health_v1.RegisterHealthServer(s.srv, healthService)
 
-	log.Infof("Server listening in %q", address)
+	log.Infof("server listening in %q", address)
 	if err := s.srv.Serve(lis); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+	log.Errorf("server stopped listening without errors in %q", address)
 }
 
 // Stop stops the server.
 func (s *Server) Stop() {
+	log.Infof("stopping to listen")
 	s.srv.Stop()
+	log.Infof("stopped")
 }
 
 // Implementation of pb.BroadcastServiceServer interface methods.
