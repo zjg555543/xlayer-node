@@ -11,6 +11,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/aggregator/pb"
 	"github.com/0xPolygonHermez/zkevm-node/config/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -326,12 +327,18 @@ func (p *Prover) waitProof(ctx context.Context, proofID string) (*pb.GetProofRes
 // call sends a message to the prover and waits to receive the response over
 // the connection stream.
 func (p *Prover) call(req *pb.AggregatorMessage) (*pb.ProverMessage, error) {
+	wrapStatus := func(err error) error {
+		if st, ok := status.FromError(err); ok {
+			return fmt.Errorf("grpc status code: %d, err: %w", st.Code(), err)
+		}
+		return err
+	}
 	if err := p.stream.Send(req); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error sending grpc message, %w", wrapStatus(err))
 	}
 	res, err := p.stream.Recv()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error receiving grpc message, %w", wrapStatus(err))
 	}
 	return res, nil
 }
