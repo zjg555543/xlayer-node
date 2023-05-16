@@ -216,7 +216,6 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 			log.Infof("Closing batch: %d, because deadline was encountered.", f.batch.batchNumber)
 			f.finalizeBatch(ctx)
 		} else if f.isBatchFull() || f.isBatchAlmostFull() {
-			log.Infof("Closing batch: %d, because it's almost full.", f.batch.batchNumber)
 			f.finalizeBatch(ctx)
 		}
 
@@ -354,14 +353,12 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 		metrics.ProcessingTime(time.Since(start))
 	}()
 
-	var ger common.Hash
 	if f.batch.isEmpty() {
-		ger = f.batch.globalExitRoot
+		f.processRequest.GlobalExitRoot = f.batch.globalExitRoot
 	} else {
-		ger = state.ZeroHash
+		f.processRequest.GlobalExitRoot = state.ZeroHash
 	}
 
-	f.processRequest.GlobalExitRoot = ger
 	if tx != nil {
 		f.processRequest.Transactions = tx.RawTx
 	} else {
@@ -380,7 +377,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 
 	oldStateRoot := f.batch.stateRoot
 	if len(result.Responses) > 0 && tx != nil {
-		err = f.handleTxProcessResp(ctx, tx, result, oldStateRoot)
+		err = f.handleProcessTransactionResult(ctx, tx, result, oldStateRoot)
 		if err != nil {
 			return err
 		}
@@ -395,13 +392,13 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) error
 	return nil
 }
 
-// handleTxProcessResp handles the response of transaction processing.
-func (f *finalizer) handleTxProcessResp(ctx context.Context, tx *TxTracker, result *state.ProcessBatchResponse, oldStateRoot common.Hash) error {
+// handleProcessTransactionResult handles the response of transaction processing.
+func (f *finalizer) handleProcessTransactionResult(ctx context.Context, tx *TxTracker, result *state.ProcessBatchResponse, oldStateRoot common.Hash) error {
 	// Handle Transaction Error
 	errorCode := executor.RomErrorCode(result.Responses[0].RomError)
 	if !state.TxChangesStateRoot(errorCode) {
 		// If intrinsic error or OOC error, we skip adding the transaction to the batch
-		f.handleTransactionError(ctx, result, tx)
+		f.handleProcessTransactionError(ctx, result, tx)
 		return result.Responses[0].RomError
 	}
 
@@ -473,7 +470,7 @@ func (f *finalizer) updateWorkerAfterTxStored(ctx context.Context, tx *TxTracker
 }
 
 // handleTransactionError handles the error of a transaction
-func (f *finalizer) handleTransactionError(ctx context.Context, result *state.ProcessBatchResponse, tx *TxTracker) *sync.WaitGroup {
+func (f *finalizer) handleProcessTransactionError(ctx context.Context, result *state.ProcessBatchResponse, tx *TxTracker) *sync.WaitGroup {
 	txResponse := result.Responses[0]
 	errorCode := executor.RomErrorCode(txResponse.RomError)
 	addressInfo := result.ReadWriteAddresses[tx.From]
@@ -512,6 +509,7 @@ func (f *finalizer) handleTransactionError(ctx context.Context, result *state.Pr
 			wg.Add(1)
 			txToDelete := txToDelete
 			go func() {
+				defer wg.Done()
 				err := f.dbManager.UpdateTxStatus(ctx, txToDelete.Hash, pool.TxStatusFailed, false, &failedReason)
 				metrics.TxProcessed(metrics.TxProcessedLabelFailed, 1)
 				if err != nil {
@@ -527,6 +525,7 @@ func (f *finalizer) handleTransactionError(ctx context.Context, result *state.Pr
 
 		wg.Add(1)
 		go func() {
+			defer wg.Done()
 			// Update the status of the transaction to failed
 			err := f.dbManager.UpdateTxStatus(ctx, tx.Hash, pool.TxStatusFailed, false, &failedReason)
 			if err != nil {
@@ -617,11 +616,7 @@ func (f *finalizer) processForcedBatches(ctx context.Context, lastBatchNumberInS
 	defer f.nextForcedBatchesMux.Unlock()
 	f.nextForcedBatchDeadline = 0
 
-	dbTx, err := f.dbManager.BeginStateTransaction(ctx)
-	if err != nil {
-		return 0, common.Hash{}, fmt.Errorf("failed to begin state transaction, err: %w", err)
-	}
-	lastTrustedForcedBatchNumber, err := f.dbManager.GetLastTrustedForcedBatchNumber(ctx, dbTx)
+	lastTrustedForcedBatchNumber, err := f.dbManager.GetLastTrustedForcedBatchNumber(ctx, nil)
 	if err != nil {
 		return 0, common.Hash{}, fmt.Errorf("failed to get last trusted forced batch number, err: %w", err)
 	}
@@ -656,6 +651,7 @@ func (f *finalizer) processForcedBatch(ctx context.Context, lastBatchNumberInSta
 		Timestamp:      now(),
 		Caller:         stateMetrics.SequencerCallerLabel,
 	}
+	//TODO: I think we can pass the forcedBatch struct to dbMananger.ProcessForcedBatch. Doing this it is not needed to query the DB to retrieve the FB again
 	response, err := f.dbManager.ProcessForcedBatch(forcedBatch.ForcedBatchNumber, request)
 	if err != nil {
 		// If there is EXECUTOR (Batch level) error, halt the finalizer.
@@ -885,25 +881,35 @@ func (f *finalizer) isBatchAlmostFull() bool {
 	resources := f.batch.remainingResources
 	zkCounters := resources.ZKCounters
 	result := false
+	resourceDesc := ""
 	if resources.Bytes <= f.getConstraintThresholdUint64(f.batchConstraints.MaxBatchBytesSize) {
+		resourceDesc = "BytesSize"
 		result = true
 	} else if zkCounters.UsedSteps <= f.getConstraintThresholdUint32(f.batchConstraints.MaxSteps) {
+		resourceDesc = "MaxSteps"
 		result = true
 	} else if zkCounters.UsedPoseidonPaddings <= f.getConstraintThresholdUint32(f.batchConstraints.MaxPoseidonPaddings) {
+		resourceDesc = "MaxPoseidonPaddings"
 		result = true
 	} else if zkCounters.UsedBinaries <= f.getConstraintThresholdUint32(f.batchConstraints.MaxBinaries) {
+		resourceDesc = "MaxBinaries"
 		result = true
 	} else if zkCounters.UsedKeccakHashes <= f.getConstraintThresholdUint32(f.batchConstraints.MaxKeccakHashes) {
+		resourceDesc = "MaxKeccakHashes"
 		result = true
 	} else if zkCounters.UsedArithmetics <= f.getConstraintThresholdUint32(f.batchConstraints.MaxArithmetics) {
+		resourceDesc = "MaxArithmetics"
 		result = true
 	} else if zkCounters.UsedMemAligns <= f.getConstraintThresholdUint32(f.batchConstraints.MaxMemAligns) {
+		resourceDesc = "MaxMemAligns"
 		result = true
 	} else if zkCounters.CumulativeGasUsed <= f.getConstraintThresholdUint64(f.batchConstraints.MaxCumulativeGasUsed) {
+		resourceDesc = "MaxCumulativeGasUsed"
 		result = true
 	}
 
 	if result {
+		log.Infof("Closing batch: %d, because it reached %s threshold limit", f.batch.batchNumber, resourceDesc)
 		f.batch.closingReason = state.BatchAlmostFullClosingReason
 	}
 
