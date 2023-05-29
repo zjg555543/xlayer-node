@@ -21,9 +21,10 @@ const (
 )
 
 type mockedServer struct {
-	Config    Config
-	Server    *Server
-	ServerURL string
+	Config      Config
+	Server      *Server
+	ServerURL   string
+	WsServerURL string
 }
 
 type mocksWrapper struct {
@@ -61,6 +62,7 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 	}()
 
 	serverURL := fmt.Sprintf("http://%s:%d", cfg.Host, cfg.Port)
+	wsServerURL := fmt.Sprintf("ws://%s:%d", cfg.WebSockets.Host, cfg.WebSockets.Port)
 	for {
 		fmt.Println("waiting server to get ready...") // fmt is used here to avoid race condition with logs
 		res, err := http.Get(serverURL)               //nolint:gosec
@@ -75,9 +77,10 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 	require.NoError(t, err)
 
 	msv := &mockedServer{
-		Config:    cfg,
-		Server:    server,
-		ServerURL: serverURL,
+		Config:      cfg,
+		Server:      server,
+		ServerURL:   serverURL,
+		WsServerURL: wsServerURL,
 	}
 
 	mks := &mocksWrapper{
@@ -96,6 +99,11 @@ func getDefaultConfig() Config {
 		Port:                      9123,
 		MaxRequestsPerIPAndSecond: maxRequestsPerIPAndSecond,
 		MaxCumulativeGasUsed:      300000,
+		WebSockets: WebSocketsConfig{
+			Enabled: true,
+			Host:    "0.0.0.0",
+			Port:    9133,
+		},
 	}
 	return cfg
 }
@@ -109,6 +117,7 @@ func newNonSequencerMockedServer(t *testing.T, sequencerNodeURI string) (*mocked
 	cfg := getDefaultConfig()
 	cfg.Port = 9124
 	cfg.SequencerNodeURI = sequencerNodeURI
+	cfg.WebSockets.Port = 9134
 	return newMockedServer(t, cfg)
 }
 
