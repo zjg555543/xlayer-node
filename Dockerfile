@@ -12,7 +12,8 @@ RUN cd /src/db && packr2
 RUN cd /src && make build
 
 # CONTAINER FOR RUNNING BINARY
-FROM alpine:3.16.0
+FROM alpine:3.18.0
+RUN apk add --no-cache postgresql-client
 COPY --from=build /src/dist/zkevm-node /app/zkevm-node
 COPY --from=build /src/config/environments/public/public.node.config.toml /app/example.config.toml
 EXPOSE 8123
