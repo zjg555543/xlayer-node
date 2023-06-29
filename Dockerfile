@@ -12,6 +12,7 @@ RUN cd /src/db && packr2
 RUN cd /src && make build
 
 # CONTAINER FOR RUNNING BINARY
+# postgresql-client 15 available for alpine>=3.18
 FROM alpine:3.18.0
 RUN apk add --no-cache postgresql-client
 COPY --from=build /src/dist/zkevm-node /app/zkevm-node
