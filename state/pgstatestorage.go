@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/hex"
+	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
@@ -1556,8 +1557,10 @@ func (p *PostgresStorage) GetLastL2Block(ctx context.Context, dbTx pgx.Tx) (*typ
 	err := q.QueryRow(ctx, getLastL2BlockSQL).Scan(&headerStr, &unclesStr, &receivedAt)
 
 	if errors.Is(err, pgx.ErrNoRows) {
+		log.Error("error 1 in GetLastL2Block: ErrStateNotSynchronized")
 		return nil, ErrStateNotSynchronized
 	} else if err != nil {
+		log.Error("error 2 in GetLastL2Block: ", err)
 		return nil, err
 	}
 
@@ -1565,16 +1568,19 @@ func (p *PostgresStorage) GetLastL2Block(ctx context.Context, dbTx pgx.Tx) (*typ
 	uncles := []*types.Header{}
 
 	if err := json.Unmarshal([]byte(headerStr), header); err != nil {
+		log.Error("error 3 in GetLastL2Block unmarshall: ", err)
 		return nil, err
 	}
 	if unclesStr != "[]" {
 		if err := json.Unmarshal([]byte(unclesStr), &uncles); err != nil {
+			log.Error("error 4 in GetLastL2Block unmarshall uncles: ", err)
 			return nil, err
 		}
 	}
 
 	transactions, err := p.GetTxsByBlockNumber(ctx, header.Number.Uint64(), dbTx)
 	if errors.Is(err, pgx.ErrNoRows) {
+		log.Error("error 5 in GetLastL2Block ErrNoRows")
 		transactions = []*types.Transaction{}
 	} else if err != nil {
 		return nil, err
@@ -1683,8 +1689,10 @@ func (p *PostgresStorage) GetTxsByBlockNumber(ctx context.Context, blockNumber u
 	rows, err := q.Query(ctx, getTxsByBlockNumSQL, blockNumber)
 
 	if errors.Is(err, pgx.ErrNoRows) {
+		log.Error("error 5.1 in GetTxsByBlockNumber ErrNoRows ")
 		return nil, ErrNotFound
 	} else if err != nil {
+		log.Error("error 5.2 in GetTxsByBlockNumber: ", err)
 		return nil, err
 	}
 
@@ -1694,11 +1702,13 @@ func (p *PostgresStorage) GetTxsByBlockNumber(ctx context.Context, blockNumber u
 	var encoded string
 	for rows.Next() {
 		if err = rows.Scan(&encoded); err != nil {
+			log.Error("error 5.3 in GetTxsByBlockNumber: ", err)
 			return nil, err
 		}
 
 		tx, err := DecodeTx(encoded)
 		if err != nil {
+			log.Error("error 5.4 in GetTxsByBlockNumber: ", err)
 			return nil, err
 		}
 		txs = append(txs, tx)
