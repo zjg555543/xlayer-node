@@ -1583,6 +1583,7 @@ func (p *PostgresStorage) GetLastL2Block(ctx context.Context, dbTx pgx.Tx) (*typ
 		log.Error("error 5 in GetLastL2Block ErrNoRows")
 		transactions = []*types.Transaction{}
 	} else if err != nil {
+		log.Error("error 6 in GetLastL2Block: ", err)
 		return nil, err
 	}
 
