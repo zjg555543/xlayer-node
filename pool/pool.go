@@ -111,6 +111,7 @@ func (p *Pool) refreshGasPrices() {
 	}
 
 	p.gasPricesMux.Lock()
+	log.Infof("refreshGasPrices: L1=%d", gasPrices.L1GasPrice)
 	p.gasPrices = gasPrices
 	p.gasPricesMux.Unlock()
 }
