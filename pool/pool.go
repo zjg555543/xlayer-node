@@ -320,6 +320,7 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 
 		// Ensure the transaction does not jump out of the expected AccountQueue
 		if poolTx.Nonce() > currentNonce+p.cfg.AccountQueue-1 {
+			log.Warnf("nonce to high, limit: %d, current: %d", currentNonce+p.cfg.AccountQueue-1, poolTx.Nonce())
 			return ErrNonceTooHigh
 		}
 	}
@@ -331,6 +332,7 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 			return err
 		}
 		if txCount >= p.cfg.GlobalQueue {
+			log.Warnf("txPool full, limit: %d, current: %d", p.cfg.GlobalQueue, txCount)
 			return ErrTxPoolOverflow
 		}
 	}
