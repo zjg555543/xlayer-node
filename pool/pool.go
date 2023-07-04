@@ -319,8 +319,8 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 		// }
 
 		// Ensure the transaction does not jump out of the expected AccountQueue
+		log.Infof("check nonce to high, limit: %d, current: %d", currentNonce+p.cfg.AccountQueue-1, poolTx.Nonce())
 		if poolTx.Nonce() > currentNonce+p.cfg.AccountQueue-1 {
-			log.Warnf("nonce to high, limit: %d, current: %d", currentNonce+p.cfg.AccountQueue-1, poolTx.Nonce())
 			return ErrNonceTooHigh
 		}
 	}
@@ -328,11 +328,11 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	// check if the pool is full
 	if p.cfg.GlobalQueue > 0 {
 		txCount, err := p.storage.CountTransactionsByStatus(ctx, TxStatusPending)
+		log.Info("check txPool, limit: %d, current: %d", p.cfg.GlobalQueue, txCount)
 		if err != nil {
 			return err
 		}
 		if txCount >= p.cfg.GlobalQueue {
-			log.Warnf("txPool full, limit: %d, current: %d", p.cfg.GlobalQueue, txCount)
 			return ErrTxPoolOverflow
 		}
 	}
