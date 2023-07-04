@@ -328,7 +328,7 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	// check if the pool is full
 	if p.cfg.GlobalQueue > 0 {
 		txCount, err := p.storage.CountTransactionsByStatus(ctx, TxStatusPending)
-		log.Info("check txPool, limit: %d, current: %d", p.cfg.GlobalQueue, txCount)
+		log.Infof("check txPool, limit: %d, current: %d", p.cfg.GlobalQueue, txCount)
 		if err != nil {
 			return err
 		}
