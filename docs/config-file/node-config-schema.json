@@ -595,11 +595,6 @@
 								"1m",
 								"300ms"
 							]
-						},
-						"StopSequencerOnBatchNum": {
-							"type": "integer",
-							"description": "StopSequencerOnBatchNum specifies the batch number where the Sequencer will stop to process more transactions and generate new batches. The Sequencer will halt after it closes the batch equal to this number",
-							"default": 0
 						}
 					},
 					"additionalProperties": false,
@@ -679,6 +674,48 @@
 					"additionalProperties": false,
 					"type": "object",
 					"description": "EffectiveGasPrice is the config for the gas price"
+				},
+				"Http": {
+					"properties": {
+						"Host": {
+							"type": "string",
+							"description": "Host defines the network adapter that will be used to serve the HTTP requests",
+							"default": "0.0.0.0"
+						},
+						"Port": {
+							"type": "integer",
+							"description": "Port defines the port to serve the endpoints via HTTP. For security reasons,\nthis port should not be directly accessible from outside the localhost. If\nremote access is necessary, ensure to establish a secure SSH tunnel. If the\nport needs to be exposed publicly for any reason, it is critical to protect\nit with stringent firewall rules, limiting access only to trusted sources.",
+							"default": 90
+						},
+						"MaxRequestsPerIPAndSecond": {
+							"type": "number",
+							"description": "MaxRequestsPerIPAndSecond defines how much requests a single IP can\nsend within a single second",
+							"default": 500
+						},
+						"ReadTimeout": {
+							"type": "string",
+							"title": "Duration",
+							"description": "ReadTimeout is the HTTP server read timeout\ncheck net/http.server.ReadTimeout and net/http.server.ReadHeaderTimeout",
+							"default": "1m0s",
+							"examples": [
+								"1m",
+								"300ms"
+							]
+						},
+						"WriteTimeout": {
+							"type": "string",
+							"title": "Duration",
+							"description": "WriteTimeout is the HTTP server write timeout\ncheck net/http.server.WriteTimeout",
+							"default": "1m0s",
+							"examples": [
+								"1m",
+								"300ms"
+							]
+						}
+					},
+					"additionalProperties": false,
+					"type": "object",
+					"description": "Http is the config for the http server"
 				}
 			},
 			"additionalProperties": false,

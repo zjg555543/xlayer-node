@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/event"
@@ -18,6 +19,7 @@ import (
 // Sequencer represents a sequencer
 type Sequencer struct {
 	cfg Config
+	srv *http.Server
 
 	pool         txPool
 	state        stateInterface
@@ -25,7 +27,8 @@ type Sequencer struct {
 	ethTxManager ethTxManager
 	etherman     etherman
 
-	address common.Address
+	address   common.Address
+	finalizer finalizerInterface
 }
 
 // batchConstraints represents the constraints for a batch
@@ -132,11 +135,11 @@ func (s *Sequencer) Start(ctx context.Context) {
 	dbManager := newDBManager(ctx, s.cfg.DBManager, s.pool, s.state, worker, closingSignalCh, batchConstraints)
 	go dbManager.Start()
 
-	finalizer := newFinalizer(s.cfg.Finalizer, s.cfg.EffectiveGasPrice, worker, dbManager, s.state, s.address, s.isSynced, closingSignalCh, batchConstraints, s.eventLog)
-	currBatch, processingReq := s.bootstrap(ctx, dbManager, finalizer)
-	go finalizer.Start(ctx, currBatch, processingReq)
+	s.finalizer = newFinalizer(s.cfg.Finalizer, s.cfg.EffectiveGasPrice, worker, dbManager, s.state, s.address, s.isSynced, closingSignalCh, batchConstraints, s.eventLog)
+	currBatch, processingReq := s.bootstrap(ctx, dbManager, s.finalizer, batchConstraints)
+	go s.finalizer.Start(ctx, currBatch, processingReq)
 
-	closingSignalsManager := newClosingSignalsManager(ctx, finalizer.dbManager, closingSignalCh, finalizer.cfg, s.etherman)
+	closingSignalsManager := newClosingSignalsManager(ctx, dbManager, closingSignalCh, s.cfg.Finalizer, s.etherman)
 	go closingSignalsManager.Start()
 
 	go s.trackOldTxs(ctx)
@@ -158,12 +161,13 @@ func (s *Sequencer) Start(ctx context.Context) {
 			}
 		}
 	}()
+	go s.startHTTP()
 
 	// Wait until context is done
 	<-ctx.Done()
 }
 
-func (s *Sequencer) bootstrap(ctx context.Context, dbManager *dbManager, finalizer *finalizer) (*WipBatch, *state.ProcessRequest) {
+func (s *Sequencer) bootstrap(ctx context.Context, dbManager *dbManager, finalizer finalizerInterface, constraints batchConstraints) (*WipBatch, *state.ProcessRequest) {
 	var (
 		currBatch      *WipBatch
 		processRequest *state.ProcessRequest
@@ -204,15 +208,15 @@ func (s *Sequencer) bootstrap(ctx context.Context, dbManager *dbManager, finaliz
 			batchNumber:        processingCtx.BatchNumber,
 			coinbase:           processingCtx.Coinbase,
 			timestamp:          timestamp,
-			remainingResources: getMaxRemainingResources(finalizer.batchConstraints),
+			remainingResources: getMaxRemainingResources(constraints),
 		}
 	} else {
 		err := finalizer.syncWithState(ctx, &batchNum)
 		if err != nil {
 			log.Fatalf("failed to sync with state, err: %v", err)
 		}
-		currBatch = finalizer.batch
-		processRequest = &finalizer.processRequest
+		currBatch = finalizer.getBatch()
+		processRequest = finalizer.getProcessRequest()
 	}
 
 	return currBatch, processRequest

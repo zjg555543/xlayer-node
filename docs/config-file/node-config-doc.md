@@ -968,6 +968,7 @@ TrustedSequencerURL=""
 | - [DBManager](#Sequencer_DBManager )                                         | No      | object  | No         | -          | DBManager's specific config properties                                                                                                             |
 | - [Worker](#Sequencer_Worker )                                               | No      | object  | No         | -          | Worker's specific config properties                                                                                                                |
 | - [EffectiveGasPrice](#Sequencer_EffectiveGasPrice )                         | No      | object  | No         | -          | EffectiveGasPrice is the config for the gas price                                                                                                  |
+| - [Http](#Sequencer_Http )                                                   | No      | object  | No         | -          | Http is the config for the http server                                                                                                             |
 
 ### <a name="Sequencer_WaitPeriodPoolIsEmpty"></a>10.1. `Sequencer.WaitPeriodPoolIsEmpty`
 
@@ -1360,19 +1361,18 @@ MaxTxLifetime="3h0m0s"
 **Type:** : `object`
 **Description:** Finalizer's specific config properties
 
-| Property                                                                                                                       | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                                                                                              |
-| ------------------------------------------------------------------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| - [GERDeadlineTimeout](#Sequencer_Finalizer_GERDeadlineTimeout )                                                               | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [ForcedBatchDeadlineTimeout](#Sequencer_Finalizer_ForcedBatchDeadlineTimeout )                                               | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [SleepDuration](#Sequencer_Finalizer_SleepDuration )                                                                         | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [ResourcePercentageToCloseBatch](#Sequencer_Finalizer_ResourcePercentageToCloseBatch )                                       | No      | integer | No         | -          | ResourcePercentageToCloseBatch is the percentage window of the resource left out for the batch to be closed                                                                                                    |
-| - [GERFinalityNumberOfBlocks](#Sequencer_Finalizer_GERFinalityNumberOfBlocks )                                                 | No      | integer | No         | -          | GERFinalityNumberOfBlocks is number of blocks to consider GER final                                                                                                                                            |
-| - [ClosingSignalsManagerWaitForCheckingL1Timeout](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingL1Timeout )         | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [ClosingSignalsManagerWaitForCheckingGER](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingGER )                     | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [ClosingSignalsManagerWaitForCheckingForcedBatches](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingForcedBatches ) | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [ForcedBatchesFinalityNumberOfBlocks](#Sequencer_Finalizer_ForcedBatchesFinalityNumberOfBlocks )                             | No      | integer | No         | -          | ForcedBatchesFinalityNumberOfBlocks is number of blocks to consider GER final                                                                                                                                  |
-| - [TimestampResolution](#Sequencer_Finalizer_TimestampResolution )                                                             | No      | string  | No         | -          | Duration                                                                                                                                                                                                       |
-| - [StopSequencerOnBatchNum](#Sequencer_Finalizer_StopSequencerOnBatchNum )                                                     | No      | integer | No         | -          | StopSequencerOnBatchNum specifies the batch number where the Sequencer will stop to process more transactions and generate new batches. The Sequencer will halt after it closes the batch equal to this number |
+| Property                                                                                                                       | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------ | ------- | ------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------- |
+| - [GERDeadlineTimeout](#Sequencer_Finalizer_GERDeadlineTimeout )                                                               | No      | string  | No         | -          | Duration                                                                                                    |
+| - [ForcedBatchDeadlineTimeout](#Sequencer_Finalizer_ForcedBatchDeadlineTimeout )                                               | No      | string  | No         | -          | Duration                                                                                                    |
+| - [SleepDuration](#Sequencer_Finalizer_SleepDuration )                                                                         | No      | string  | No         | -          | Duration                                                                                                    |
+| - [ResourcePercentageToCloseBatch](#Sequencer_Finalizer_ResourcePercentageToCloseBatch )                                       | No      | integer | No         | -          | ResourcePercentageToCloseBatch is the percentage window of the resource left out for the batch to be closed |
+| - [GERFinalityNumberOfBlocks](#Sequencer_Finalizer_GERFinalityNumberOfBlocks )                                                 | No      | integer | No         | -          | GERFinalityNumberOfBlocks is number of blocks to consider GER final                                         |
+| - [ClosingSignalsManagerWaitForCheckingL1Timeout](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingL1Timeout )         | No      | string  | No         | -          | Duration                                                                                                    |
+| - [ClosingSignalsManagerWaitForCheckingGER](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingGER )                     | No      | string  | No         | -          | Duration                                                                                                    |
+| - [ClosingSignalsManagerWaitForCheckingForcedBatches](#Sequencer_Finalizer_ClosingSignalsManagerWaitForCheckingForcedBatches ) | No      | string  | No         | -          | Duration                                                                                                    |
+| - [ForcedBatchesFinalityNumberOfBlocks](#Sequencer_Finalizer_ForcedBatchesFinalityNumberOfBlocks )                             | No      | integer | No         | -          | ForcedBatchesFinalityNumberOfBlocks is number of blocks to consider GER final                               |
+| - [TimestampResolution](#Sequencer_Finalizer_TimestampResolution )                                                             | No      | string  | No         | -          | Duration                                                                                                    |
 
 #### <a name="Sequencer_Finalizer_GERDeadlineTimeout"></a>10.25.1. `Sequencer.Finalizer.GERDeadlineTimeout`
 
@@ -1598,20 +1598,6 @@ ForcedBatchesFinalityNumberOfBlocks=64
 TimestampResolution="10s"
 ```
 
-#### <a name="Sequencer_Finalizer_StopSequencerOnBatchNum"></a>10.25.11. `Sequencer.Finalizer.StopSequencerOnBatchNum`
-
-**Type:** : `integer`
-
-**Default:** `0`
-
-**Description:** StopSequencerOnBatchNum specifies the batch number where the Sequencer will stop to process more transactions and generate new batches. The Sequencer will halt after it closes the batch equal to this number
-
-**Example setting the default value** (0):
-```
-[Sequencer.Finalizer]
-StopSequencerOnBatchNum=0
-```
-
 ### <a name="Sequencer_DBManager"></a>10.26. `[Sequencer.DBManager]`
 
 **Type:** : `object`
@@ -1790,6 +1776,120 @@ This value is assigned from [Pool].DefaultMinGasPriceAllowed
 ```
 [Sequencer.EffectiveGasPrice]
 DefaultMinGasPriceAllowed=0
+```
+
+### <a name="Sequencer_Http"></a>10.29. `[Sequencer.Http]`
+
+**Type:** : `object`
+**Description:** Http is the config for the http server
+
+| Property                                                                  | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| - [Host](#Sequencer_Http_Host )                                           | No      | string  | No         | -          | Host defines the network adapter that will be used to serve the HTTP requests                                                                                                                                                                                                                                                                                                                                  |
+| - [Port](#Sequencer_Http_Port )                                           | No      | integer | No         | -          | Port defines the port to serve the endpoints via HTTP. For security reasons,<br />this port should not be directly accessible from outside the localhost. If<br />remote access is necessary, ensure to establish a secure SSH tunnel. If the<br />port needs to be exposed publicly for any reason, it is critical to protect<br />it with stringent firewall rules, limiting access only to trusted sources. |
+| - [MaxRequestsPerIPAndSecond](#Sequencer_Http_MaxRequestsPerIPAndSecond ) | No      | number  | No         | -          | MaxRequestsPerIPAndSecond defines how much requests a single IP can<br />send within a single second                                                                                                                                                                                                                                                                                                           |
+| - [ReadTimeout](#Sequencer_Http_ReadTimeout )                             | No      | string  | No         | -          | Duration                                                                                                                                                                                                                                                                                                                                                                                                       |
+| - [WriteTimeout](#Sequencer_Http_WriteTimeout )                           | No      | string  | No         | -          | Duration                                                                                                                                                                                                                                                                                                                                                                                                       |
+
+#### <a name="Sequencer_Http_Host"></a>10.29.1. `Sequencer.Http.Host`
+
+**Type:** : `string`
+
+**Default:** `"0.0.0.0"`
+
+**Description:** Host defines the network adapter that will be used to serve the HTTP requests
+
+**Example setting the default value** ("0.0.0.0"):
+```
+[Sequencer.Http]
+Host="0.0.0.0"
+```
+
+#### <a name="Sequencer_Http_Port"></a>10.29.2. `Sequencer.Http.Port`
+
+**Type:** : `integer`
+
+**Default:** `90`
+
+**Description:** Port defines the port to serve the endpoints via HTTP. For security reasons,
+this port should not be directly accessible from outside the localhost. If
+remote access is necessary, ensure to establish a secure SSH tunnel. If the
+port needs to be exposed publicly for any reason, it is critical to protect
+it with stringent firewall rules, limiting access only to trusted sources.
+
+**Example setting the default value** (90):
+```
+[Sequencer.Http]
+Port=90
+```
+
+#### <a name="Sequencer_Http_MaxRequestsPerIPAndSecond"></a>10.29.3. `Sequencer.Http.MaxRequestsPerIPAndSecond`
+
+**Type:** : `number`
+
+**Default:** `500`
+
+**Description:** MaxRequestsPerIPAndSecond defines how much requests a single IP can
+send within a single second
+
+**Example setting the default value** (500):
+```
+[Sequencer.Http]
+MaxRequestsPerIPAndSecond=500
+```
+
+#### <a name="Sequencer_Http_ReadTimeout"></a>10.29.4. `Sequencer.Http.ReadTimeout`
+
+**Title:** Duration
+
+**Type:** : `string`
+
+**Default:** `"1m0s"`
+
+**Description:** ReadTimeout is the HTTP server read timeout
+check net/http.server.ReadTimeout and net/http.server.ReadHeaderTimeout
+
+**Examples:** 
+
+```json
+"1m"
+```
+
+```json
+"300ms"
+```
+
+**Example setting the default value** ("1m0s"):
+```
+[Sequencer.Http]
+ReadTimeout="1m0s"
+```
+
+#### <a name="Sequencer_Http_WriteTimeout"></a>10.29.5. `Sequencer.Http.WriteTimeout`
+
+**Title:** Duration
+
+**Type:** : `string`
+
+**Default:** `"1m0s"`
+
+**Description:** WriteTimeout is the HTTP server write timeout
+check net/http.server.WriteTimeout
+
+**Examples:** 
+
+```json
+"1m"
+```
+
+```json
+"300ms"
+```
+
+**Example setting the default value** ("1m0s"):
+```
+[Sequencer.Http]
+WriteTimeout="1m0s"
 ```
 
 ## <a name="SequenceSender"></a>11. `[SequenceSender]`
