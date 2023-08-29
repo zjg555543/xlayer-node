@@ -45,6 +45,8 @@ type Transaction struct {
 	IsWIP                 bool
 	IP                    string
 	FailedReason          *string
+	IsClaims              bool
+	DepositCount          *uint64
 }
 
 // NewTransaction creates a new transaction
@@ -57,5 +59,24 @@ func NewTransaction(tx types.Transaction, ip string, isWIP bool, p *Pool) *Trans
 		IP:          ip,
 	}
 
+	poolTx.IsClaims = poolTx.IsClaimTx(p.l2BridgeAddr, p.cfg.FreeClaimGasLimit)
+
 	return &poolTx
+}
+
+// IsClaimTx checks, if tx is a claim tx
+func (tx *Transaction) IsClaimTx(l2BridgeAddr common.Address, freeClaimGasLimit uint64) bool {
+	if tx.To() == nil {
+		return false
+	}
+
+	txGas := tx.Gas()
+	if txGas > freeClaimGasLimit {
+		return false
+	}
+
+	if *tx.To() == l2BridgeAddr {
+		return true
+	}
+	return false
 }

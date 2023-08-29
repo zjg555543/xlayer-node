@@ -7,6 +7,9 @@ import (
 
 // Config is the pool configuration
 type Config struct {
+	// FreeClaimGasLimit is the max gas allowed use to do a free claim
+	FreeClaimGasLimit uint64 `mapstructure:"FreeClaimGasLimit"`
+
 	// IntervalToRefreshBlockedAddresses is the time it takes to sync the
 	// blocked address list from db to memory
 	IntervalToRefreshBlockedAddresses types.Duration `mapstructure:"IntervalToRefreshBlockedAddresses"`
@@ -28,4 +31,6 @@ type Config struct {
 
 	// PollMinAllowedGasPriceInterval is the interval to poll the suggested min gas price for a tx
 	PollMinAllowedGasPriceInterval types.Duration `mapstructure:"PollMinAllowedGasPriceInterval"`
+
+	FreeGasAddress string `mapstructure:"FreeGasAddress"`
 }
