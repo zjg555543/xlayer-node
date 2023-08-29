@@ -1,6 +1,8 @@
 package sequencer
 
 import (
+	"github.com/0xPolygonHermez/zkevm-node/pool"
+	"math"
 	"math/big"
 	"time"
 
@@ -31,6 +33,7 @@ type TxTracker struct {
 	weightMultipliers      batchResourceWeightMultipliers
 	resourceCostMultiplier float64
 	totalWeight            float64
+	IsClaim                bool
 }
 
 // batchResourceWeightMultipliers is a struct that contains the weight multipliers for each resource
@@ -61,7 +64,8 @@ type batchConstraintsFloat64 struct {
 }
 
 // newTxTracker creates and inti a TxTracker
-func newTxTracker(tx types.Transaction, counters state.ZKCounters, constraints batchConstraintsFloat64, weights batchResourceWeights, resourceCostMultiplier float64, ip string) (*TxTracker, error) {
+func newTxTracker(ptx pool.Transaction, counters state.ZKCounters, constraints batchConstraintsFloat64, weights batchResourceWeights, resourceCostMultiplier float64, ip string) (*TxTracker, error) {
+	tx := ptx.Transaction
 	addr, err := state.GetSender(tx)
 	if err != nil {
 		return nil, err
@@ -95,6 +99,7 @@ func newTxTracker(tx types.Transaction, counters state.ZKCounters, constraints b
 		weightMultipliers:      calculateWeightMultipliers(weights, totalWeight),
 		resourceCostMultiplier: resourceCostMultiplier,
 		totalWeight:            totalWeight,
+		IsClaim:                ptx.IsClaims,
 	}
 	txTracker.calculateEfficiency(constraints, weights)
 
@@ -129,9 +134,13 @@ func (tx *TxTracker) calculateEfficiency(constraints batchConstraintsFloat64, we
 
 	var eff *big.Float
 
-	ben := big.NewFloat(0).SetInt(tx.Benefit)
-	rc := big.NewFloat(0).SetFloat64(resourceCost)
-	eff = big.NewFloat(0).Quo(ben, rc)
+	if tx.From == common.HexToAddress(pool.FreeClaimAddress) && tx.IsClaim {
+		eff = big.NewFloat(math.MaxFloat64)
+	} else {
+		ben := big.NewFloat(0).SetInt(tx.Benefit)
+		rc := big.NewFloat(0).SetFloat64(resourceCost)
+		eff = big.NewFloat(0).Quo(ben, rc)
+	}
 
 	var accuracy big.Accuracy
 	tx.Efficiency, accuracy = eff.Float64()
