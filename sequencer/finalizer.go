@@ -579,7 +579,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) (errW
 	start := time.Now()
 	defer func() {
 		metrics.ProcessingTime(time.Since(start))
-		if nil != nil {
+		if tx != nil {
 			metrics.GetLogStatistics().CumulativeTiming(metrics.ProcessingTxTiming, time.Since(start))
 		}
 	}()
