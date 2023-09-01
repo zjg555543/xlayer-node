@@ -150,3 +150,5 @@ require (
 	github.com/0xPolygon/cdk-data-availability v0.0.0-20230831100042-1da5d033d9ff
 	github.com/prometheus/client_golang v1.16.0
 )
+
+replace github.com/0xPolygonHermez/zkevm-node => ./

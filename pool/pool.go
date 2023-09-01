@@ -60,6 +60,7 @@ func NewPool(cfg Config, s storage, st stateInterface, l2BridgeAddr common.Addre
 		chainID:                 chainID,
 		blockedAddresses:        sync.Map{},
 		minSuggestedGasPriceMux: new(sync.RWMutex),
+		minSuggestedGasPrice:    big.NewInt(int64(cfg.DefaultMinGasPriceAllowed)),
 		eventLog:                eventLog,
 	}
 
@@ -251,6 +252,11 @@ func (p *Pool) CountPendingTransactions(ctx context.Context) (uint64, error) {
 // IsTxPending check if tx is still pending
 func (p *Pool) IsTxPending(ctx context.Context, hash common.Hash) (bool, error) {
 	return p.storage.IsTxPending(ctx, hash)
+}
+
+// CheckPolicy checks if an address is allowed by policy name
+func (p *Pool) CheckPolicy(ctx context.Context, policy PolicyName, address common.Address) (bool, error) {
+	return p.storage.CheckPolicy(ctx, policy, address)
 }
 
 func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {

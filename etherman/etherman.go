@@ -19,6 +19,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/matic"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevmglobalexitroot"
+	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/supernets2datacommittee"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -163,6 +164,12 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	dataCommittee, err := supernets2datacommittee.NewSupernets2datacommittee(l1Config.DataCommitteeAddr, ethClient)
+	if err != nil {
+		return nil, err
+	}
+
 	var scAddresses []common.Address
 	scAddresses = append(scAddresses, l1Config.ZkEVMAddr, l1Config.GlobalExitRootManagerAddr)
 
@@ -472,14 +479,14 @@ func (etherMan *Client) WaitTxToBeMined(ctx context.Context, tx *types.Transacti
 }
 
 // EstimateGasSequenceBatches estimates gas for sending batches
-func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence) (*types.Transaction, error) {
+func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, committeeSignaturesAndAddrs []byte) (*types.Transaction, error) {
 	opts, err := etherMan.getAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, ErrPrivateKeyNotFound
 	}
 	opts.NoSend = true
 
-	tx, err := etherMan.sequenceBatches(opts, sequences)
+	tx, err := etherMan.sequenceBatches(opts, sequences, committeeSignaturesAndAddrs)
 	if err != nil {
 		return nil, err
 	}
@@ -488,7 +495,11 @@ func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequen
 }
 
 // BuildSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
-func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence) (to *common.Address, data []byte, err error) {
+func (etherMan *Client) BuildSequenceBatchesTxData(
+	sender common.Address,
+	sequences []ethmanTypes.Sequence,
+	committeeSignaturesAndAddrs []byte,
+) (to *common.Address, data []byte, err error) {
 	opts, err := etherMan.getAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, nil, fmt.Errorf("failed to build sequence batches, err: %w", ErrPrivateKeyNotFound)
@@ -499,7 +510,7 @@ func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequen
 	opts.GasLimit = uint64(1)
 	opts.GasPrice = big.NewInt(1)
 
-	tx, err := etherMan.sequenceBatches(opts, sequences)
+	tx, err := etherMan.sequenceBatches(opts, sequences, committeeSignaturesAndAddrs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -507,11 +518,15 @@ func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequen
 	return tx.To(), tx.Data(), nil
 }
 
-func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethmanTypes.Sequence) (*types.Transaction, error) {
+func (etherMan *Client) sequenceBatches(
+	opts bind.TransactOpts,
+	sequences []ethmanTypes.Sequence,
+	committeeSignaturesAndAddrs []byte,
+) (*types.Transaction, error) {
 	var batches []polygonzkevm.PolygonZkEVMBatchData
 	for _, seq := range sequences {
 		batch := polygonzkevm.PolygonZkEVMBatchData{
-			Transactions:       seq.BatchL2Data,
+			Transactions:       nil, //crypto.Keccak256Hash(seq.BatchL2Data), // TODO zhujianguo
 			GlobalExitRoot:     seq.GlobalExitRoot,
 			Timestamp:          uint64(seq.Timestamp),
 			MinForcedTimestamp: uint64(seq.ForcedBatchTimestamp),
@@ -520,11 +535,15 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 		batches = append(batches, batch)
 	}
 
-	tx, err := etherMan.ZkEVM.SequenceBatches(&opts, batches, opts.From)
+	tx, err := etherMan.ZkEVM.SequenceBatches(&opts, batches, opts.From, committeeSignaturesAndAddrs)
 	if err != nil {
 		if parsedErr, ok := tryParseError(err); ok {
 			err = parsedErr
 		}
+		err = fmt.Errorf(
+			"error sequencing batches: %w, committeeSignaturesAndAddrs %s",
+			err, common.Bytes2Hex(committeeSignaturesAndAddrs),
+		)
 	}
 
 	return tx, err

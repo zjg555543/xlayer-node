@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/0xPolygon/cdk-data-availability/client"
 	"math/big"
 	"strings"
 	"time"
@@ -27,16 +28,20 @@ type Synchronizer interface {
 
 // ClientSynchronizer connects L1 and L2
 type ClientSynchronizer struct {
-	isTrustedSequencer bool
-	etherMan           ethermanInterface
-	state              stateInterface
-	pool               poolInterface
-	ethTxManager       ethTxManager
-	zkEVMClient        zkEVMClientInterface
-	ctx                context.Context
-	cancelCtx          context.CancelFunc
-	genesis            state.Genesis
-	cfg                Config
+	isTrustedSequencer         bool
+	etherMan                   ethermanInterface
+	state                      stateInterface
+	pool                       poolInterface
+	ethTxManager               ethTxManager
+	zkEVMClient                zkEVMClientInterface
+	ctx                        context.Context
+	cancelCtx                  context.CancelFunc
+	genesis                    state.Genesis
+	cfg                        Config
+	previousExecutorFlushID    uint64
+	committeeMembers           []etherman.DataCommitteeMember
+	selectedCommitteeMember    int
+	dataCommitteeClientFactory client.ClientFactoryInterface
 }
 
 // NewSynchronizer creates and initializes an instance of Synchronizer
@@ -48,21 +53,26 @@ func NewSynchronizer(
 	ethTxManager ethTxManager,
 	zkEVMClient zkEVMClientInterface,
 	genesis state.Genesis,
-	cfg Config) (Synchronizer, error) {
+	cfg Config,
+	clientFactory client.ClientFactoryInterface) (Synchronizer, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	return &ClientSynchronizer{
-		isTrustedSequencer: isTrustedSequencer,
-		state:              st,
-		etherMan:           ethMan,
-		pool:               pool,
-		ctx:                ctx,
-		cancelCtx:          cancel,
-		ethTxManager:       ethTxManager,
-		zkEVMClient:        zkEVMClient,
-		genesis:            genesis,
-		cfg:                cfg,
-	}, nil
+	c := &ClientSynchronizer{
+		isTrustedSequencer:         isTrustedSequencer,
+		state:                      st,
+		etherMan:                   ethMan,
+		pool:                       pool,
+		ctx:                        ctx,
+		cancelCtx:                  cancel,
+		ethTxManager:               ethTxManager,
+		zkEVMClient:                zkEVMClient,
+		genesis:                    genesis,
+		cfg:                        cfg,
+		previousExecutorFlushID:    0,
+		dataCommitteeClientFactory: clientFactory,
+	}
+	err := c.loadCommittee()
+	return c, err
 }
 
 var waitDuration = time.Duration(0)
@@ -709,6 +719,10 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 		return nil
 	}
 	for _, sbatch := range sequencedBatches {
+		batchL2Data, err := s.getBatchL2Data(sbatch.BatchNumber, sbatch.TransactionsHash)
+		if err != nil {
+			return err
+		}
 		virtualBatch := state.VirtualBatch{
 			BatchNumber:   sbatch.BatchNumber,
 			TxHash:        sbatch.TxHash,
@@ -721,7 +735,7 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 			GlobalExitRoot: sbatch.GlobalExitRoot,
 			Timestamp:      time.Unix(int64(sbatch.Timestamp), 0),
 			Coinbase:       sbatch.Coinbase,
-			BatchL2Data:    sbatch.Transactions,
+			BatchL2Data:    batchL2Data,
 		}
 		// ForcedBatch must be processed
 		if sbatch.MinForcedTimestamp > 0 { // If this is true means that the batch is forced
@@ -748,7 +762,7 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 			}
 			if uint64(forcedBatches[0].ForcedAt.Unix()) != sbatch.MinForcedTimestamp ||
 				forcedBatches[0].GlobalExitRoot != sbatch.GlobalExitRoot ||
-				common.Bytes2Hex(forcedBatches[0].RawTxsData) != common.Bytes2Hex(sbatch.Transactions) {
+				common.Bytes2Hex(forcedBatches[0].RawTxsData) != common.Bytes2Hex(batchL2Data) {
 				log.Warnf("ForcedBatch stored: %+v", forcedBatches)
 				log.Warnf("ForcedBatch sequenced received: %+v", sbatch)
 				log.Errorf("error: forcedBatch received doesn't match with the next expected forcedBatch stored in db. Expected: %+v, Synced: %+v", forcedBatches, sbatch)
