@@ -147,6 +147,7 @@ require (
 
 require (
 	github.com/0xPolygon/cdk-data-availability v0.0.0-20230831100042-1da5d033d9ff
+	github.com/0xPolygon/cdk-validium-node v0.0.0-20230831094457-8d07bc9043a8
 	github.com/prometheus/client_golang v1.16.0
 )
 

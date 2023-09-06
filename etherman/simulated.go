@@ -3,6 +3,7 @@ package etherman
 import (
 	"context"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/datacommittee"
 	"math/big"
 
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/matic"
@@ -24,7 +25,7 @@ func NewSimulatedEtherman(cfg Config, auth *bind.TransactOpts) (
 	ethBackend *backends.SimulatedBackend,
 	maticAddr common.Address,
 	br *polygonzkevmbridge.Polygonzkevmbridge,
-	da *supernets2datacommittee.Supernets2datacommittee,
+	da *datacommittee.Supernets2datacommittee,
 	err error,
 ) {
 	if auth == nil {
