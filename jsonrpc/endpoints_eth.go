@@ -798,9 +798,6 @@ func (e *EthEndpoints) SendRawTransaction(httpRequest *http.Request, input strin
 	if e.cfg.SequencerNodeURI != "" {
 		return e.relayTxToSequencerNode(input)
 	} else {
-		if err := checkPolicy(context.Background(), e.pool, input); err != nil {
-			return rpcErrorResponse(types.AccessDeniedCode, err.Error(), nil)
-		}
 		ip := ""
 		ips := httpRequest.Header.Get("X-Forwarded-For")
 
