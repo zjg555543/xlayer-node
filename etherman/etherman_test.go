@@ -39,7 +39,7 @@ func newTestingEnv() (
 	auth *bind.TransactOpts,
 	maticAddr common.Address,
 	br *polygonzkevmbridge.Polygonzkevmbridge,
-	da *datacommittee.Supernets2datacommittee,
+	da *datacommittee.Datacommittee,
 ) {
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
@@ -167,15 +167,15 @@ func TestSequencedBatchesEvent(t *testing.T) {
 		GlobalExitRoot:     ger,
 		Timestamp:          currentBlock.Time(),
 		MinForcedTimestamp: uint64(blocks[2].ForcedBatches[0].ForcedAt.Unix()),
-		Transactions:       crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
+		TransactionsHash:   crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
 	})
 	sequences = append(sequences, polygonzkevm.PolygonZkEVMBatchData{
 		GlobalExitRoot:     ger,
 		Timestamp:          currentBlock.Time() + 1,
 		MinForcedTimestamp: 0,
-		Transactions:       crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
+		TransactionsHash:   crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
 	})
-	_, err = etherman.ZkEVM.SequenceBatches(auth, sequences, auth.From)
+	_, err = etherman.ZkEVM.SequenceBatches(auth, sequences, auth.From, []byte{})
 	require.NoError(t, err)
 
 	// Mine the tx in a block
@@ -190,7 +190,7 @@ func TestSequencedBatchesEvent(t *testing.T) {
 	t.Log("Blocks: ", blocks)
 	assert.Equal(t, 4, len(blocks))
 	assert.Equal(t, 1, len(blocks[3].SequencedBatches))
-	assert.Equal(t, common.Hex2Bytes(rawTxs), blocks[3].SequencedBatches[0][1].Transactions)
+	assert.Equal(t, crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)), common.Hash(blocks[3].SequencedBatches[0][1].TransactionsHash))
 	assert.Equal(t, currentBlock.Time(), blocks[3].SequencedBatches[0][0].Timestamp)
 	assert.Equal(t, ger, blocks[3].SequencedBatches[0][0].GlobalExitRoot)
 	assert.Equal(t, auth.From, blocks[3].SequencedBatches[0][0].Coinbase)
@@ -214,9 +214,9 @@ func TestVerifyBatchEvent(t *testing.T) {
 		GlobalExitRoot:     common.Hash{},
 		Timestamp:          initBlock.Time(),
 		MinForcedTimestamp: 0,
-		Transactions:       crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
+		TransactionsHash:   crypto.Keccak256Hash(common.Hex2Bytes(rawTxs)),
 	}
-	_, err = etherman.ZkEVM.SequenceBatches(auth, []polygonzkevm.PolygonZkEVMBatchData{tx}, auth.From)
+	_, err = etherman.ZkEVM.SequenceBatches(auth, []polygonzkevm.PolygonZkEVMBatchData{tx}, auth.From, []byte{})
 	require.NoError(t, err)
 
 	// Mine the tx in a block
@@ -276,7 +276,7 @@ func TestSequenceForceBatchesEvent(t *testing.T) {
 	t.Log("Blocks: ", blocks)
 
 	forceBatchData := polygonzkevm.PolygonZkEVMForcedBatchData{
-		Transactions:       crypto.Keccak256Hash(blocks[1].ForcedBatches[0].RawTxsData),
+		Transactions:       blocks[1].ForcedBatches[0].RawTxsData,
 		GlobalExitRoot:     blocks[1].ForcedBatches[0].GlobalExitRoot,
 		MinForcedTimestamp: uint64(blocks[1].ForcedBatches[0].ForcedAt.Unix()),
 	}

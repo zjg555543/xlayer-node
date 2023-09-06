@@ -135,7 +135,7 @@ type Client struct {
 	ZkEVM                 *polygonzkevm.Polygonzkevm
 	GlobalExitRootManager *polygonzkevmglobalexitroot.Polygonzkevmglobalexitroot
 	Matic                 *matic.Matic
-	DataCommittee         *datacommittee.Supernets2datacommittee
+	DataCommittee         *datacommittee.Datacommittee
 	SCAddresses           []common.Address
 
 	GasProviders externalGasProviders
@@ -166,7 +166,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 
-	dataCommittee, err := datacommittee.NewSupernets2datacommittee(l1Config.DataCommitteeAddr, ethClient)
+	dataCommittee, err := datacommittee.NewDatacommittee(l1Config.DataCommitteeAddr, ethClient)
 	if err != nil {
 		return nil, err
 	}
@@ -528,7 +528,7 @@ func (etherMan *Client) sequenceBatches(
 	var batches []polygonzkevm.PolygonZkEVMBatchData
 	for _, seq := range sequences {
 		batch := polygonzkevm.PolygonZkEVMBatchData{
-			Transactions:       nil, //crypto.Keccak256Hash(seq.BatchL2Data), // TODO zhujianguo
+			TransactionsHash:   crypto.Keccak256Hash(seq.BatchL2Data),
 			GlobalExitRoot:     seq.GlobalExitRoot,
 			Timestamp:          uint64(seq.Timestamp),
 			MinForcedTimestamp: uint64(seq.ForcedBatchTimestamp),

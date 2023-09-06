@@ -25,7 +25,7 @@ func NewSimulatedEtherman(cfg Config, auth *bind.TransactOpts) (
 	ethBackend *backends.SimulatedBackend,
 	maticAddr common.Address,
 	br *polygonzkevmbridge.Polygonzkevmbridge,
-	da *datacommittee.Supernets2datacommittee,
+	da *datacommittee.Datacommittee,
 	err error,
 ) {
 	if auth == nil {
@@ -42,6 +42,20 @@ func NewSimulatedEtherman(cfg Config, auth *bind.TransactOpts) (
 	}
 	blockGasLimit := uint64(999999999999999999) //nolint:gomnd
 	client := backends.NewSimulatedBackend(genesisAlloc, blockGasLimit)
+
+	// DAC Setup
+	dataCommitteeAddr, _, da, err := datacommittee.DeployDatacommittee(auth, client)
+	if err != nil {
+		return nil, nil, common.Address{}, nil, nil, err
+	}
+	_, err = da.Initialize(auth)
+	if err != nil {
+		return nil, nil, common.Address{}, nil, nil, err
+	}
+	_, err = da.SetupCommittee(auth, big.NewInt(0), []string{}, []byte{})
+	if err != nil {
+		return nil, nil, common.Address{}, nil, nil, err
+	}
 
 	// Deploy contracts
 	const maticDecimalPlaces = 18
@@ -71,7 +85,7 @@ func NewSimulatedEtherman(cfg Config, auth *bind.TransactOpts) (
 	if err != nil {
 		return nil, nil, common.Address{}, nil, nil, err
 	}
-	poeAddr, _, poe, err := polygonzkevm.DeployPolygonzkevm(auth, client, exitManagerAddr, maticAddr, rollupVerifierAddr, bridgeAddr, 1000, 1) //nolint
+	poeAddr, _, poe, err := polygonzkevm.DeployPolygonzkevm(auth, client, exitManagerAddr, maticAddr, rollupVerifierAddr, bridgeAddr, dataCommitteeAddr, 1000, 1) //nolint
 	if err != nil {
 		return nil, nil, common.Address{}, nil, nil, err
 	}
@@ -122,7 +136,7 @@ func NewSimulatedEtherman(cfg Config, auth *bind.TransactOpts) (
 		ZkEVM:                 poe,
 		Matic:                 maticContract,
 		GlobalExitRootManager: globalExitRoot,
-		SCAddresses:           []common.Address{poeAddr, exitManagerAddr},
+		SCAddresses:           []common.Address{poeAddr, exitManagerAddr, dataCommitteeAddr},
 		auth:                  map[common.Address]bind.TransactOpts{},
 	}
 	err = c.AddOrReplaceAuth(*auth)
