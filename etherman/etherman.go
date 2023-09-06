@@ -16,10 +16,10 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/etherscan"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/ethgasstation"
+	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/datacommittee"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/matic"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevmglobalexitroot"
-	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/supernets2datacommittee"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -135,6 +135,7 @@ type Client struct {
 	ZkEVM                 *polygonzkevm.Polygonzkevm
 	GlobalExitRootManager *polygonzkevmglobalexitroot.Polygonzkevmglobalexitroot
 	Matic                 *matic.Matic
+	DataCommittee         *datacommittee.Supernets2datacommittee
 	SCAddresses           []common.Address
 
 	GasProviders externalGasProviders
@@ -165,7 +166,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 
-	dataCommittee, err := supernets2datacommittee.NewSupernets2datacommittee(l1Config.DataCommitteeAddr, ethClient)
+	dataCommittee, err := datacommittee.NewSupernets2datacommittee(l1Config.DataCommitteeAddr, ethClient)
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +190,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		ZkEVM:                 poe,
 		Matic:                 matic,
 		GlobalExitRootManager: globalExitRoot,
+		DataCommittee:         dataCommittee,
 		SCAddresses:           scAddresses,
 		GasProviders: externalGasProviders{
 			MultiGasProvider: cfg.MultiGasProvider,

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/datacommittee"
 	"math"
 	"math/big"
 	"testing"
@@ -38,7 +39,7 @@ func newTestingEnv() (
 	auth *bind.TransactOpts,
 	maticAddr common.Address,
 	br *polygonzkevmbridge.Polygonzkevmbridge,
-	da *supernets2datacommittee.Supernets2datacommittee,
+	da *datacommittee.Supernets2datacommittee,
 ) {
 	privateKey, err := crypto.GenerateKey()
 	if err != nil {
