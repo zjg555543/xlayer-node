@@ -157,12 +157,12 @@ func internalTxTraceToInnerTx(currentTx okFrame, name string, depth int, index i
 	}
 	gas, _ := strconv.ParseUint(currentTx.Gas, 0, 64)
 	gasUsed, _ := strconv.ParseUint(currentTx.GasUsed, 0, 64)
-	valueWei, _ := strconv.ParseUint(value, 0, 64)
+	valueWei, _ := hexutil.DecodeBig(value)
 	callTx := &InnerTx{
 		Dept:         *big.NewInt(int64(depth)),
 		From:         currentTx.From.String(),
 		To:           toAddress,
-		ValueWei:     strconv.Itoa(int(valueWei)),
+		ValueWei:     valueWei.String(),
 		CallValueWei: value,
 		CallType:     strings.ToLower(currentTx.Type),
 		Name:         name,
