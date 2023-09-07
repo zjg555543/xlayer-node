@@ -35,7 +35,6 @@ require (
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
-	github.com/0xPolygon/cdk-validium-node v0.0.0-20230831094457-8d07bc9043a8 // indirect
 	github.com/DataDog/zstd v1.5.2 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230717121422-5aa5874ade95 // indirect
@@ -76,8 +75,6 @@ require (
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
 	github.com/huin/goupnp v1.0.3 // indirect
-	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0 // indirect
-	github.com/invopop/jsonschema v0.7.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -151,6 +148,6 @@ require (
 	github.com/prometheus/client_golang v1.16.0
 )
 
-replace github.com/0xPolygon/cdk-data-availability => github.com/okx/cdk-data-availability v0.0.0-20230831100042-1da5d033d9ff
+replace github.com/0xPolygon/cdk-data-availability => github.com/okx/cdk-data-availability v0.0.0-20230907074552-c74bcc460213
 
 replace github.com/0xPolygonHermez/zkevm-node => ./

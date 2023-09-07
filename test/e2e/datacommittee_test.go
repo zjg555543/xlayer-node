@@ -15,10 +15,10 @@ import (
 	"time"
 
 	"github.com/0xPolygon/cdk-data-availability/config"
-	cTypes "github.com/0xPolygon/cdk-validium-node/config/types"
-	"github.com/0xPolygon/cdk-validium-node/db"
-	"github.com/0xPolygon/cdk-validium-node/jsonrpc"
+	cTypes "github.com/0xPolygonHermez/zkevm-node/config/types"
+	"github.com/0xPolygonHermez/zkevm-node/db"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/datacommittee"
+	"github.com/0xPolygonHermez/zkevm-node/jsonrpc"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/test/operations"
 	"github.com/ethereum/go-ethereum"
@@ -110,10 +110,10 @@ func TestDataCommittee(t *testing.T) {
 	// Spin up M DAC nodes
 	dacNodeConfig := config.Config{
 		L1: config.L1Config{
-			WsURL:       "ws://supernets2-mock-l1-network:8546",
-			Contract:    "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
-			Timeout:     cTypes.NewDuration(time.Minute * 3),
-			RetryPeriod: cTypes.NewDuration(time.Second * 5),
+			WsURL:              "ws://supernets2-mock-l1-network:8546",
+			CDKValidiumAddress: "0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82",
+			Timeout:            cTypes.NewDuration(time.Minute * 3),
+			RetryPeriod:        cTypes.NewDuration(time.Second * 5),
 		},
 		PrivateKey: cTypes.KeystoreFileConfig{
 			Path:     ksFile,
