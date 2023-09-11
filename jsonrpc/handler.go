@@ -196,7 +196,7 @@ func (h *Handler) RemoveFilterByWsConn(wsConn *websocket.Conn) {
 }
 
 func (h *Handler) registerService(service Service) {
-	st := reflect.TypeOf(service)
+	st := reflect.TypeOf(service.Service)
 	if st.Kind() == reflect.Struct {
 		panic(fmt.Sprintf("jsonrpc: service '%s' must be a pointer to struct", service.Name))
 	}
