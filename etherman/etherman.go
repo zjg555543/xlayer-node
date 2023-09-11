@@ -121,7 +121,7 @@ type L1Config struct {
 	MaticAddr                 common.Address `json:"maticTokenAddress"`
 	GlobalExitRootManagerAddr common.Address `json:"polygonZkEVMGlobalExitRootAddress"`
 	// Address of the data availability committee contract
-	DataCommitteeAddr common.Address `json:"supernets2DataCommitteeContract"`
+	DataCommitteeAddr common.Address `json:"dataCommitteeContract"`
 }
 
 type externalGasProviders struct {
