@@ -149,6 +149,6 @@ require (
 
 require github.com/prometheus/client_golang v1.16.0
 
-replace github.com/0xPolygon/cdk-data-availability => github.com/okx/cdk-data-availability v0.0.1-dac.0.20230913105315-58a5a82a1743
+replace github.com/0xPolygon/cdk-data-availability => github.com/okx/cdk-data-availability v0.0.1-dac.0.20230913121303-66766c988eea
 
 replace github.com/0xPolygonHermez/zkevm-node => ./
