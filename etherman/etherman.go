@@ -575,7 +575,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 			batches = append(batches, batch)
 		}
 
-		tx, err = etherMan.ZkEVM.SequenceBatches(&opts, batches, opts.From, committeeSignaturesAndAddrs)
+		tx, err = etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase, committeeSignaturesAndAddrs)
 	} else {
 		for _, seq := range sequences {
 			batch := polygonzkevm.PolygonZkEVMBatchData{
@@ -589,7 +589,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 			batches = append(batches, batch)
 		}
 
-		tx, err = etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase, committeeSignaturesAndAddrs)
+		tx, err = etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase, nil)
 	}
 
 	if err != nil {
