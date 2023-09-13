@@ -179,7 +179,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 
 		sequences = append(sequences, seq)
 		if len(sequences) == int(s.cfg.MaxBatchesForL1) {
-			log.Info(
+			log.Infof(
 				"sequence should be sent to L1, because MaxBatchesForL1 (%d) has been reached",
 				s.cfg.MaxBatchesForL1,
 			)
