@@ -18,6 +18,11 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
+const (
+	// BridgeClaimMethodSignature for tracking BridgeClaimMethodSignature method
+	BridgeClaimMethodSignature = "0x2cffd02e"
+)
+
 var (
 	// ErrNotFound indicates an object has not been found for the search criteria used
 	ErrNotFound = errors.New("object not found")
