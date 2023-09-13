@@ -340,6 +340,7 @@ func (e *EthEndpoints) GetCompilers() (interface{}, types.Error) {
 // GetFilterChanges polling method for a filter, which returns
 // an array of logs which occurred since last poll.
 func (e *EthEndpoints) GetFilterChanges(filterID string) (interface{}, types.Error) {
+	log.Infof("newPendingTransactionFilter eth_getFilterChanges %s\n", filterID)
 	filter, err := e.storage.GetFilter(filterID)
 	if errors.Is(err, ErrNotFound) {
 		return rpcErrorResponse(types.DefaultErrorCode, "filter not found", err)
@@ -787,6 +788,7 @@ func (e *EthEndpoints) newPendingTransactionFilter(wsConn *websocket.Conn) (inte
 	if err != nil {
 		return rpcErrorResponse(types.DefaultErrorCode, "failed to create new pending transaction filter", err)
 	}
+	log.Infof("newPendingTransactionFilter %s\n", id)
 
 	return id, nil
 }
