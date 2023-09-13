@@ -222,6 +222,7 @@ func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isW
 			// if the nonce is different from the current nonce for the
 			// account sending the claim, the transaction gets rejected
 			if poolTx.Nonce() != nonce {
+				log.Infof("from %s, poolTx nonce %d, state nonce %d\n", from, poolTx.Nonce(), nonce)
 				return fmt.Errorf("invalid nonce")
 			}
 			poolTx.DepositCount = depositCount
