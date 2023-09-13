@@ -62,3 +62,7 @@ func (etherMan *Client) GetCurrentDataCommitteeMembers() ([]DataCommitteeMember,
 	}
 	return members, nil
 }
+
+func (etherMan *Client) GetConfigUseValidium() bool {
+	return etherMan.UseValidium
+}

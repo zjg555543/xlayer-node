@@ -571,7 +571,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 				MinForcedTimestamp: uint64(seq.ForcedBatchTimestamp),
 			}
 
-			log.Infof("sequenceBatches, use dac, txs len:%d, tx hash:%s", len(batch.Transactions), hex.EncodeToString(batch.TransactionsHash[:]))
+			log.Infof("sequenceBatches with validium, txs len:%d, tx hash:%s", len(batch.Transactions), hex.EncodeToString(batch.TransactionsHash[:]))
 			batches = append(batches, batch)
 		}
 
@@ -585,7 +585,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 				MinForcedTimestamp: uint64(seq.ForcedBatchTimestamp),
 			}
 
-			log.Infof("sequenceBatches, do not use dac, txs len:%d, tx hash:%s ", len(batch.Transactions), hex.EncodeToString(batch.TransactionsHash[:]))
+			log.Infof("sequenceBatches with rollup, txs len:%d, tx hash:%s ", len(batch.Transactions), hex.EncodeToString(batch.TransactionsHash[:]))
 			batches = append(batches, batch)
 		}
 
