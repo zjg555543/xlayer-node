@@ -480,14 +480,6 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 		}
 	}
 
-	// Reject transactions with a gas price lower than the minimum gas price
-	p.minSuggestedGasPriceMux.RLock()
-	gasPriceCmp := poolTx.GasPrice().Cmp(p.minSuggestedGasPrice)
-	p.minSuggestedGasPriceMux.RUnlock()
-	if gasPriceCmp == -1 {
-		return ErrGasPrice
-	}
-
 	// Transactor should have enough funds to cover the costs
 	// cost == V + GP * GL
 	balance, err := p.state.GetBalance(ctx, from, lastL2Block.Root())
