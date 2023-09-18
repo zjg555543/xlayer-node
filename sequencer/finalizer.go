@@ -379,12 +379,14 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 			metrics.GetLogStatistics().SetTag(metrics.BatchCloseReason, "deadline")
 			f.finalizeBatch(ctx)
 			log.Infof(metrics.GetLogStatistics().Summary())
+			metrics.GetLogStatistics().ResetStatistics()
 			metrics.GetLogStatistics().UpdateTimestamp(metrics.NewRound, time.Now())
 		} else if f.isBatchFull() || f.isBatchAlmostFull() {
 			log.Infof("closing batch %d because it's almost full.", f.batch.batchNumber)
 			metrics.GetLogStatistics().SetTag(metrics.BatchCloseReason, "full")
 			f.finalizeBatch(ctx)
 			log.Infof(metrics.GetLogStatistics().Summary())
+			metrics.GetLogStatistics().ResetStatistics()
 			metrics.GetLogStatistics().UpdateTimestamp(metrics.NewRound, time.Now())
 		}
 
