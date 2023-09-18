@@ -64,7 +64,7 @@ func (l *logStatisticsInstance) Summary() string {
 		"CloseBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchCloseBatch])) + "ms>, " +
 		"OpenBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchOpenBatch])) + "ms>>, "
 
-	result := "Batch<" + strconv.Itoa(int(l.statistics[FinalizeBatchNumber])) + ">, " +
+	result := "Batch<" + l.tags[FinalizeBatchNumber] + ">, " +
 		"TotalDuration<" + batchTotalDuration + "ms>, " +
 		"Tx<" + strconv.Itoa(int(l.statistics[TxCounter])) + ">, " +
 		"GetTx<" + strconv.Itoa(int(l.statistics[GetTx])) + "ms>, " +
