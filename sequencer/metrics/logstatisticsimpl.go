@@ -53,7 +53,7 @@ func (l *logStatisticsInstance) ResetStatistics() {
 func (l *logStatisticsInstance) Summary() string {
 	batchTotalDuration := "-"
 	if key, ok := l.timestamp[NewRound]; ok {
-		batchTotalDuration = strconv.Itoa(int(time.Since(key)))
+		batchTotalDuration = strconv.Itoa(int(time.Since(key).Milliseconds()))
 	}
 	processTxTiming := "ProcessTx<" + strconv.Itoa(int(l.statistics[ProcessingTxTiming])) + "ms, " +
 		"Commit<" + strconv.Itoa(int(l.statistics[ProcessingTxCommit])) + "ms>, " +
