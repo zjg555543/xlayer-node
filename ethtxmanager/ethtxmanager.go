@@ -8,6 +8,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	stdlog "log"
 	"math/big"
 	"time"
 
@@ -76,6 +77,7 @@ func (c *Client) Add(ctx context.Context, owner, id string, from common.Address,
 	// get gas
 	gas, err := c.etherman.EstimateGas(ctx, from, to, value, data)
 	if err != nil {
+		stdlog.Printf("from %s to %s \n ", from, to)
 		err := fmt.Errorf("failed to estimate gas: %w, data: %v", err, common.Bytes2Hex(data))
 		log.Error(err.Error())
 		if c.cfg.ForcedGas > 0 {
