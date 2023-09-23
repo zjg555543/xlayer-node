@@ -356,8 +356,10 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 						break
 					}
 				}
+				metrics.GetLogStatistics().CumulativeValue(metrics.BatchGas, int64(tx.Gas))
 				break
 			}
+
 			f.sharedResourcesMux.Unlock()
 		} else {
 			// wait for new txs

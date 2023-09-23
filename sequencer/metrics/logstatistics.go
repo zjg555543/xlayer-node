@@ -8,6 +8,7 @@ type LogTag string
 
 type LogStatistics interface {
 	CumulativeCounting(tag LogTag)
+	CumulativeValue(tag LogTag, value int64)
 	CumulativeTiming(tag LogTag, duration time.Duration)
 	SetTag(tag LogTag, value string)
 	Summary() string
@@ -24,6 +25,7 @@ const (
 	ReprocessingTxCounter LogTag = "ReProcessingTxCounter"
 	FailTxCounter         LogTag = "FailTxCounter"
 	NewRound              LogTag = "NewRound"
+	BatchGas              LogTag = "BatchGas"
 
 	ProcessingTxTiming         LogTag = "ProcessingTxTiming"
 	ProcessingInvalidTxCounter LogTag = "ProcessingInvalidTxCounter"

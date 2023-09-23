@@ -19,7 +19,8 @@ func Test_logStatisticsInstance_Summary(t *testing.T) {
 		// TODO: Add test cases.
 		{"1", fields{
 			timestamp: map[LogTag]time.Time{NewRound: time.Now().Add(-time.Second)},
-			statistics: map[LogTag]int64{FinalizeBatchNumber: 123,
+			statistics: map[LogTag]int64{
+				BatchGas:                        111111,
 				TxCounter:                       10,
 				GetTx:                           time.Second.Milliseconds(),
 				GetTxPauseCounter:               2,
@@ -34,7 +35,7 @@ func Test_logStatisticsInstance_Summary(t *testing.T) {
 				FinalizeBatchCloseBatch:         time.Second.Milliseconds() * 10,
 				FinalizeBatchOpenBatch:          time.Second.Milliseconds() * 10,
 			},
-			tags: map[LogTag]string{BatchCloseReason: "deadline"},
+			tags: map[LogTag]string{BatchCloseReason: "deadline", FinalizeBatchNumber: "123"},
 		}, "test"},
 	}
 	for _, tt := range tests {
