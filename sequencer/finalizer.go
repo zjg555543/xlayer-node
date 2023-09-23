@@ -356,8 +356,10 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 						break
 					}
 				}
+				metrics.GetLogStatistics().CumulativeValue(metrics.BatchGas, int64(tx.Gas))
 				break
 			}
+
 			f.sharedResourcesMux.Unlock()
 		} else {
 			// wait for new txs
@@ -581,7 +583,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker) (errW
 	start := time.Now()
 	defer func() {
 		metrics.ProcessingTime(time.Since(start))
-		if nil != nil {
+		if tx != nil {
 			metrics.GetLogStatistics().CumulativeTiming(metrics.ProcessingTxTiming, time.Since(start))
 		}
 	}()

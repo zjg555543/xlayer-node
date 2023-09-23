@@ -33,6 +33,10 @@ func (l *logStatisticsInstance) CumulativeCounting(tag LogTag) {
 	l.statistics[tag]++
 }
 
+func (l *logStatisticsInstance) CumulativeValue(tag LogTag, value int64) {
+	l.statistics[tag] += value
+}
+
 func (l *logStatisticsInstance) CumulativeTiming(tag LogTag, duration time.Duration) {
 	l.statistics[tag] += duration.Milliseconds()
 }
@@ -66,6 +70,7 @@ func (l *logStatisticsInstance) Summary() string {
 
 	result := "Batch<" + l.tags[FinalizeBatchNumber] + ">, " +
 		"TotalDuration<" + batchTotalDuration + "ms>, " +
+		"GasUsed<" + strconv.Itoa(int(l.statistics[BatchGas])) + ">, " +
 		"Tx<" + strconv.Itoa(int(l.statistics[TxCounter])) + ">, " +
 		"GetTx<" + strconv.Itoa(int(l.statistics[GetTx])) + "ms>, " +
 		"GetTxPause<" + strconv.Itoa(int(l.statistics[GetTxPauseCounter])) + ">, " +
