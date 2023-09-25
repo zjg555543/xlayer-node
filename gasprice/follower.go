@@ -12,19 +12,21 @@ import (
 
 // FollowerGasPrice struct.
 type FollowerGasPrice struct {
-	cfg  Config
-	pool poolInterface
-	ctx  context.Context
-	eth  ethermanInterface
+	cfg     Config
+	pool    poolInterface
+	ctx     context.Context
+	eth     ethermanInterface
+	ratePrc *RateProcessor
 }
 
 // newFollowerGasPriceSuggester inits l2 follower gas price suggester which is based on the l1 gas price.
 func newFollowerGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface) *FollowerGasPrice {
 	gps := &FollowerGasPrice{
-		cfg:  cfg,
-		pool: pool,
-		ctx:  ctx,
-		eth:  ethMan,
+		cfg:     cfg,
+		pool:    pool,
+		ctx:     ctx,
+		eth:     ethMan,
+		ratePrc: newRateProcessor(cfg, ctx),
 	}
 	gps.UpdateGasPriceAvg()
 	return gps
@@ -44,6 +46,12 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	factor := big.NewFloat(0).SetFloat64(f.cfg.Factor)
 	res := new(big.Float).Mul(factor, big.NewFloat(0).SetInt(l1GasPrice))
 
+	// convert the eth gas price to okb gas price
+	L2L1Rate := f.ratePrc.GetRate()
+	if L2L1Rate > 0.0 {
+		res = new(big.Float).Mul(big.NewFloat(0).SetFloat64(L2L1Rate), res)
+	}
+
 	// Store l2 gasPrice calculated
 	result := new(big.Int)
 	res.Int(result)
@@ -58,7 +66,8 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 		result = maxGasPrice
 	}
 	var truncateValue *big.Int
-	log.Debug("Full L2 gas price value: ", result, ". Length: ", len(result.String()))
+	log.Debug("Full L2 gas price value: ", result, ". Length: ", len(result.String()), ". L1 gas price value: ", l1GasPrice)
+
 	numLength := len(result.String())
 	if numLength > 3 { //nolint:gomnd
 		aux := "%0" + strconv.Itoa(numLength-3) + "d" //nolint:gomnd
@@ -71,7 +80,7 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	} else {
 		truncateValue = result
 	}
-	log.Debug("Storing truncated L2 gas price: ", truncateValue)
+	log.Debugf("Storing truncated L2 gas price: %v L2L1Rate: %v", truncateValue, L2L1Rate)
 	if truncateValue != nil {
 		err := f.pool.SetGasPrices(ctx, truncateValue.Uint64(), l1GasPrice.Uint64())
 		if err != nil {
