@@ -46,7 +46,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 
 	l2CoinPrice := f.ratePrc.GetL2CoinPrice()
 	if l2CoinPrice < 1e-18 {
-		log.Warn("the l2 coin price too small...")
+		log.Warn("the L2 native coin price too small...")
 		return
 	}
 	res := new(big.Float).Mul(big.NewFloat(0).SetFloat64(f.cfg.GasPriceUsdt/l2CoinPrice), big.NewFloat(0).SetFloat64(OKBWei))
@@ -78,7 +78,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	} else {
 		truncateValue = result
 	}
-	log.Debugf("Storing truncated L2 gas price: %v l2CoinPrice: %v", truncateValue, l2CoinPrice)
+	log.Debugf("Storing truncated L2 gas price: %v, L2 native coin price: %v", truncateValue, l2CoinPrice)
 	if truncateValue != nil {
 		err := f.pool.SetGasPrices(ctx, truncateValue.Uint64(), l1GasPrice.Uint64())
 		if err != nil {

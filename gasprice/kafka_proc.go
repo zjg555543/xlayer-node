@@ -130,30 +130,31 @@ func getKafkaReader(cfg Config) *kafka.Reader {
 	}
 
 	return kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		GroupID:  cfg.GroupID,
-		Topic:    cfg.Topic,
-		MinBytes: 1,    // 1
-		MaxBytes: 10e6, // 10MB
-		Dialer:   dialer,
+		Brokers:     brokers,
+		GroupID:     cfg.GroupID,
+		Topic:       cfg.Topic,
+		MinBytes:    1,    // 1
+		MaxBytes:    10e6, // 10MB
+		Dialer:      dialer,
+		StartOffset: kafka.LastOffset, // read data from new message
 	})
 }
 
 func (rp *KafkaProcessor) processor() {
-	log.Info("follower KafkaProcessor start processor ")
+	log.Info("kafka processor start processor ")
 	defer rp.kreader.Close()
 	for {
 		select {
 		case <-rp.ctx.Done():
 			return
 		default:
-			rate, err := rp.ReadAndCalc(rp.ctx)
+			value, err := rp.ReadAndCalc(rp.ctx)
 			if err != nil {
-				log.Warn("follower get okb to eth rate fail ", err)
+				log.Warn("get the destion data fail ", err)
 				time.Sleep(time.Second * 10)
 				continue
 			}
-			rp.updateL2CoinPrice(rate)
+			rp.updateL2CoinPrice(value)
 		}
 	}
 }
@@ -166,10 +167,10 @@ func (rp *KafkaProcessor) ReadAndCalc(ctx context.Context) (float64, error) {
 	return rp.parseL2CoinPrice(m.Value)
 }
 
-func (rp *KafkaProcessor) updateL2CoinPrice(rate float64) {
+func (rp *KafkaProcessor) updateL2CoinPrice(price float64) {
 	rp.rwLock.Lock()
 	defer rp.rwLock.Unlock()
-	rp.L2Price = rate
+	rp.L2Price = price
 }
 
 func (rp *KafkaProcessor) GetL2CoinPrice() float64 {
@@ -192,5 +193,5 @@ func (rp *KafkaProcessor) parseL2CoinPrice(value []byte) (float64, error) {
 			return price.Price, nil
 		}
 	}
-	return 0, fmt.Errorf("not find a correct token price coinId=%f", rp.l2CoinId)
+	return 0, fmt.Errorf("not find a correct coin price coinId=%v", rp.l2CoinId)
 }
