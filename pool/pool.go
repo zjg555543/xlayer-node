@@ -411,16 +411,6 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 		return ErrOversizedData
 	}
 
-	// Reject transactions with a gas price lower than the minimum gas price
-	if from != common.HexToAddress(FreeClaimAddress) || !poolTx.IsClaims {
-		p.minSuggestedGasPriceMux.RLock()
-		gasPriceCmp := poolTx.GasPrice().Cmp(p.minSuggestedGasPrice)
-		p.minSuggestedGasPriceMux.RUnlock()
-		if gasPriceCmp == -1 {
-			return ErrGasPrice
-		}
-	}
-
 	// Transactions can't be negative. This may never happen using RLP decoded
 	// transactions but may occur if you create a transaction using the RPC.
 	if poolTx.Value().Sign() < 0 {
@@ -481,11 +471,13 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	}
 
 	// Reject transactions with a gas price lower than the minimum gas price
-	p.minSuggestedGasPriceMux.RLock()
-	gasPriceCmp := poolTx.GasPrice().Cmp(p.minSuggestedGasPrice)
-	p.minSuggestedGasPriceMux.RUnlock()
-	if gasPriceCmp == -1 {
-		return ErrGasPrice
+	if from != common.HexToAddress(FreeClaimAddress) || !poolTx.IsClaims {
+		p.minSuggestedGasPriceMux.RLock()
+		gasPriceCmp := poolTx.GasPrice().Cmp(p.minSuggestedGasPrice)
+		p.minSuggestedGasPriceMux.RUnlock()
+		if gasPriceCmp == -1 {
+			return ErrGasPrice
+		}
 	}
 
 	// Transactor should have enough funds to cover the costs
