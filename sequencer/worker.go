@@ -3,13 +3,13 @@ package sequencer
 import (
 	"context"
 	"fmt"
-	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"math/big"
 	"runtime"
 	"sync"
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"github.com/ethereum/go-ethereum/common"
 )
