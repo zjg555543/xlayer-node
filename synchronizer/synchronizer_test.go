@@ -44,7 +44,7 @@ type mocks struct {
 //	this Check partially point 2: Use previous batch stored in memory to avoid getting from database
 func Test_Given_PermissionlessNode_When_SyncronizeAgainSameBatch_Then_UseTheOneInMemoryInstaeadOfGettingFromDb(t *testing.T) {
 	genesis, cfg, m := setupGenericTest(t)
-	sync_interface, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, *genesis, *cfg)
+	sync_interface, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, *genesis, *cfg, nil)
 	require.NoError(t, err)
 	sync, ok := sync_interface.(*ClientSynchronizer)
 	require.EqualValues(t, true, ok, "Can't convert to underlaying struct the interface of syncronizer")
@@ -67,7 +67,7 @@ func Test_Given_PermissionlessNode_When_SyncronizeAgainSameBatch_Then_UseTheOneI
 //	this Check partially point 2: Store last batch in memory (CurrentTrustedBatch)
 func Test_Given_PermissionlessNode_When_SyncronizeFirstTimeABatch_Then_StoreItInALocalVar(t *testing.T) {
 	genesis, cfg, m := setupGenericTest(t)
-	sync_interface, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, *genesis, *cfg)
+	sync_interface, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, *genesis, *cfg, nil)
 	require.NoError(t, err)
 	sync, ok := sync_interface.(*ClientSynchronizer)
 	require.EqualValues(t, true, ok, "Can't convert to underlaying struct the interface of syncronizer")
@@ -100,7 +100,7 @@ func TestForcedBatch(t *testing.T) {
 		ZKEVMClient: newZkEVMClientMock(t),
 	}
 
-	sync, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, genesis, cfg)
+	sync, err := NewSynchronizer(false, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, genesis, cfg, nil)
 	require.NoError(t, err)
 
 	// state preparation
@@ -344,7 +344,7 @@ func TestSequenceForcedBatch(t *testing.T) {
 		ZKEVMClient: newZkEVMClientMock(t),
 	}
 
-	sync, err := NewSynchronizer(true, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, genesis, cfg)
+	sync, err := NewSynchronizer(true, m.Etherman, m.State, m.Pool, m.EthTxManager, m.ZKEVMClient, nil, genesis, cfg, nil)
 	require.NoError(t, err)
 
 	// state preparation
