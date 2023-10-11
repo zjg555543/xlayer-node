@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	okbcoinId   = 7184
-	defaultTime = 10
+	okbcoinId      = 7184
+	defaultTime    = 10
+	defaultMaxData = 10e6 // 10M
 )
 
 // aliyun root ca
@@ -121,7 +122,7 @@ func getKafkaReader(cfg Config) *kafka.Reader {
 	brokers := strings.Split(cfg.KafkaURL, ",")
 
 	var dialer *kafka.Dialer
-	if cfg.Password != "" && cfg.Username != "" {
+	if cfg.Password != "" && cfg.Username != "" { // #nosec G402
 		caCertPool := x509.NewCertPool()
 		if ok := caCertPool.AppendCertsFromPEM([]byte(rootCA)); !ok {
 			panic("caCertPool.AppendCertsFromPEM")
@@ -130,7 +131,7 @@ func getKafkaReader(cfg Config) *kafka.Reader {
 			Timeout:       defaultTime * time.Second,
 			DualStack:     true,
 			SASLMechanism: plain.Mechanism{Username: cfg.Username, Password: cfg.Password},
-			TLS:           &tls.Config{RootCAs: caCertPool, InsecureSkipVerify: true}, // #nosec G402
+			TLS:           &tls.Config{RootCAs: caCertPool, InsecureSkipVerify: true},
 		}
 	}
 
@@ -138,8 +139,8 @@ func getKafkaReader(cfg Config) *kafka.Reader {
 		Brokers:     brokers,
 		GroupID:     cfg.GroupID,
 		Topic:       cfg.Topic,
-		MinBytes:    1,    // 1
-		MaxBytes:    10e6, // 10MB
+		MinBytes:    1, // 1
+		MaxBytes:    defaultMaxData,
 		Dialer:      dialer,
 		StartOffset: kafka.LastOffset, // read data from new message
 	})
@@ -179,6 +180,7 @@ func (rp *KafkaProcessor) updateL2CoinPrice(price float64) {
 	rp.L2Price = price
 }
 
+// GetL2CoinPrice get L2 coin price
 func (rp *KafkaProcessor) GetL2CoinPrice() float64 {
 	rp.rwLock.RLock()
 	defer rp.rwLock.RUnlock()
