@@ -36,12 +36,13 @@ type Config struct {
 	CleanHistoryPeriod        types.Duration `mapstructure:"CleanHistoryPeriod"`
 	CleanHistoryTimeRetention types.Duration `mapstructure:"CleanHistoryTimeRetention"`
 
-	KafkaURL string `mapstructure:"KafkaURL"`
-	Topic    string `mapstructure:"Topic"`
-	GroupID  string `mapstructure:"GroupID"`
-	Username string `mapstructure:"Username"`
-	Password string `mapstructure:"Password"`
-	L2CoinId int    `mapstructure:"L2CoinId"`
+	KafkaURL   string `mapstructure:"KafkaURL"`
+	Topic      string `mapstructure:"Topic"`
+	GroupID    string `mapstructure:"GroupID"`
+	Username   string `mapstructure:"Username"`
+	Password   string `mapstructure:"Password"`
+	RootCAPath string `mapstructure:"RootCAPath"`
+	L2CoinId   int    `mapstructure:"L2CoinId"`
 	// DefaultL2CoinPrice is the native token's coin price
 	DefaultL2CoinPrice float64 `mapstructure:"DefaultL2CoinPrice"`
 	GasPriceUsdt       float64 `mapstructure:"GasPriceUsdt"`

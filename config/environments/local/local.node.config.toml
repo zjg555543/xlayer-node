@@ -134,6 +134,7 @@ MaxGasPriceWei = 0
 ## just in SASL_SSL mode
 #Username = ""
 #Password = ""
+#RootCAPath = "only-4096-ca-cert"
 #DefaultL2CoinPrice = 40
 #GasPriceUsdt = 0.0001
 #L2CoinId = 7184
