@@ -16,7 +16,7 @@ func TestCalculateRate(t *testing.T) {
 		{
 			// error
 			l2CoinId: okbcoinId,
-			msg:      fmt.Sprintf("{\"topic\":\"middle_coinPrice_push\"}"),
+			msg:      "{\"topic\":\"middle_coinPrice_push\"}",
 			check: func(rate float64, err error) {
 				require.Error(t, err)
 			},

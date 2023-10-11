@@ -10,9 +10,12 @@ import (
 )
 
 const (
-	OKBWei = 1e18
+	// OKBWei OKB wei
+	OKBWei    = 1e18
+	minOKBWei = 1e-18
 )
 
+// FixedGasPrice struct
 type FixedGasPrice struct {
 	cfg     Config
 	pool    poolInterface
@@ -45,7 +48,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	}
 
 	l2CoinPrice := f.ratePrc.GetL2CoinPrice()
-	if l2CoinPrice < 1e-18 {
+	if l2CoinPrice < minOKBWei {
 		log.Warn("the L2 native coin price too small...")
 		return
 	}

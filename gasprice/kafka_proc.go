@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	okbcoinId = 7184
+	okbcoinId   = 7184
+	defaultTime = 10
 )
 
 // aliyun root ca
@@ -50,16 +51,19 @@ e4seRTTZgyXU+5dgFIXqagub2A79tRtPAr+4Xi84jzY84ceUwqX2fxRwkfaUUJb8
 Hh2q+P+VJeK50B83DZ4ui+WNJbAaAbcLMsn/idX3
 -----END CERTIFICATE-----`
 
+// MsgInfo msg info
 type MsgInfo struct {
 	Topic string `json:"topic"`
 	Data  *Body  `json:"data"`
 }
 
+// Body msg body
 type Body struct {
 	Id        string   `json:"id"`
 	PriceList []*Price `json:"priceList"`
 }
 
+// Price coin price
 type Price struct {
 	CoinId                   int     `json:"coinId"`
 	Symbol                   string  `json:"symbol"`
@@ -89,6 +93,7 @@ type Price struct {
 	Id                       string  `json:"id"`
 }
 
+// KafkaProcessor kafka processor
 type KafkaProcessor struct {
 	kreader  *kafka.Reader
 	L2Price  float64
@@ -122,10 +127,10 @@ func getKafkaReader(cfg Config) *kafka.Reader {
 			panic("caCertPool.AppendCertsFromPEM")
 		}
 		dialer = &kafka.Dialer{
-			Timeout:       10 * time.Second,
+			Timeout:       defaultTime * time.Second,
 			DualStack:     true,
 			SASLMechanism: plain.Mechanism{Username: cfg.Username, Password: cfg.Password},
-			TLS:           &tls.Config{RootCAs: caCertPool, InsecureSkipVerify: true},
+			TLS:           &tls.Config{RootCAs: caCertPool, InsecureSkipVerify: true}, // #nosec G402
 		}
 	}
 
@@ -151,7 +156,7 @@ func (rp *KafkaProcessor) processor() {
 			value, err := rp.ReadAndCalc(rp.ctx)
 			if err != nil {
 				log.Warn("get the destion data fail ", err)
-				time.Sleep(time.Second * 10)
+				time.Sleep(time.Second * defaultTime)
 				continue
 			}
 			rp.updateL2CoinPrice(value)
@@ -159,6 +164,7 @@ func (rp *KafkaProcessor) processor() {
 	}
 }
 
+// ReadAndCalc read and calc
 func (rp *KafkaProcessor) ReadAndCalc(ctx context.Context) (float64, error) {
 	m, err := rp.kreader.ReadMessage(ctx)
 	if err != nil {
