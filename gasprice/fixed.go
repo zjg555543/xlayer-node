@@ -3,10 +3,11 @@ package gasprice
 import (
 	"context"
 	"fmt"
-	"github.com/0xPolygonHermez/zkevm-node/encoding"
-	"github.com/0xPolygonHermez/zkevm-node/log"
 	"math/big"
 	"strconv"
+
+	"github.com/0xPolygonHermez/zkevm-node/encoding"
+	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
 const (
