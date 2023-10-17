@@ -475,6 +475,13 @@ run: ## Runs a full node
 stop: ## Stops all services
 	$(STOP)
 
+.PHONY: local-network
+local-network: ## run db and l1 mock network to start a local network environment
+	$(RUNSTATEDB)
+	$(RUNPOOLDB)
+	$(RUNEVENTDB)
+	$(RUNL1NETWORK)
+
 .PHONY: ship
 ship: ## Builds docker images and run them
 	cd .. && make build-docker && cd ./test && make run

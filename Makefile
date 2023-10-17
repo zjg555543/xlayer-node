@@ -11,7 +11,9 @@ else
 endif
 GOBASE := $(shell pwd)
 GOBIN := $(GOBASE)/dist
+LOCAL_GOBIN := $(GOBASE)/test
 GOENVVARS := GOBIN=$(GOBIN) CGO_ENABLED=0 GOOS=linux GOARCH=$(ARCH)
+LOCAL_GOENVVARS := GOBIN=$(GOBIN) CGO_ENABLED=0 GOARCH=$(ARCH)
 GOBINARY := zkevm-node
 GOCMD := $(GOBASE)/cmd
 
@@ -77,6 +79,10 @@ generate-code-from-proto: check-protoc
 .PHONY: build
 build: ## Builds the binary locally into ./dist
 	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/$(GOBINARY) $(GOCMD)
+
+.PHONY: local_build
+local_build: ## Builds the binary locally into ./dist
+	$(LOCAL_GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(LOCAL_GOBIN)/$(GOBINARY) $(GOCMD)
 
 .PHONY: build-docker
 build-docker: ## Builds a docker image with the node binary

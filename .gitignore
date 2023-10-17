@@ -21,3 +21,6 @@ cmd/__debug_bin
 .venv
 
 *metrics.txt
+
+/test/*.log
+/test/zkevm-node
