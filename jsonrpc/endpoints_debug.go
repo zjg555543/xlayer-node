@@ -7,13 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/client"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -178,16 +176,16 @@ func (d *DebugEndpoints) TraceBatchByNumber(httpRequest *http.Request, number ty
 	// }
 
 	// builds the url of the remote jRPC server
-	scheme := "http"
-	if d.cfg.TraceBatchUseHTTPS {
-		scheme = "https"
-	}
-	u := url.URL{
-		Scheme: scheme,
-		Host:   httpRequest.Host,
-		Path:   httpRequest.URL.Path,
-	}
-	rpcURL := u.String()
+	//scheme := "http"
+	//if d.cfg.TraceBatchUseHTTPS {
+	//	scheme = "https"
+	//}
+	//u := url.URL{
+	//	Scheme: scheme,
+	//	Host:   httpRequest.Host,
+	//	Path:   httpRequest.URL.Path,
+	//}
+	//rpcURL := u.String()
 
 	return d.txMan.NewDbTxScope(d.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
 		batchNumber, rpcErr := number.GetNumericBatchNumber(ctx, d.state, dbTx)
@@ -237,17 +235,26 @@ func (d *DebugEndpoints) TraceBatchByNumber(httpRequest *http.Request, number ty
 				txHash:      receipt.TxHash,
 			}
 
-			res, err := client.JSONRPCCall(rpcURL, "debug_traceTransaction", receipt.TxHash.String(), cfg)
+			//res, err := client.JSONRPCCall(rpcURL, "debug_traceTransaction", receipt.TxHash.String(), cfg)
+			//if err != nil {
+			//	err := fmt.Errorf("failed to get tx trace from remote jRPC server %v for tx %v, err: %w", rpcURL, receipt.TxHash.String(), err)
+			//	log.Errorf(err.Error())
+			//	response.err = err
+			//} else if res.Error != nil {
+			//	err := fmt.Errorf("tx trace error returned from remote jRPC server %v for tx %v, err: %v - %v", rpcURL, receipt.TxHash.String(), res.Error.Code, res.Error.Message)
+			//	log.Errorf(err.Error())
+			//	response.err = err
+			//} else {
+			//	response.trace = res.Result
+			//}
+
+			trace, err := d.TraceTransaction(types.ArgHash(receipt.TxHash), cfg)
 			if err != nil {
-				err := fmt.Errorf("failed to get tx trace from remote jRPC server %v for tx %v, err: %w", rpcURL, receipt.TxHash.String(), err)
-				log.Errorf(err.Error())
-				response.err = err
-			} else if res.Error != nil {
-				err := fmt.Errorf("tx trace error returned from remote jRPC server %v for tx %v, err: %v - %v", rpcURL, receipt.TxHash.String(), res.Error.Code, res.Error.Message)
+				err := fmt.Errorf("failed to get tx trace for tx %v, err: %w", receipt.TxHash.String(), err)
 				log.Errorf(err.Error())
 				response.err = err
 			} else {
-				response.trace = res.Result
+				response.trace = trace
 			}
 
 			// add to the responses
