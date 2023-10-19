@@ -54,9 +54,9 @@ EnableL2SuggestedGasPricePolling = true
 		Port = 8546
 	[RCP.Nacos]
 		URLs = ""
-		NamespaceId = ""
+		NamespaceId = "public"
 		ApplicationName = ""
-	    ExternalListenAddr = "127.0.0.1:8123"
+		ExternalListenAddr = "127.0.0.1:8123"
 
 [Synchronizer]
 SyncInterval = "1s"
