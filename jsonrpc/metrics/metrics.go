@@ -33,6 +33,15 @@ const stateDuration = "state_duration"
 
 var vec *prometheus.GaugeVec
 
+func init() {
+	vec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name:        stateDuration,
+		Help:        "state duration",
+		ConstLabels: nil,
+	}, []string{"method"})
+	prometheus.DefaultRegisterer.MustRegister(vec)
+}
+
 // Register the metrics for the jsonrpc package.
 func Register() {
 	var (
@@ -60,12 +69,6 @@ func Register() {
 			Buckets: prometheus.LinearBuckets(start, width, count),
 		},
 	}
-	vec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
-		Name:        stateDuration,
-		Help:        "state duration",
-		ConstLabels: nil,
-	}, []string{"method"})
-	prometheus.DefaultRegisterer.MustRegister(vec)
 
 	metrics.RegisterCounterVecs(counterVecs...)
 	metrics.RegisterHistograms(histograms...)
