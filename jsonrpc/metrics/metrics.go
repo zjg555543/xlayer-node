@@ -29,6 +29,10 @@ const (
 	RequestHandledLabelBatch RequestHandledLabel = "batch"
 )
 
+const stateDuration = "state_duration"
+
+var vec *prometheus.GaugeVec
+
 // Register the metrics for the jsonrpc package.
 func Register() {
 	var (
@@ -56,9 +60,19 @@ func Register() {
 			Buckets: prometheus.LinearBuckets(start, width, count),
 		},
 	}
+	vec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
+		Name:        stateDuration,
+		Help:        "state duration",
+		ConstLabels: nil,
+	}, []string{"method"})
+	prometheus.DefaultRegisterer.MustRegister(vec)
 
 	metrics.RegisterCounterVecs(counterVecs...)
 	metrics.RegisterHistograms(histograms...)
+}
+
+func StateDuration(start time.Time, method string) {
+	vec.WithLabelValues(method).Set(time.Now().Sub(start).Seconds())
 }
 
 // RequestHandled increments the requests handled counter vector by one for the

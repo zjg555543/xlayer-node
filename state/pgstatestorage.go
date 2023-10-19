@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/metrics"
+	"github.com/jackc/pgconn"
 	"math/big"
 	"time"
 
@@ -25,20 +27,70 @@ const (
 
 // PostgresStorage implements the Storage interface
 type PostgresStorage struct {
-	*pgxpool.Pool
+	*poolexecQuerierWrapper
 }
 
 // NewPostgresStorage creates a new StateDB
 func NewPostgresStorage(db *pgxpool.Pool) *PostgresStorage {
 	return &PostgresStorage{
-		db,
+		&poolexecQuerierWrapper{},
 	}
+}
+
+type poolexecQuerierWrapper struct {
+	*pgxpool.Pool
+}
+
+func (e *poolexecQuerierWrapper) Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error) {
+	s := time.Now()
+	tag, err := e.Pool.Exec(ctx, sql, arguments...)
+	metrics.StateDuration(s, "pool_exec")
+	return tag, err
+}
+
+func (e *poolexecQuerierWrapper) Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+	s := time.Now()
+	tag, err := e.Pool.Query(ctx, sql, args...)
+	metrics.StateDuration(s, "pool_query")
+	return tag, err
+}
+
+func (e *poolexecQuerierWrapper) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+	s := time.Now()
+	tag := e.Pool.QueryRow(ctx, sql, args...)
+	metrics.StateDuration(s, "pool_query_row")
+	return tag
+}
+
+type execQuerierWrapper struct {
+	dbTx pgx.Tx
+}
+
+func (e *execQuerierWrapper) Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error) {
+	s := time.Now()
+	tag, err := e.dbTx.Exec(ctx, sql, arguments...)
+	metrics.StateDuration(s, "temp_exec")
+	return tag, err
+}
+
+func (e *execQuerierWrapper) Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
+	s := time.Now()
+	tag, err := e.dbTx.Query(ctx, sql, args...)
+	metrics.StateDuration(s, "temp_query")
+	return tag, err
+}
+
+func (e *execQuerierWrapper) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
+	s := time.Now()
+	tag := e.dbTx.QueryRow(ctx, sql, args...)
+	metrics.StateDuration(s, "temp_query_row")
+	return tag
 }
 
 // getExecQuerier determines which execQuerier to use, dbTx or the main pgxpool
 func (p *PostgresStorage) getExecQuerier(dbTx pgx.Tx) execQuerier {
 	if dbTx != nil {
-		return dbTx
+		return &execQuerierWrapper{dbTx: dbTx}
 	}
 	return p
 }
