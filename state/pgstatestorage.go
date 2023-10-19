@@ -33,7 +33,7 @@ type PostgresStorage struct {
 // NewPostgresStorage creates a new StateDB
 func NewPostgresStorage(db *pgxpool.Pool) *PostgresStorage {
 	return &PostgresStorage{
-		&poolexecQuerierWrapper{},
+		&poolexecQuerierWrapper{db},
 	}
 }
 
