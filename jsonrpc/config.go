@@ -60,10 +60,10 @@ type WebSocketsConfig struct {
 
 type NacosConfig struct {
 	// URLs nacos server urls for discovery service of rest api, url is separated by ","
-	URLs string `mapstructure:"NacosURLs"`
+	URLs string `mapstructure:"URLs"`
 
 	// NamespaceId nacos namepace id for discovery service of rest api
-	NamespaceId string `mapstructure:"NacosNamespaceId"`
+	NamespaceId string `mapstructure:"NamespaceId"`
 
 	// ApplicationName rest application name in  nacos
 	ApplicationName string `mapstructure:"ApplicationName"`
