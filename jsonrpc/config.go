@@ -42,17 +42,8 @@ type Config struct {
 	// EnablePendingTransactionFilter enables pending transaction filter that can support query L2 pending transaction
 	EnablePendingTransactionFilter bool `mapstructure:"EnablePendingTransactionFilter"`
 
-	// NacosURLs nacos server urls for discovery service of rest api, url is separated by ","
-	NacosURLs string `mapstructure:"NacosURLs"`
-
-	// NacosNamespaceId nacos namepace id for discovery service of rest api
-	NacosNamespaceId string `mapstructure:"NacosNamespaceId"`
-
-	// ApplicationName rest application name in  nacos
-	ApplicationName string `mapstructure:"ApplicationName"`
-
-	// ExternalListenAddr Set the rest-server external ip and port, when it is launched by Docker
-	ExternalListenAddr string `mapstructure:"ExternalListenAddr"`
+	// Nacos configuration
+	Nacos NacosConfig `mspstructure:"Nacos"`
 }
 
 // WebSocketsConfig has parameters to config the rpc websocket support
@@ -65,4 +56,18 @@ type WebSocketsConfig struct {
 
 	// Port defines the port to serve the endpoints via WS
 	Port int `mapstructure:"Port"`
+}
+
+type NacosConfig struct {
+	// URLs nacos server urls for discovery service of rest api, url is separated by ","
+	URLs string `mapstructure:"NacosURLs"`
+
+	// NamespaceId nacos namepace id for discovery service of rest api
+	NamespaceId string `mapstructure:"NacosNamespaceId"`
+
+	// ApplicationName rest application name in  nacos
+	ApplicationName string `mapstructure:"ApplicationName"`
+
+	// ExternalListenAddr Set the rest-server external ip and port, when it is launched by Docker
+	ExternalListenAddr string `mapstructure:"ExternalListenAddr"`
 }

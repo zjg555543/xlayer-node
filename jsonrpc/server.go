@@ -420,7 +420,7 @@ func combinedLog(r *http.Request, start time.Time, httpStatus, dataLen int) {
 
 func (s *Server) registerNacos() {
 	// start nacos client for registering restful service
-	if s.config.NacosURLs != "" {
-		nacos.StartNacosClient(s.config.NacosURLs, s.config.NacosNamespaceId, s.config.ApplicationName, s.config.ExternalListenAddr)
+	if s.config.Nacos.URLs != "" {
+		nacos.StartNacosClient(s.config.Nacos.URLs, s.config.Nacos.NamespaceId, s.config.Nacos.ApplicationName, s.config.Nacos.ExternalListenAddr)
 	}
 }
