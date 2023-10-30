@@ -2,6 +2,7 @@ package sequencer
 
 import (
 	"context"
+	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"math/big"
 	"time"
 
@@ -131,6 +132,7 @@ func (d *dbManager) loadFromPool() {
 				log.Errorf("error adding transaction to worker: %v", err)
 			}
 		}
+		metrics.PendingTxCount(len(poolTransactions))
 	}
 }
 

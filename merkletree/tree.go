@@ -3,10 +3,8 @@ package merkletree
 import (
 	"context"
 	"fmt"
-	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/metrics"
 	"math/big"
 	"strings"
-	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/merkletree/hashdb"
@@ -35,12 +33,10 @@ func (tree *StateTree) GetBalance(ctx context.Context, address common.Address, r
 	}
 
 	k := new(big.Int).SetBytes(key[:])
-	start := time.Now()
 	proof, err := tree.get(ctx, scalarToh4(r), scalarToh4(k))
 	if err != nil {
 		return nil, err
 	}
-	metrics.StateDuration(start, "get_balance")
 	if proof == nil || proof.Value == nil {
 		return big.NewInt(0), nil
 	}
@@ -57,12 +53,10 @@ func (tree *StateTree) GetNonce(ctx context.Context, address common.Address, roo
 	}
 
 	k := new(big.Int).SetBytes(key[:])
-	start := time.Now()
 	proof, err := tree.get(ctx, scalarToh4(r), scalarToh4(k))
 	if err != nil {
 		return nil, err
 	}
-	metrics.StateDuration(start, "get_nonce")
 	if proof == nil || proof.Value == nil {
 		return big.NewInt(0), nil
 	}
@@ -79,12 +73,10 @@ func (tree *StateTree) GetCodeHash(ctx context.Context, address common.Address, 
 	}
 	// this code gets only the hash of the smart contract code from the merkle tree
 	k := new(big.Int).SetBytes(key[:])
-	s := time.Now()
 	proof, err := tree.get(ctx, scalarToh4(r), scalarToh4(k))
 	if err != nil {
 		return nil, err
 	}
-	metrics.StateDuration(s, "get_code_hash")
 	if proof.Value == nil {
 		return nil, nil
 	}
@@ -103,12 +95,11 @@ func (tree *StateTree) GetCode(ctx context.Context, address common.Address, root
 	k := new(big.Int).SetBytes(scCodeHash[:])
 
 	// this code gets actual smart contract code from sc code storage
-	s := time.Now()
 	scCode, err := tree.getProgram(ctx, scalarToh4(k))
 	if err != nil {
 		return nil, err
 	}
-	metrics.StateDuration(s, "get_code")
+
 	return scCode.Data, nil
 }
 
@@ -122,12 +113,10 @@ func (tree *StateTree) GetStorageAt(ctx context.Context, address common.Address,
 	}
 
 	k := new(big.Int).SetBytes(key[:])
-	s := time.Now()
 	proof, err := tree.get(ctx, scalarToh4(r), scalarToh4(k))
 	if err != nil {
 		return nil, err
 	}
-	metrics.StateDuration(s, "get_storage_at")
 	if proof == nil || proof.Value == nil {
 		return big.NewInt(0), nil
 	}
@@ -148,12 +137,12 @@ func (tree *StateTree) SetBalance(ctx context.Context, address common.Address, b
 
 	k := new(big.Int).SetBytes(key)
 	balanceH8 := scalar2fea(balance)
-	s := time.Now()
+
 	updateProof, err := tree.set(ctx, scalarToh4(r), scalarToh4(k), balanceH8, uuid)
 	if err != nil {
 		return nil, nil, err
 	}
-	metrics.StateDuration(s, "set_balance")
+
 	return h4ToFilledByteSlice(updateProof.NewRoot), updateProof, nil
 }
 
@@ -172,12 +161,12 @@ func (tree *StateTree) SetNonce(ctx context.Context, address common.Address, non
 	k := new(big.Int).SetBytes(key[:])
 
 	nonceH8 := scalar2fea(nonce)
-	s := time.Now()
+
 	updateProof, err := tree.set(ctx, scalarToh4(r), scalarToh4(k), nonceH8, uuid)
 	if err != nil {
 		return nil, nil, err
 	}
-	metrics.StateDuration(s, "set_nonce")
+
 	return h4ToFilledByteSlice(updateProof.NewRoot), updateProof, nil
 }
 
@@ -243,12 +232,11 @@ func (tree *StateTree) SetStorageAt(ctx context.Context, address common.Address,
 
 	k := new(big.Int).SetBytes(key[:])
 	valueH8 := scalar2fea(value)
-	s := time.Now()
 	updateProof, err := tree.set(ctx, scalarToh4(r), scalarToh4(k), valueH8, uuid)
 	if err != nil {
 		return nil, nil, err
 	}
-	metrics.StateDuration(s, "set_storage_at")
+
 	return h4ToFilledByteSlice(updateProof.NewRoot), updateProof, nil
 }
 

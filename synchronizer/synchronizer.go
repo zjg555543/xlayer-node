@@ -1001,6 +1001,7 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 			log.Errorf("error storing virtualBatch. BatchNumber: %d, BlockNumber: %d, error: %v", virtualBatch.BatchNumber, blockNumber, err)
 			return err
 		}
+		metrics.VirtualBatchNum(virtualBatch.BatchNumber)
 	}
 	// Insert the sequence to allow the aggregator verify the sequence batches
 	seq := state.Sequence{
@@ -1251,6 +1252,7 @@ func (s *ClientSynchronizer) processTrustedVerifyBatches(lastVerifiedBatch ether
 			log.Errorf("error storing the verifiedB in processTrustedVerifyBatches. BlockNumber: %d, error: %v", lastVerifiedBatch.BlockNumber, err)
 			return err
 		}
+		metrics.VerifiedBatchNum(verifiedB.BatchNumber)
 	}
 	return nil
 }

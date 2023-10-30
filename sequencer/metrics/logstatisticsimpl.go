@@ -45,6 +45,14 @@ func (l *logStatisticsInstance) SetTag(tag LogTag, value string) {
 	l.tags[tag] = value
 }
 
+func (l *logStatisticsInstance) GetTag(tag LogTag) string {
+	return l.tags[tag]
+}
+
+func (l *logStatisticsInstance) GetStatistics(tag LogTag) int64 {
+	return l.statistics[tag]
+}
+
 func (l *logStatisticsInstance) UpdateTimestamp(tag LogTag, tm time.Time) {
 	l.timestamp[tag] = tm
 }
