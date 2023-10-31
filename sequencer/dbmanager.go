@@ -2,7 +2,6 @@ package sequencer
 
 import (
 	"context"
-	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"math/big"
 	"time"
 
@@ -114,21 +113,6 @@ func (d *dbManager) checkIfReorg() {
 	if numberOfReorgs != d.numberOfReorgs {
 		log.Warnf("New L2 reorg detected")
 		d.l2ReorgCh <- L2ReorgEvent{}
-	}
-}
-
-func (d *dbManager) countPendingTx() {
-	ticker := time.NewTicker(time.Second * 10)
-	for {
-		select {
-		case <-ticker.C:
-			transactions, err := d.txPool.CountPendingTransactions(d.ctx)
-			if err != nil {
-				log.Errorf("load pending tx from pool: %v", err)
-				continue
-			}
-			metrics.PendingTxCount(int(transactions))
-		}
 	}
 }
 
