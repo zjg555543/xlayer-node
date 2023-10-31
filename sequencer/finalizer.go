@@ -40,7 +40,7 @@ type finalizer struct {
 	effectiveGasPriceCfg    EffectiveGasPriceCfg
 	closingSignalCh         ClosingSignalCh
 	isSynced                func(ctx context.Context) bool
-	sequencerAddress        common.Address
+	l2coinbase              common.Address
 	worker                  workerInterface
 	dbManager               dbManagerInterface
 	executor                stateInterface
@@ -112,7 +112,7 @@ func newFinalizer(
 	worker workerInterface,
 	dbManager dbManagerInterface,
 	executor stateInterface,
-	sequencerAddr common.Address,
+	l2coinbase common.Address,
 	isSynced func(ctx context.Context) bool,
 	closingSignalCh ClosingSignalCh,
 	batchConstraints batchConstraints,
@@ -123,7 +123,7 @@ func newFinalizer(
 		effectiveGasPriceCfg: effectiveGasPriceCfg,
 		closingSignalCh:      closingSignalCh,
 		isSynced:             isSynced,
-		sequencerAddress:     sequencerAddr,
+		l2coinbase:           l2coinbase,
 		worker:               worker,
 		dbManager:            dbManager,
 		executor:             executor,
@@ -978,7 +978,7 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 		BatchNumber:    *lastBatchNum,
 		OldStateRoot:   f.batch.stateRoot,
 		GlobalExitRoot: f.batch.globalExitRoot,
-		Coinbase:       f.sequencerAddress,
+		Coinbase:       f.l2coinbase,
 		Timestamp:      f.batch.timestamp,
 		Transactions:   make([]byte, 0, 1),
 		Caller:         stateMetrics.SequencerCallerLabel,
@@ -1030,7 +1030,7 @@ func (f *finalizer) processForcedBatch(ctx context.Context, lastBatchNumberInSta
 		OldStateRoot:   stateRoot,
 		GlobalExitRoot: forcedBatch.GlobalExitRoot,
 		Transactions:   forcedBatch.RawTxsData,
-		Coinbase:       f.sequencerAddress,
+		Coinbase:       f.l2coinbase,
 		Timestamp:      now(),
 		Caller:         stateMetrics.SequencerCallerLabel,
 	}
@@ -1093,7 +1093,7 @@ func (f *finalizer) openWIPBatch(ctx context.Context, batchNum uint64, ger, stat
 
 	return &WipBatch{
 		batchNumber:        batchNum,
-		coinbase:           f.sequencerAddress,
+		coinbase:           f.l2coinbase,
 		initialStateRoot:   stateRoot,
 		stateRoot:          stateRoot,
 		timestamp:          openBatchResp.Timestamp,
@@ -1129,7 +1129,7 @@ func (f *finalizer) closeBatch(ctx context.Context) error {
 func (f *finalizer) openBatch(ctx context.Context, num uint64, ger common.Hash, dbTx pgx.Tx) (state.ProcessingContext, error) {
 	processingCtx := state.ProcessingContext{
 		BatchNumber:    num,
-		Coinbase:       f.sequencerAddress,
+		Coinbase:       f.l2coinbase,
 		Timestamp:      now(),
 		GlobalExitRoot: ger,
 	}

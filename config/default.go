@@ -90,6 +90,7 @@ MaxBinaries = 473170
 MaxSteps = 7570538
 TxLifetimeCheckTimeout = "10m"
 MaxTxLifetime = "3h"
+L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 	[Sequencer.Finalizer]
 		GERDeadlineTimeout = "5s"
 		ForcedBatchDeadlineTimeout = "60s"

@@ -132,7 +132,7 @@ func TestNewFinalizer(t *testing.T) {
 	assert.Equal(t, f.worker, workerMock)
 	assert.Equal(t, dbManagerMock, dbManagerMock)
 	assert.Equal(t, f.executor, executorMock)
-	assert.Equal(t, f.sequencerAddress, seqAddr)
+	assert.Equal(t, f.l2coinbase, seqAddr)
 	assert.Equal(t, f.closingSignalCh, closingSignalCh)
 	assert.Equal(t, f.batchConstraints, bc)
 }
@@ -365,7 +365,7 @@ func TestFinalizer_newWIPBatch(t *testing.T) {
 	newBatchNum := f.batch.batchNumber + 1
 	expectedNewWipBatch := &WipBatch{
 		batchNumber:        newBatchNum,
-		coinbase:           f.sequencerAddress,
+		coinbase:           f.l2coinbase,
 		initialStateRoot:   newHash,
 		stateRoot:          newHash,
 		timestamp:          now(),
@@ -610,7 +610,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			batches:       batches,
 			expectedBatch: &WipBatch{
 				batchNumber:        one + 1,
-				coinbase:           f.sequencerAddress,
+				coinbase:           f.l2coinbase,
 				initialStateRoot:   oldHash,
 				stateRoot:          oldHash,
 				timestamp:          testNow(),
@@ -619,7 +619,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			},
 			expectedProcessingCtx: state.ProcessingContext{
 				BatchNumber:    one + 1,
-				Coinbase:       f.sequencerAddress,
+				Coinbase:       f.l2coinbase,
 				Timestamp:      testNow(),
 				GlobalExitRoot: oldHash,
 			},
@@ -633,7 +633,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			ger:           common.Hash{},
 			expectedBatch: &WipBatch{
 				batchNumber:        one,
-				coinbase:           f.sequencerAddress,
+				coinbase:           f.l2coinbase,
 				initialStateRoot:   oldHash,
 				stateRoot:          oldHash,
 				timestamp:          testNow(),
@@ -642,7 +642,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			},
 			expectedProcessingCtx: state.ProcessingContext{
 				BatchNumber:    one,
-				Coinbase:       f.sequencerAddress,
+				Coinbase:       f.l2coinbase,
 				Timestamp:      testNow(),
 				GlobalExitRoot: oldHash,
 			},
@@ -683,7 +683,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			openBatchErr:  testErr,
 			expectedProcessingCtx: state.ProcessingContext{
 				BatchNumber:    one + 1,
-				Coinbase:       f.sequencerAddress,
+				Coinbase:       f.l2coinbase,
 				Timestamp:      testNow(),
 				GlobalExitRoot: oldHash,
 			},
@@ -697,7 +697,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			ger:           oldHash,
 			expectedProcessingCtx: state.ProcessingContext{
 				BatchNumber:    one + 1,
-				Coinbase:       f.sequencerAddress,
+				Coinbase:       f.l2coinbase,
 				Timestamp:      testNow(),
 				GlobalExitRoot: oldHash,
 			},
@@ -954,7 +954,7 @@ func TestFinalizer_processForcedBatches(t *testing.T) {
 						OldStateRoot:   stateRootHashes[i],
 						GlobalExitRoot: forcedBatch.GlobalExitRoot,
 						Transactions:   forcedBatch.RawTxsData,
-						Coinbase:       f.sequencerAddress,
+						Coinbase:       f.l2coinbase,
 						Timestamp:      now(),
 						Caller:         stateMetrics.SequencerCallerLabel,
 					}
@@ -1020,7 +1020,7 @@ func TestFinalizer_openWIPBatch(t *testing.T) {
 	batchNum := f.batch.batchNumber + 1
 	expectedWipBatch := &WipBatch{
 		batchNumber:        batchNum,
-		coinbase:           f.sequencerAddress,
+		coinbase:           f.l2coinbase,
 		initialStateRoot:   oldHash,
 		stateRoot:          oldHash,
 		timestamp:          now(),
@@ -1175,7 +1175,7 @@ func TestFinalizer_openBatch(t *testing.T) {
 			managerErr: nil,
 			expectedCtx: state.ProcessingContext{
 				BatchNumber:    batchNum,
-				Coinbase:       f.sequencerAddress,
+				Coinbase:       f.l2coinbase,
 				Timestamp:      now(),
 				GlobalExitRoot: oldHash,
 			},
@@ -2506,7 +2506,7 @@ func setupFinalizer(withWipBatch bool) *finalizer {
 		effectiveGasPriceCfg: effectiveGasPriceCfg,
 		closingSignalCh:      closingSignalCh,
 		isSynced:             isSynced,
-		sequencerAddress:     seqAddr,
+		l2coinbase:           seqAddr,
 		worker:               workerMock,
 		dbManager:            dbManagerMock,
 		executor:             executorMock,

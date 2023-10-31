@@ -72,10 +72,10 @@ func (d *dbManager) OpenBatch(ctx context.Context, processingContext state.Proce
 }
 
 // CreateFirstBatch is using during genesis
-func (d *dbManager) CreateFirstBatch(ctx context.Context, sequencerAddress common.Address) state.ProcessingContext {
+func (d *dbManager) CreateFirstBatch(ctx context.Context, l2coinbase common.Address) state.ProcessingContext {
 	processingCtx := state.ProcessingContext{
 		BatchNumber:    1,
-		Coinbase:       sequencerAddress,
+		Coinbase:       l2coinbase,
 		Timestamp:      time.Now(),
 		GlobalExitRoot: state.ZeroHash,
 	}

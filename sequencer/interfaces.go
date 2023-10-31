@@ -100,7 +100,7 @@ type workerInterface interface {
 type dbManagerInterface interface {
 	OpenBatch(ctx context.Context, processingContext state.ProcessingContext, dbTx pgx.Tx) error
 	BeginStateTransaction(ctx context.Context) (pgx.Tx, error)
-	CreateFirstBatch(ctx context.Context, sequencerAddress common.Address) state.ProcessingContext
+	CreateFirstBatch(ctx context.Context, l2coinbase common.Address) state.ProcessingContext
 	GetLastBatchNumber(ctx context.Context) (uint64, error)
 	DeleteTransactionFromPool(ctx context.Context, txHash common.Hash) error
 	CloseBatch(ctx context.Context, params ClosingBatchParameters) error

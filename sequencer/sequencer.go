@@ -3,7 +3,6 @@ package sequencer
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/event"
@@ -25,7 +24,7 @@ type Sequencer struct {
 	ethTxManager ethTxManager
 	etherman     etherman
 
-	address common.Address
+	l2coinbase common.Address
 }
 
 // batchConstraints represents the constraints for a batch
@@ -56,18 +55,13 @@ type ClosingSignalCh struct {
 
 // New init sequencer
 func New(cfg Config, txPool txPool, state stateInterface, etherman etherman, manager ethTxManager, eventLog *event.EventLog) (*Sequencer, error) {
-	addr, err := etherman.TrustedSequencer()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get trusted sequencer address, err: %v", err)
-	}
-
 	return &Sequencer{
 		cfg:          cfg,
 		pool:         txPool,
 		state:        state,
 		etherman:     etherman,
 		ethTxManager: manager,
-		address:      addr,
+		l2coinbase:   cfg.L2Coinbase,
 		eventLog:     eventLog,
 	}, nil
 }
@@ -108,7 +102,7 @@ func (s *Sequencer) Start(ctx context.Context) {
 	dbManager := newDBManager(ctx, s.cfg.DBManager, s.pool, s.state, worker, closingSignalCh, batchConstraints)
 	go dbManager.Start()
 
-	finalizer := newFinalizer(s.cfg.Finalizer, s.cfg.EffectiveGasPrice, worker, dbManager, s.state, s.address, s.isSynced, closingSignalCh, batchConstraints, s.eventLog)
+	finalizer := newFinalizer(s.cfg.Finalizer, s.cfg.EffectiveGasPrice, worker, dbManager, s.state, s.l2coinbase, s.isSynced, closingSignalCh, batchConstraints, s.eventLog)
 	currBatch, processingReq := s.bootstrap(ctx, dbManager, finalizer)
 	go finalizer.Start(ctx, currBatch, processingReq)
 
@@ -159,7 +153,7 @@ func (s *Sequencer) bootstrap(ctx context.Context, dbManager *dbManager, finaliz
 		///////////////////
 		// GENESIS Batch //
 		///////////////////
-		processingCtx := dbManager.CreateFirstBatch(ctx, s.address)
+		processingCtx := dbManager.CreateFirstBatch(ctx, s.l2coinbase)
 		timestamp := processingCtx.Timestamp
 		_, oldStateRoot, err := finalizer.getLastBatchNumAndOldStateRoot(ctx)
 		if err != nil {
