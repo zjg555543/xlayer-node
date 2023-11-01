@@ -199,7 +199,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		if len(sequences) == 0 {
 			l2coinbase.SetBytes(batch.Coinbase.Bytes())
 		}
-		if bytes.Compare(l2coinbase.Bytes(), batch.Coinbase.Bytes()) != 0 {
+		if !bytes.Equal(l2coinbase.Bytes(), batch.Coinbase.Bytes()) {
 			break
 		}
 		sequences = append(sequences, seq)
