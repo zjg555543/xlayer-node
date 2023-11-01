@@ -1,6 +1,7 @@
 package sequencesender
 
 import (
+	"bytes"
 	"context"
 	"crypto/ecdsa"
 	"errors"
@@ -14,6 +15,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
+	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
 )
@@ -85,7 +87,7 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 
 	// Check if should send sequence to L1
 	log.Infof("getting sequences to send")
-	sequences, err := s.getSequencesToSend(ctx)
+	sequences, l2coinbase, err := s.getSequencesToSend(ctx)
 	if err != nil || len(sequences) == 0 {
 		if err != nil {
 			log.Errorf("error getting sequences: %v", err)
@@ -112,7 +114,7 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	metrics.SequencesSentToL1(float64(sequenceCount))
 
 	// add sequence to be monitored
-	signaturesAndAddrs, err := s.getSignaturesAndAddrsFromDataCommittee(ctx, sequences)
+	signaturesAndAddrs, err := s.getSignaturesAndAddrsFromDataCommittee(ctx, sequences, l2coinbase)
 	if err != nil {
 		log.Error("error getting signatures and addresses from the data committee: ", err)
 		waitTick(ctx, ticker)
@@ -122,7 +124,7 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 		signaturesAndAddrs = nil
 	}
 
-	to, data, err := s.etherman.BuildSequenceBatchesTxData(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, signaturesAndAddrs)
+	to, data, err := s.etherman.BuildSequenceBatchesTxData(s.cfg.SenderAddress, sequences, l2coinbase, signaturesAndAddrs)
 	if err != nil {
 		log.Error("error estimating new sequenceBatches to add to eth tx manager: ", err)
 		waitTick(ctx, ticker)
@@ -142,10 +144,12 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 // getSequencesToSend generates an array of sequences to be send to L1.
 // If the array is empty, it doesn't necessarily mean that there are no sequences to be sent,
 // it could be that it's not worth it to do so yet.
-func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequence, error) {
+// return sequences, l2coibase, error
+func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequence, common.Address, error) {
+	var l2coinbase common.Address
 	lastVirtualBatchNum, err := s.state.GetLastVirtualBatchNum(ctx, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get last virtual batch num, err: %w", err)
+		return nil, l2coinbase, fmt.Errorf("failed to get last virtual batch num, err: %w", err)
 	}
 
 	currentBatchNumToSequence := lastVirtualBatchNum + 1
@@ -158,13 +162,13 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		//Check if the next batch belongs to a new forkid, in this case we need to stop sequencing as we need to
 		//wait the upgrade of forkid is completed and s.cfg.NumBatchForkIdUpgrade is disabled (=0) again
 		if (s.cfg.ForkUpgradeBatchNumber != 0) && (currentBatchNumToSequence == (s.cfg.ForkUpgradeBatchNumber + 1)) {
-			return nil, fmt.Errorf("aborting sequencing process as we reached the batch %d where a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber+1)
+			return nil, l2coinbase, fmt.Errorf("aborting sequencing process as we reached the batch %d where a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber+1)
 		}
 
 		// Check if batch is closed
 		isClosed, err := s.state.IsBatchClosed(ctx, currentBatchNumToSequence, nil)
 		if err != nil {
-			return nil, err
+			return nil, l2coinbase, err
 		}
 		if !isClosed {
 			// Reached current (WIP) batch
@@ -173,7 +177,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		// Add new sequence
 		batch, err := s.state.GetBatchByNumber(ctx, currentBatchNumToSequence, nil)
 		if err != nil {
-			return nil, err
+			return nil, l2coinbase, err
 		}
 
 		seq := types.Sequence{
@@ -186,11 +190,18 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		if batch.ForcedBatchNum != nil {
 			forcedBatch, err := s.state.GetForcedBatch(ctx, *batch.ForcedBatchNum, nil)
 			if err != nil {
-				return nil, err
+				return nil, l2coinbase, err
 			}
 			seq.ForcedBatchTimestamp = forcedBatch.ForcedAt.Unix()
 		}
 
+		//  All coinbase of sequences must be same
+		if len(sequences) == 0 {
+			l2coinbase.SetBytes(batch.Coinbase.Bytes())
+		}
+		if bytes.Compare(l2coinbase.Bytes(), batch.Coinbase.Bytes()) != 0 {
+			break
+		}
 		sequences = append(sequences, seq)
 
 		if s.isValidium() {
@@ -199,11 +210,11 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 					"sequence should be sent to L1, because MaxBatchesForL1 (%d) has been reached",
 					s.cfg.MaxBatchesForL1,
 				)
-				return sequences, nil
+				return sequences, l2coinbase, nil
 			}
 		} else {
 			// Check if can be send
-			tx, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, nil)
+			tx, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, l2coinbase, nil)
 			if err == nil && tx.Size() > s.cfg.MaxTxSizeForL1 {
 				metrics.SequencesOvesizedDataError()
 				log.Infof("oversized Data on TX oldHash %s (txSize %d > %d)", tx.Hash(), tx.Size(), s.cfg.MaxTxSizeForL1)
@@ -214,17 +225,17 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 				sequences, err = s.handleEstimateGasSendSequenceErr(ctx, sequences, currentBatchNumToSequence, err)
 				if sequences != nil {
 					// Handling the error gracefully, re-processing the sequence as a sanity check
-					_, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, nil)
-					return sequences, err
+					_, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, l2coinbase, nil)
+					return sequences, l2coinbase, err
 				}
-				return sequences, err
+				return sequences, l2coinbase, err
 			}
 		}
 
 		//Check if the current batch is the last before a change to a new forkid, in this case we need to close and send the sequence to L1
 		if (s.cfg.ForkUpgradeBatchNumber != 0) && (currentBatchNumToSequence == (s.cfg.ForkUpgradeBatchNumber)) {
 			log.Info("sequence should be sent to L1, as we have reached the batch %d from which a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber)
-			return sequences, nil
+			return sequences, l2coinbase, nil
 		}
 
 		// Increase batch num for next iteration
@@ -234,24 +245,24 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 	// Reached latest batch. Decide if it's worth to send the sequence, or wait for new batches
 	if len(sequences) == 0 {
 		log.Info("no batches to be sequenced")
-		return nil, nil
+		return nil, l2coinbase, nil
 	}
 
 	lastBatchVirtualizationTime, err := s.state.GetTimeForLatestBatchVirtualization(ctx, nil)
 	if err != nil && !errors.Is(err, state.ErrNotFound) {
 		log.Warnf("failed to get last l1 interaction time, err: %v. Sending sequences as a conservative approach", err)
-		return sequences, nil
+		return sequences, l2coinbase, nil
 	}
 	if lastBatchVirtualizationTime.Before(time.Now().Add(-s.cfg.LastBatchVirtualizationTimeMaxWaitPeriod.Duration)) {
 		// TODO: implement check profitability
 		// if s.checker.IsSendSequencesProfitable(new(big.Int).SetUint64(estimatedGas), sequences) {
 		log.Info("sequence should be sent to L1, because too long since didn't send anything to L1")
-		return sequences, nil
+		return sequences, l2coinbase, nil
 		//}
 	}
 
 	log.Info("not enough time has passed since last batch was virtualized, and the sequence could be bigger")
-	return nil, nil
+	return nil, l2coinbase, nil
 }
 
 // handleEstimateGasSendSequenceErr handles an error on the estimate gas. It will return:

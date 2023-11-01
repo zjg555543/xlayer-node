@@ -23,7 +23,7 @@ type signatureMsg struct {
 	err       error
 }
 
-func (s *SequenceSender) getSignaturesAndAddrsFromDataCommittee(ctx context.Context, sequences []types.Sequence) ([]byte, error) {
+func (s *SequenceSender) getSignaturesAndAddrsFromDataCommittee(ctx context.Context, sequences []types.Sequence, l2coinbase common.Address) ([]byte, error) {
 	// Get current committee
 	committee, err := s.etherman.GetCurrentDataCommittee()
 	if err != nil {
@@ -54,7 +54,7 @@ func (s *SequenceSender) getSignaturesAndAddrsFromDataCommittee(ctx context.Cont
 			Number:         jTypes.ArgUint64(seq.BatchNumber),
 			GlobalExitRoot: seq.GlobalExitRoot,
 			Timestamp:      jTypes.ArgUint64(seq.Timestamp),
-			Coinbase:       s.cfg.L2Coinbase,
+			Coinbase:       l2coinbase,
 			L2Data:         seq.BatchL2Data,
 		})
 	}
