@@ -177,5 +177,6 @@ func (rp *KafkaProcessor) parseL2CoinPrice(value []byte) (float64, error) {
 			return price.Price, nil
 		}
 	}
+	log.Info("the msg is ", string(value))
 	return 0, fmt.Errorf("not find a correct coin price coinId=%v", rp.l2CoinId)
 }
