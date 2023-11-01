@@ -118,6 +118,7 @@ L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 WaitPeriodSendSequence = "5s"
 LastBatchVirtualizationTimeMaxWaitPeriod = "5s"
 MaxTxSizeForL1 = 10
+MaxBatchesForL1 = 10
 PrivateKey = {Path = "/pk/sequencer.keystore", Password = "testonly"}
 UseValidium = true
 
