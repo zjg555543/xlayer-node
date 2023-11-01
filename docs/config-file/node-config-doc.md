@@ -1862,7 +1862,6 @@ DefaultMinGasPriceAllowed=0
 | - [MaxTxSizeForL1](#SequenceSender_MaxTxSizeForL1 )                                                     | No      | integer          | No         | -          | MaxTxSizeForL1 is the maximum size a single transaction can have. This field has<br />non-trivial consequences: larger transactions than 128KB are significantly harder and<br />more expensive to propagate; larger transactions also take more resources<br />to validate whether they fit into the pool or not. |
 | - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                 |
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                    |
-| - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which addess is going to receive the fees                                                                                                                                                                                                                                                       |
 | - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                  |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                         |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                        |
@@ -1924,6 +1923,23 @@ LastBatchVirtualizationTimeMaxWaitPeriod="5s"
 
 **Type:** : `integer`
 
+**Default:** `10`
+
+**Description:** MaxTxSizeForL1 is the maximum size a single transaction can have. This field has
+non-trivial consequences: larger transactions than 128KB are significantly harder and
+more expensive to propagate; larger transactions also take more resources
+to validate whether they fit into the pool or not.
+
+**Example setting the default value** (10):
+```
+[SequenceSender]
+MaxTxSizeForL1=10
+```
+
+### <a name="SequenceSender_MaxBatchesForL1"></a>11.4. `SequenceSender.MaxBatchesForL1`
+
+**Type:** : `integer`
+
 **Default:** `0`
 
 **Description:** MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx
@@ -1931,21 +1947,7 @@ LastBatchVirtualizationTimeMaxWaitPeriod="5s"
 **Example setting the default value** (0):
 ```
 [SequenceSender]
-MaxTxSizeForL1=0
-```
-
-### <a name="SequenceSender_MaxBatchesForL1"></a>11.4. `SequenceSender.MaxBatchesForL1`
-
-**Type:** : `integer`
-
-**Default:** `10`
-
-**Description:** MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx
-
-**Example setting the default value** (10):
-```
-[SequenceSender]
-MaxBatchesForL1=10
+MaxBatchesForL1=0
 ```
 
 ### <a name="SequenceSender_SenderAddress"></a>11.5. `SequenceSender.SenderAddress`
@@ -1954,21 +1956,7 @@ MaxBatchesForL1=10
 **Description:** SenderAddress defines which private key the eth tx manager needs to use
 to sign the L1 txs
 
-### <a name="SequenceSender_L2Coinbase"></a>11.6. `SequenceSender.L2Coinbase`
-
-**Type:** : `array of integer`
-
-**Default:** `"0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"`
-
-**Description:** L2Coinbase defines which addess is going to receive the fees
-
-**Example setting the default value** ("0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"):
-```
-[SequenceSender]
-L2Coinbase="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-```
-
-### <a name="SequenceSender_PrivateKey"></a>11.7. `[SequenceSender.PrivateKey]`
+### <a name="SequenceSender_PrivateKey"></a>11.6. `[SequenceSender.PrivateKey]`
 
 **Type:** : `object`
 **Description:** PrivateKey defines all the key store files that are going
@@ -1979,7 +1967,7 @@ to be read in order to provide the private keys to sign the L1 txs
 | - [Path](#SequenceSender_PrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
 | - [Password](#SequenceSender_PrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
 
-#### <a name="SequenceSender_PrivateKey_Path"></a>11.7.1. `SequenceSender.PrivateKey.Path`
+#### <a name="SequenceSender_PrivateKey_Path"></a>11.6.1. `SequenceSender.PrivateKey.Path`
 
 **Type:** : `string`
 
@@ -1993,7 +1981,7 @@ to be read in order to provide the private keys to sign the L1 txs
 Path="/pk/sequencer.keystore"
 ```
 
-#### <a name="SequenceSender_PrivateKey_Password"></a>11.7.2. `SequenceSender.PrivateKey.Password`
+#### <a name="SequenceSender_PrivateKey_Password"></a>11.6.2. `SequenceSender.PrivateKey.Password`
 
 **Type:** : `string`
 
@@ -2007,7 +1995,7 @@ Path="/pk/sequencer.keystore"
 Password="testonly"
 ```
 
-### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.8. `SequenceSender.ForkUpgradeBatchNumber`
+### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.7. `SequenceSender.ForkUpgradeBatchNumber`
 
 **Type:** : `integer`
 
@@ -2021,7 +2009,7 @@ Password="testonly"
 ForkUpgradeBatchNumber=0
 ```
 
-### <a name="SequenceSender_UseValidium"></a>11.9. `SequenceSender.UseValidium`
+### <a name="SequenceSender_UseValidium"></a>11.8. `SequenceSender.UseValidium`
 
 **Type:** : `boolean`
 
