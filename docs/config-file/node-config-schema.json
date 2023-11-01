@@ -521,16 +521,6 @@
 						"300ms"
 					]
 				},
-				"L2Coinbase": {
-					"items": {
-						"type": "integer"
-					},
-					"type": "array",
-					"maxItems": 20,
-					"minItems": 20,
-					"description": "L2Coinbase defines which addess is going to receive the fees",
-					"default": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-				},
 				"Finalizer": {
 					"properties": {
 						"GERDeadlineTimeout": {
@@ -724,13 +714,13 @@
 				},
 				"MaxTxSizeForL1": {
 					"type": "integer",
-					"description": "// MaxTxSizeForL1 is the maximum size a single transaction can have. This field has\n// non-trivial consequences: larger transactions than 128KB are significantly harder and\n// more expensive to propagate; larger transactions also take more resources\n// to validate whether they fit into the pool or not.",
-					"default": 1000
+					"description": "MaxTxSizeForL1 is the maximum size a single transaction can have. This field has\nnon-trivial consequences: larger transactions than 128KB are significantly harder and\nmore expensive to propagate; larger transactions also take more resources\nto validate whether they fit into the pool or not.",
+					"default": 0
 				},
 				"MaxBatchesForL1": {
 					"type": "integer",
 					"description": "MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx",
-					"default": 0
+					"default": 10
 				},
 				"SenderAddress": {
 					"items": {
@@ -740,6 +730,16 @@
 					"maxItems": 20,
 					"minItems": 20,
 					"description": "SenderAddress defines which private key the eth tx manager needs to use\nto sign the L1 txs"
+				},
+				"L2Coinbase": {
+					"items": {
+						"type": "integer"
+					},
+					"type": "array",
+					"maxItems": 20,
+					"minItems": 20,
+					"description": "L2Coinbase defines which addess is going to receive the fees",
+					"default": "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 				},
 				"PrivateKey": {
 					"properties": {
