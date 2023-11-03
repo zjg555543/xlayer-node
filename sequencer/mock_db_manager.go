@@ -104,6 +104,20 @@ func (_m *DbManagerMock) CreateFirstBatch(ctx context.Context, l2coinbase common
 	return r0
 }
 
+// DeleteBatchByNumber provides a mock function with given fields: ctx, batchNumber, dbTx
+func (_m *DbManagerMock) DeleteBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
+	ret := _m.Called(ctx, batchNumber, dbTx)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, pgx.Tx) error); ok {
+		r0 = rf(ctx, batchNumber, dbTx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // DeleteTransactionFromPool provides a mock function with given fields: ctx, txHash
 func (_m *DbManagerMock) DeleteTransactionFromPool(ctx context.Context, txHash common.Hash) error {
 	ret := _m.Called(ctx, txHash)
@@ -182,19 +196,6 @@ func (_m *DbManagerMock) GetBatchByNumber(ctx context.Context, batchNumber uint6
 	}
 
 	return r0, r1
-}
-
-func (_m *DbManagerMock) DeletBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
-	ret := _m.Called(ctx, batchNumber)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
-		r0 = rf(ctx, batchNumber)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
 }
 
 // GetDefaultMinGasPriceAllowed provides a mock function with given fields:

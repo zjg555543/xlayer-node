@@ -585,7 +585,8 @@ func (p *PostgresStorage) GetBatchByNumber(ctx context.Context, batchNumber uint
 	return &batch, nil
 }
 
-func (p *PostgresStorage) DeletBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
+// DeleteBatchByNumber deletes batch with given number.
+func (p *PostgresStorage) DeleteBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
 	deleteBatchByNumberSQL := "DELETE FROM state.batch WHERE batch_num = $1"
 
 	e := p.getExecQuerier(dbTx)

@@ -601,6 +601,12 @@ generate-mocks: ## Generates mocks for the tests, using mockery tool
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=aggregatorTxProfitabilityChecker --dir=../aggregator --output=../aggregator/mocks --outpkg=mocks --structname=ProfitabilityCheckerMock --filename=mock_profitabilitychecker.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=Tx --srcpkg=github.com/jackc/pgx/v4 --output=../aggregator/mocks --outpkg=mocks --structname=DbTxMock --filename=mock_dbtx.go
 
+.PHONY: generate-sequencesender-mocks
+generate-sequencesender-mocks:
+	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=stateInterface --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=stateMock --filename=mock_state.go
+	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ethermanInterface --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=ethermanMock --filename=mock_etherman.go
+	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ethTxManager --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=ethTxManagerMock --filename=mock_ethtxmanager.go
+
 .PHONY: run-benchmarks
 run-benchmarks: run-db ## Runs benchmars
 	go test -bench=. ./state/tree

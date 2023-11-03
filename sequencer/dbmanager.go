@@ -29,8 +29,8 @@ func (d *dbManager) GetBatchByNumber(ctx context.Context, batchNumber uint64, db
 	return d.state.GetBatchByNumber(ctx, batchNumber, dbTx)
 }
 
-func (d *dbManager) DeletBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
-	return d.state.DeletBatchByNumber(ctx, batchNumber, dbTx)
+func (d *dbManager) DeleteBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
+	return d.state.DeleteBatchByNumber(ctx, batchNumber, dbTx)
 }
 
 // ClosingBatchParameters contains the necessary parameters to close a batch
