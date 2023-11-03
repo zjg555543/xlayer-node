@@ -12,12 +12,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/didip/tollbooth/v6"
+	"github.com/gorilla/websocket"
+
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/nacos"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
-	"github.com/didip/tollbooth/v6"
-	"github.com/gorilla/websocket"
 )
 
 const (
@@ -422,4 +423,10 @@ func (s *Server) registerNacos() {
 	if s.config.Nacos.URLs != "" {
 		nacos.StartNacosClient(s.config.Nacos.URLs, s.config.Nacos.NamespaceId, s.config.Nacos.ApplicationName, s.config.Nacos.ExternalListenAddr)
 	}
+
+	// start nacos client for registering restful service
+	if s.config.NacosWs.URLs != "" {
+		nacos.StartNacosClient(s.config.NacosWs.URLs, s.config.NacosWs.NamespaceId, s.config.NacosWs.ApplicationName, s.config.NacosWs.ExternalListenAddr)
+	}
+
 }
