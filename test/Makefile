@@ -558,7 +558,7 @@ run-db-scripts: ## Executes scripts on the db after it has been initialized, pot
 
 .PHONY: install-mockery
 install-mockery: ## Installs mockery with the correct version to generate the mocks
-	go install github.com/vektra/mockery/v2@v2.22.1
+	go install github.com/vektra/mockery/v2@v2.28.1
 
 .PHONY: generate-mocks
 generate-mocks: ## Generates mocks for the tests, using mockery tool
@@ -581,8 +581,8 @@ generate-mocks: ## Generates mocks for the tests, using mockery tool
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=poolInterface --dir=../synchronizer --output=../synchronizer --outpkg=synchronizer --structname=poolMock --filename=mock_pool.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=zkEVMClientInterface --dir=../synchronizer --output=../synchronizer --outpkg=synchronizer --structname=zkEVMClientMock --filename=mock_zkevmclient.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=Tx --srcpkg=github.com/jackc/pgx/v4 --output=../synchronizer --outpkg=synchronizer --structname=dbTxMock --filename=mock_dbtx.go
-	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ClientFactoryInterface --srcpkg=github.com/okx/Xgon-data-availability/client --output=../synchronizer --outpkg=synchronizer --structname=dataCommitteeClientFactoryMock --filename=mock_datacommitteeclientfactory.go
-	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ClientInterface --srcpkg=github.com/okx/Xgon-data-availability/client --output=../synchronizer --outpkg=synchronizer --structname=dataCommitteeClientMock --filename=mock_datacommitteeclient.go
+	#export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ClientFactoryInterface --srcpkg=github.com/okx/Xgon-data-availability/client --output=../synchronizer --outpkg=synchronizer --structname=dataCommitteeClientFactoryMock --filename=mock_datacommitteeclientfactory.go
+	#export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ClientInterface --srcpkg=github.com/okx/Xgon-data-availability/client --output=../synchronizer --outpkg=synchronizer --structname=dataCommitteeClientMock --filename=mock_datacommitteeclient.go
 
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=GasPricer --srcpkg=github.com/ethereum/go-ethereum --output=../etherman --outpkg=etherman --structname=etherscanMock --filename=mock_etherscan.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=GasPricer --srcpkg=github.com/ethereum/go-ethereum --output=../etherman --outpkg=etherman --structname=ethGasStationMock --filename=mock_ethgasstation.go
@@ -601,8 +601,6 @@ generate-mocks: ## Generates mocks for the tests, using mockery tool
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=aggregatorTxProfitabilityChecker --dir=../aggregator --output=../aggregator/mocks --outpkg=mocks --structname=ProfitabilityCheckerMock --filename=mock_profitabilitychecker.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=Tx --srcpkg=github.com/jackc/pgx/v4 --output=../aggregator/mocks --outpkg=mocks --structname=DbTxMock --filename=mock_dbtx.go
 
-.PHONY: generate-sequencesender-mocks
-generate-sequencesender-mocks:
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=stateInterface --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=stateMock --filename=mock_state.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ethermanInterface --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=ethermanMock --filename=mock_etherman.go
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/mockery --name=ethTxManager --dir=../sequencesender --output=../sequencesender --outpkg=sequencesender --structname=ethTxManagerMock --filename=mock_ethtxmanager.go

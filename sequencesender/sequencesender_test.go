@@ -2,12 +2,20 @@ package sequencesender
 
 import (
 	"context"
+	"fmt"
 	"github.com/0xPolygon/cdk-data-availability/config"
 	cfgTypes "github.com/0xPolygonHermez/zkevm-node/config/types"
+	"github.com/0xPolygonHermez/zkevm-node/etherman"
+	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/event/nileventstorage"
+	"github.com/0xPolygonHermez/zkevm-node/state"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/jackc/pgx/v4"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"time"
 )
 
 var (
@@ -30,6 +38,10 @@ var (
 		},
 		UseValidium: true,
 	}
+
+	addr0 = common.Address{}
+	addr1 = common.Address{0x1}
+	addr2 = common.Address{0x2}
 )
 
 func TestSequenceSender_getSequencesToSend(t *testing.T) {
@@ -43,10 +55,141 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 	require.NoError(t, err)
 	ctx = context.Background()
 
-	state_interface.On("GetLastVirtualBatchNum", ctx, nil).Return(uint64(9), nil)
-
-	sequence, address, err := sequenceSender.getSequencesToSend(ctx)
+	state_interface.On("GetTimeForLatestBatchVirtualization", ctx, nil).Return(func(ctx context.Context, dbTx pgx.Tx) (time.Time, error) {
+		return time.Now().Add(-cfg.LastBatchVirtualizationTimeMaxWaitPeriod.Duration), nil
+	})
+	etherman_interface.On("GetCurrentDataCommittee").Return(&etherman.DataCommittee{
+		Members: []etherman.DataCommitteeMember{{
+			URL:  "fake url",
+			Addr: common.HexToAddress("0xff"),
+		}},
+	}, nil)
+	time_speical, err := time.Parse(time.UnixDate, "Wed Feb 25 11:06:39 PST 2015")
 	require.NoError(t, err)
-	t.Log("sequence", sequence)
-	t.Log("address", address)
+	testCases := []struct {
+		name           string
+		times          int
+		prepareBatches func(ctx context.Context, number uint64, dbTx pgx.Tx) (*state.Batch, error)
+		isBatchClosed  func(ctx context.Context, number uint64, dbTx pgx.Tx) (bool, error)
+		expectFunc     func(ctx context.Context, t *testing.T)
+	}{
+		{
+			name:  "only one batch push into sequence",
+			times: 1,
+			prepareBatches: func(ctx context.Context, number uint64, dbTx pgx.Tx) (*state.Batch, error) {
+				if number > 1 {
+					return nil, fmt.Errorf("The batch %d is not exist", number)
+				}
+
+				return &state.Batch{
+					BatchNumber: number,
+					Timestamp:   time_speical,
+					Coinbase:    addr1,
+				}, nil
+			},
+			isBatchClosed: func(ctx context.Context, number uint64, dbTx pgx.Tx) (bool, error) {
+				if number > 1 {
+					return false, nil
+				}
+				return true, nil
+			},
+			expectFunc: func(ctx context.Context, t *testing.T) {
+				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
+				require.Equal(t, addr1, coinbase)
+				require.Equal(t, []types.Sequence{
+					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
+				}, sequence)
+				require.NoError(t, err)
+			},
+		},
+		{
+			name:  "2 batch which has same batch push into sequence",
+			times: 2,
+			prepareBatches: func(ctx context.Context, number uint64, dbTx pgx.Tx) (*state.Batch, error) {
+				if number > 2 {
+					return nil, fmt.Errorf("The batch %d is not exist", number)
+				}
+
+				return &state.Batch{
+					BatchNumber: number,
+					Timestamp:   time_speical,
+					Coinbase:    addr1,
+				}, nil
+			},
+			isBatchClosed: func(ctx context.Context, number uint64, dbTx pgx.Tx) (bool, error) {
+				if number > 2 {
+					return false, nil
+				}
+				return true, nil
+			},
+			expectFunc: func(ctx context.Context, t *testing.T) {
+				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
+				require.Equal(t, addr1, coinbase)
+				require.Equal(t, []types.Sequence{
+					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 2, Timestamp: time_speical.Unix()},
+				}, sequence)
+				require.NoError(t, err)
+			},
+		},
+		{
+			name:  "2 batch which has same coinbase and another 2 batch which has different from first batches  push into sequence",
+			times: 5,
+			prepareBatches: func(ctx context.Context, number uint64, dbTx pgx.Tx) (*state.Batch, error) {
+				if number > 4 {
+					return nil, fmt.Errorf("The batch %d is not exist", number)
+				}
+				if number <= 2 {
+					return &state.Batch{
+						BatchNumber: number,
+						Timestamp:   time_speical,
+						Coinbase:    addr1,
+					}, nil
+				} else {
+					return &state.Batch{
+						BatchNumber: number,
+						Timestamp:   time_speical,
+						Coinbase:    addr2,
+					}, nil
+				}
+
+			},
+			isBatchClosed: func(ctx context.Context, number uint64, dbTx pgx.Tx) (bool, error) {
+				if number > 4 {
+					return false, nil
+				}
+				return true, nil
+			},
+			expectFunc: func(ctx context.Context, t *testing.T) {
+				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
+				require.Equal(t, addr1, coinbase)
+				require.Equal(t, []types.Sequence{
+					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 2, Timestamp: time_speical.Unix()},
+				}, sequence)
+				require.NoError(t, err)
+				state_interface.On("GetLastVirtualBatchNum", ctx, nil).Return(uint64(2), nil).Once()
+
+				sequence, coinbase, err = sequenceSender.getSequencesToSend(ctx)
+				require.Equal(t, addr2, coinbase)
+				require.Equal(t, []types.Sequence{
+					types.Sequence{BatchNumber: 3, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 4, Timestamp: time_speical.Unix()},
+				}, sequence)
+				require.NoError(t, err)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			state_interface.On("GetLastVirtualBatchNum", ctx, nil).Return(uint64(0), nil).Once()
+			state_interface.On("GetBatchByNumber", ctx, mock.AnythingOfType("uint64"), nil).Return(tc.prepareBatches).Times(tc.times)
+			state_interface.On("IsBatchClosed", ctx, mock.AnythingOfType("uint64"), nil).Return(tc.isBatchClosed).Times(tc.times + 1)
+			tc.expectFunc(ctx, t)
+
+			state_interface.AssertExpectations(t)
+			etherman_interface.AssertExpectations(t)
+		})
+	}
 }
