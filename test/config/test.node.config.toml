@@ -73,6 +73,7 @@ MaxBinaries = 473170
 MaxSteps = 7570538
 TxLifetimeCheckTimeout = "10m"
 MaxTxLifetime = "3h"
+L2Coinbase = "0x2222222222222222222222222222222222222222"
 	[Sequencer.Finalizer]
 		GERDeadlineTimeout = "2s"
 		ForcedBatchDeadlineTimeout = "5s"
@@ -100,7 +101,6 @@ WaitPeriodSendSequence = "15s"
 LastBatchVirtualizationTimeMaxWaitPeriod = "10s"
 MaxBatchesForL1 = 10
 SenderAddress = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 PrivateKey = {Path = "/pk/sequencer.keystore", Password = "testonly"}
 
 [Aggregator]

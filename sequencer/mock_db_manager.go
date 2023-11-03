@@ -184,6 +184,19 @@ func (_m *DbManagerMock) GetBatchByNumber(ctx context.Context, batchNumber uint6
 	return r0, r1
 }
 
+func (_m *DbManagerMock) DeletBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
+	ret := _m.Called(ctx, batchNumber)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(ctx, batchNumber)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetDefaultMinGasPriceAllowed provides a mock function with given fields:
 func (_m *DbManagerMock) GetDefaultMinGasPriceAllowed() uint64 {
 	ret := _m.Called()

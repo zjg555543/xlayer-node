@@ -1,6 +1,7 @@
 package sequencer
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -962,9 +963,28 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 			return err
 		}
 	} else {
-		f.batch, err = f.dbManager.GetWIPBatch(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to get work-in-progress batch, err: %w", err)
+		if bytes.Equal(lastBatch.Coinbase.Bytes(), f.l2coinbase.Bytes()) {
+			f.batch, err = f.dbManager.GetWIPBatch(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to get work-in-progress batch, err: %w", err)
+			}
+		} else {
+			oldGER := lastBatch.GlobalExitRoot
+			if err := f.dbManager.DeletBatchByNumber(ctx, *lastBatchNum, nil); err != nil {
+				return fmt.Errorf("failed to delete last no-closed batch, err: %w", err)
+			}
+			f.lastGERHash = oldGER
+			lastBatch, err = f.dbManager.GetLastBatch(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to get last batch again, err: %w", err)
+			}
+			oldStateRoot := lastBatch.StateRoot
+
+			f.batch, err = f.openWIPBatch(ctx, *lastBatchNum, oldGER, oldStateRoot)
+			if err != nil {
+				return err
+			}
+
 		}
 	}
 	log.Infof("Initial Batch: %+v", f.batch)

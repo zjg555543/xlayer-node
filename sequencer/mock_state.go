@@ -210,6 +210,19 @@ func (_m *StateMock) GetBatchByNumber(ctx context.Context, batchNumber uint64, d
 	return r0, r1
 }
 
+func (_m *StateMock) DeletBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
+	ret := _m.Called(ctx, batchNumber)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64) error); ok {
+		r0 = rf(ctx, batchNumber)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetForcedBatch provides a mock function with given fields: ctx, forcedBatchNumber, dbTx
 func (_m *StateMock) GetForcedBatch(ctx context.Context, forcedBatchNumber uint64, dbTx pgx.Tx) (*state.ForcedBatch, error) {
 	ret := _m.Called(ctx, forcedBatchNumber, dbTx)
