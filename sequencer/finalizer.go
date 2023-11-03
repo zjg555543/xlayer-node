@@ -973,7 +973,6 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 			if err := f.dbManager.DeletBatchByNumber(ctx, *lastBatchNum, nil); err != nil {
 				return fmt.Errorf("failed to delete last no-closed batch, err: %w", err)
 			}
-			f.lastGERHash = oldGER
 			lastBatch, err = f.dbManager.GetLastBatch(ctx)
 			if err != nil {
 				return fmt.Errorf("failed to get last batch again, err: %w", err)
@@ -987,6 +986,7 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 
 		}
 	}
+	f.lastGERHash = f.batch.globalExitRoot
 	log.Infof("Initial Batch: %+v", f.batch)
 	log.Infof("Initial Batch.StateRoot: %s", f.batch.stateRoot.String())
 	log.Infof("Initial Batch.GER: %s", f.batch.globalExitRoot.String())
