@@ -326,7 +326,7 @@ func runJSONRPCServer(c config.Config, etherman *etherman.Client, chainID uint64
 		}
 		log.Debug("SequencerNodeURI ", c.RPC.SequencerNodeURI)
 	}
-
+	chainID = 196
 	services := []jsonrpc.Service{}
 	if _, ok := apis[jsonrpc.APIEth]; ok {
 		services = append(services, jsonrpc.Service{
