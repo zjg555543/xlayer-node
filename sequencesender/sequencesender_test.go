@@ -97,7 +97,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
@@ -126,8 +126,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
-					types.Sequence{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
@@ -163,8 +163,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
-					types.Sequence{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 				state_interface.On("GetLastVirtualBatchNum", ctx, nil).Return(uint64(2), nil).Once()
@@ -172,8 +172,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err = sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr2, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 3, Timestamp: timeSpeical.Unix()},
-					types.Sequence{BatchNumber: 4, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 3, Timestamp: timeSpeical.Unix()},
+					{BatchNumber: 4, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
