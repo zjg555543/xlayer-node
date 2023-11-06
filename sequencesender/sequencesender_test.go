@@ -39,7 +39,6 @@ var (
 		UseValidium: true,
 	}
 
-	addr0 = common.Address{}
 	addr1 = common.Address{0x1}
 	addr2 = common.Address{0x2}
 )
@@ -64,7 +63,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 			Addr: common.HexToAddress("0xff"),
 		}},
 	}, nil)
-	time_speical, err := time.Parse(time.UnixDate, "Wed Feb 25 11:06:39 PST 2015")
+	timeSpeical, err := time.Parse(time.UnixDate, "Wed Feb 25 11:06:39 PST 2015")
 	require.NoError(t, err)
 	testCases := []struct {
 		name           string
@@ -83,7 +82,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 
 				return &state.Batch{
 					BatchNumber: number,
-					Timestamp:   time_speical,
+					Timestamp:   timeSpeical,
 					Coinbase:    addr1,
 				}, nil
 			},
@@ -97,7 +96,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
@@ -112,7 +111,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 
 				return &state.Batch{
 					BatchNumber: number,
-					Timestamp:   time_speical,
+					Timestamp:   timeSpeical,
 					Coinbase:    addr1,
 				}, nil
 			},
@@ -126,8 +125,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
-					types.Sequence{BatchNumber: 2, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
+					types.Sequence{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
@@ -142,13 +141,13 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				if number <= 2 {
 					return &state.Batch{
 						BatchNumber: number,
-						Timestamp:   time_speical,
+						Timestamp:   timeSpeical,
 						Coinbase:    addr1,
 					}, nil
 				} else {
 					return &state.Batch{
 						BatchNumber: number,
-						Timestamp:   time_speical,
+						Timestamp:   timeSpeical,
 						Coinbase:    addr2,
 					}, nil
 				}
@@ -164,8 +163,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err := sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr1, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 1, Timestamp: time_speical.Unix()},
-					types.Sequence{BatchNumber: 2, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 1, Timestamp: timeSpeical.Unix()},
+					types.Sequence{BatchNumber: 2, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 				state_interface.On("GetLastVirtualBatchNum", ctx, nil).Return(uint64(2), nil).Once()
@@ -173,8 +172,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 				sequence, coinbase, err = sequenceSender.getSequencesToSend(ctx)
 				require.Equal(t, addr2, coinbase)
 				require.Equal(t, []types.Sequence{
-					types.Sequence{BatchNumber: 3, Timestamp: time_speical.Unix()},
-					types.Sequence{BatchNumber: 4, Timestamp: time_speical.Unix()},
+					types.Sequence{BatchNumber: 3, Timestamp: timeSpeical.Unix()},
+					types.Sequence{BatchNumber: 4, Timestamp: timeSpeical.Unix()},
 				}, sequence)
 				require.NoError(t, err)
 			},
