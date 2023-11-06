@@ -10,21 +10,27 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
+const (
+	minETHWei = 1e-18
+)
+
 // FollowerGasPrice struct.
 type FollowerGasPrice struct {
-	cfg  Config
-	pool poolInterface
-	ctx  context.Context
-	eth  ethermanInterface
+	cfg      Config
+	pool     poolInterface
+	ctx      context.Context
+	eth      ethermanInterface
+	kafkaPrc *KafkaProcessor
 }
 
 // newFollowerGasPriceSuggester inits l2 follower gas price suggester which is based on the l1 gas price.
 func newFollowerGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface) *FollowerGasPrice {
 	gps := &FollowerGasPrice{
-		cfg:  cfg,
-		pool: pool,
-		ctx:  ctx,
-		eth:  ethMan,
+		cfg:      cfg,
+		pool:     pool,
+		ctx:      ctx,
+		eth:      ethMan,
+		kafkaPrc: newKafkaProcessor(cfg, ctx),
 	}
 	gps.UpdateGasPriceAvg()
 	return gps
@@ -43,6 +49,17 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	// Apply factor to calculate l2 gasPrice
 	factor := big.NewFloat(0).SetFloat64(f.cfg.Factor)
 	res := new(big.Float).Mul(factor, big.NewFloat(0).SetInt(l1GasPrice))
+
+	// convert the eth gas price to okb gas price
+	if f.cfg.EnableFollowerAdjustByL2L1Price {
+		l1CoinPrice, l2CoinPrice := f.kafkaPrc.GetL1L2CoinPrice()
+		if l1CoinPrice < minETHWei || l2CoinPrice < minOKBWei {
+			log.Warn("the L1 or L2 native coin price too small...")
+			return
+		}
+		res = new(big.Float).Mul(big.NewFloat(0).SetFloat64(l2CoinPrice/l1CoinPrice), res)
+		log.Debug("L2 pre gas price value: ", res.String(), ". L1 coin price: ", l1CoinPrice, ". L2 coin price: ", l2CoinPrice)
+	}
 
 	// Store l2 gasPrice calculated
 	result := new(big.Int)
