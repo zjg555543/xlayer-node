@@ -17,7 +17,7 @@ func TestParseCoinPrice(t *testing.T) {
 		{
 			// param err
 			coinIds: []int{},
-			msg:     fmt.Sprintf("{\"topic\":\"middle_coinPrice_push\"}"),
+			msg:     "{\"topic\":\"middle_coinPrice_push\"}",
 			check: func(prices map[int]float64, err error) {
 				require.Error(t, err)
 			},
@@ -25,7 +25,7 @@ func TestParseCoinPrice(t *testing.T) {
 		{
 			// param err
 			coinIds: []int{ethcoinId, okbcoinId},
-			msg:     fmt.Sprintf("{\"topic\":\"middle_coinPrice_push\"}"),
+			msg:     "{\"topic\":\"middle_coinPrice_push\"}",
 			check: func(prices map[int]float64, err error) {
 				require.Error(t, err)
 			},
@@ -101,7 +101,6 @@ func TestParseCoinPrice(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, len(prices), 1)
 				require.Equal(t, prices[okbcoinId], 0.002)
-
 			},
 		},
 	}
@@ -197,7 +196,7 @@ func TestUpdate(t *testing.T) {
 			},
 		},
 		{ // not find
-			msg: fmt.Sprintf("{\"topic\":\"middle_coinPrice_push\",\"source\":null,\"type\":null,\"data\":{\"id\":\"98a797ce-f61b-4e90-87ac-445e77ad3599\"}}"),
+			msg: "{\"topic\":\"middle_coinPrice_push\",\"source\":null,\"type\":null,\"data\":{\"id\":\"98a797ce-f61b-4e90-87ac-445e77ad3599\"}}",
 			cfg: Config{Topic: "middle_coinPrice_push", Type: FixedType},
 			check: func(rp *KafkaProcessor, err error) {
 				require.EqualError(t, err, "the data PriceList is empty")

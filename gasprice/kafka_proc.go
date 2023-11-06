@@ -25,6 +25,7 @@ const (
 )
 
 var (
+	// ErrNotFindCoinPrice not find a correct coin price
 	ErrNotFindCoinPrice = errors.New("not find a correct coin price")
 )
 
@@ -164,7 +165,7 @@ func (rp *KafkaProcessor) processor() {
 	}
 }
 
-// ReadAndCalc read and calc
+// ReadAndUpdate read and update
 func (rp *KafkaProcessor) ReadAndUpdate(ctx context.Context) error {
 	m, err := rp.kreader.ReadMessage(ctx)
 	if err != nil {
@@ -173,6 +174,7 @@ func (rp *KafkaProcessor) ReadAndUpdate(ctx context.Context) error {
 	return rp.Update(m.Value)
 }
 
+// Update update the coin price
 func (rp *KafkaProcessor) Update(data []byte) error {
 	if rp.cfg.Type == FixedType {
 		price, err := rp.parseCoinPrice(data, []int{rp.l2CoinId})
