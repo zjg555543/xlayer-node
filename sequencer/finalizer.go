@@ -983,7 +983,6 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 			if err != nil {
 				return err
 			}
-
 		}
 	}
 

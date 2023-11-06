@@ -152,7 +152,6 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 						Coinbase:    addr2,
 					}, nil
 				}
-
 			},
 			isBatchClosed: func(ctx context.Context, number uint64, dbTx pgx.Tx) (bool, error) {
 				if number > 4 {
