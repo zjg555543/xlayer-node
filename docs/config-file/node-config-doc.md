@@ -1923,17 +1923,17 @@ LastBatchVirtualizationTimeMaxWaitPeriod="5s"
 
 **Type:** : `integer`
 
-**Default:** `10`
+**Default:** `131072`
 
 **Description:** MaxTxSizeForL1 is the maximum size a single transaction can have. This field has
 non-trivial consequences: larger transactions than 128KB are significantly harder and
 more expensive to propagate; larger transactions also take more resources
 to validate whether they fit into the pool or not.
 
-**Example setting the default value** (10):
+**Example setting the default value** (131072):
 ```
 [SequenceSender]
-MaxTxSizeForL1=10
+MaxTxSizeForL1=131072
 ```
 
 ### <a name="SequenceSender_MaxBatchesForL1"></a>11.4. `SequenceSender.MaxBatchesForL1`

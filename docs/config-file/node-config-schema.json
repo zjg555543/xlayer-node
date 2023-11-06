@@ -725,7 +725,7 @@
 				"MaxTxSizeForL1": {
 					"type": "integer",
 					"description": "MaxTxSizeForL1 is the maximum size a single transaction can have. This field has\nnon-trivial consequences: larger transactions than 128KB are significantly harder and\nmore expensive to propagate; larger transactions also take more resources\nto validate whether they fit into the pool or not.",
-					"default": 10
+					"default": 131072
 				},
 				"MaxBatchesForL1": {
 					"type": "integer",
