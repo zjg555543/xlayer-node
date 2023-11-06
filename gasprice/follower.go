@@ -26,11 +26,13 @@ type FollowerGasPrice struct {
 // newFollowerGasPriceSuggester inits l2 follower gas price suggester which is based on the l1 gas price.
 func newFollowerGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface) *FollowerGasPrice {
 	gps := &FollowerGasPrice{
-		cfg:      cfg,
-		pool:     pool,
-		ctx:      ctx,
-		eth:      ethMan,
-		kafkaPrc: newKafkaProcessor(cfg, ctx),
+		cfg:  cfg,
+		pool: pool,
+		ctx:  ctx,
+		eth:  ethMan,
+	}
+	if cfg.EnableFollowerAdjustByL2L1Price {
+		gps.kafkaPrc = newKafkaProcessor(cfg, ctx)
 	}
 	gps.UpdateGasPriceAvg()
 	return gps
