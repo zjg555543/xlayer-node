@@ -3,6 +3,9 @@ package sequencesender
 import (
 	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/0xPolygon/cdk-data-availability/config"
 	cfgTypes "github.com/0xPolygonHermez/zkevm-node/config/types"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
@@ -14,8 +17,6 @@ import (
 	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
 var (
