@@ -49,7 +49,7 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 	eventLog := event.NewEventLog(event.Config{}, eventStorage)
 
 	priv, err := config.NewKeyFromKeystore(cfg.PrivateKey)
-
+	require.NoError(t, err)
 	sequenceSender, err := New(cfg, state_interface, etherman_interface, ethtxman_interface, eventLog, priv)
 	require.NoError(t, err)
 	ctx = context.Background()
