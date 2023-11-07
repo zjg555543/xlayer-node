@@ -446,11 +446,6 @@
 					"description": "EnableHttpLog allows the user to enable or disable the logs related to the HTTP\nrequests to be captured by the server.",
 					"default": true
 				},
-				"EnablePendingTransactionFilter": {
-					"type": "boolean",
-					"description": "EnablePendingTransactionFilter enables pending transaction filter that can support query L2 pending transaction",
-					"default": false
-				},
 				"Nacos": {
 					"properties": {
 						"URLs": {
@@ -504,6 +499,14 @@
 					"additionalProperties": false,
 					"type": "object",
 					"description": "NacosWs configuration"
+				},
+				"DisableAPIs": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array",
+					"description": "DisableAPIs disable some API",
+					"default": []
 				}
 			},
 			"additionalProperties": false,
