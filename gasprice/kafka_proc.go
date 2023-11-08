@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -20,6 +21,11 @@ const (
 	okbcoinId      = 7184
 	defaultTime    = 10
 	defaultMaxData = 10e6 // 10M
+)
+
+var (
+	// ErrNotFindCoinPrice not find a correct coin price
+	ErrNotFindCoinPrice = errors.New("not find a correct coin price")
 )
 
 // MsgInfo msg info
@@ -132,8 +138,10 @@ func (rp *KafkaProcessor) processor() {
 		default:
 			value, err := rp.ReadAndCalc(rp.ctx)
 			if err != nil {
-				log.Warn("get the destion data fail ", err)
-				time.Sleep(time.Second * defaultTime)
+				if err != ErrNotFindCoinPrice {
+					log.Warn("get the destion data fail ", err)
+					time.Sleep(time.Second * defaultTime)
+				}
 				continue
 			}
 			rp.updateL2CoinPrice(value)
@@ -177,5 +185,5 @@ func (rp *KafkaProcessor) parseL2CoinPrice(value []byte) (float64, error) {
 			return price.Price, nil
 		}
 	}
-	return 0, fmt.Errorf("not find a correct coin price coinId=%v", rp.l2CoinId)
+	return 0, ErrNotFindCoinPrice
 }
