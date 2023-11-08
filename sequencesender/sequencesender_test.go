@@ -34,7 +34,7 @@ var (
 		MaxTxSizeForL1:  10,
 		MaxBatchesForL1: 10,
 		PrivateKey: cfgTypes.KeystoreFileConfig{
-			Path:     "./test.keystore",
+			Path:     "../test/sequencer.keystore",
 			Password: "testonly",
 		},
 		UseValidium: true,

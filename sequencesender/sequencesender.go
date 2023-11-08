@@ -149,7 +149,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 	var l2coinbase common.Address
 	lastVirtualBatchNum, err := s.state.GetLastVirtualBatchNum(ctx, nil)
 	if err != nil {
-		return nil, l2coinbase, fmt.Errorf("failed to get last virtual batch num, err: %w", err)
+		return nil, common.Address{}, fmt.Errorf("failed to get last virtual batch num, err: %w", err)
 	}
 
 	currentBatchNumToSequence := lastVirtualBatchNum + 1
@@ -162,13 +162,13 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		//Check if the next batch belongs to a new forkid, in this case we need to stop sequencing as we need to
 		//wait the upgrade of forkid is completed and s.cfg.NumBatchForkIdUpgrade is disabled (=0) again
 		if (s.cfg.ForkUpgradeBatchNumber != 0) && (currentBatchNumToSequence == (s.cfg.ForkUpgradeBatchNumber + 1)) {
-			return nil, l2coinbase, fmt.Errorf("aborting sequencing process as we reached the batch %d where a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber+1)
+			return nil, common.Address{}, fmt.Errorf("aborting sequencing process as we reached the batch %d where a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber+1)
 		}
 
 		// Check if batch is closed
 		isClosed, err := s.state.IsBatchClosed(ctx, currentBatchNumToSequence, nil)
 		if err != nil {
-			return nil, l2coinbase, err
+			return nil, common.Address{}, err
 		}
 		if !isClosed {
 			// Reached current (WIP) batch
@@ -177,7 +177,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		// Add new sequence
 		batch, err := s.state.GetBatchByNumber(ctx, currentBatchNumToSequence, nil)
 		if err != nil {
-			return nil, l2coinbase, err
+			return nil, common.Address{}, err
 		}
 
 		seq := types.Sequence{
@@ -190,7 +190,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		if batch.ForcedBatchNum != nil {
 			forcedBatch, err := s.state.GetForcedBatch(ctx, *batch.ForcedBatchNum, nil)
 			if err != nil {
-				return nil, l2coinbase, err
+				return nil, common.Address{}, err
 			}
 			seq.ForcedBatchTimestamp = forcedBatch.ForcedAt.Unix()
 		}
@@ -245,7 +245,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 	// Reached latest batch. Decide if it's worth to send the sequence, or wait for new batches
 	if len(sequences) == 0 {
 		log.Info("no batches to be sequenced")
-		return nil, l2coinbase, nil
+		return nil, common.Address{}, nil
 	}
 
 	lastBatchVirtualizationTime, err := s.state.GetTimeForLatestBatchVirtualization(ctx, nil)
@@ -262,7 +262,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 	}
 
 	log.Info("not enough time has passed since last batch was virtualized, and the sequence could be bigger")
-	return nil, l2coinbase, nil
+	return nil, common.Address{}, nil
 }
 
 // handleEstimateGasSendSequenceErr handles an error on the estimate gas. It will return:
