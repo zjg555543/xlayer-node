@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	kafka "github.com/segmentio/kafka-go"
@@ -19,6 +20,10 @@ const (
 	okbcoinId      = 7184
 	defaultTime    = 10
 	defaultMaxData = 10e6 // 10M
+)
+
+var (
+	ErrNotFindCoinPrice = errors.New("not find a correct coin price")
 )
 
 // MsgInfo msg info
@@ -130,7 +135,7 @@ func (rp *KafkaProcessor) processor() {
 			return
 		default:
 			value, err := rp.ReadAndCalc(rp.ctx)
-			if err != nil {
+			if err != nil && err != ErrNotFindCoinPrice {
 				log.Warn("get the destion data fail ", err)
 				time.Sleep(time.Second * defaultTime)
 				continue
@@ -171,10 +176,11 @@ func (rp *KafkaProcessor) parseL2CoinPrice(value []byte) (float64, error) {
 	if msgI.Data == nil || len(msgI.Data.PriceList) == 0 {
 		return 0, fmt.Errorf("the data PriceList is empty")
 	}
+	fmt.Println(string(value))
 	for _, price := range msgI.Data.PriceList {
 		if price.CoinId == rp.l2CoinId {
 			return price.Price, nil
 		}
 	}
-	return 0, fmt.Errorf("not find a correct coin price coinId=%v", rp.l2CoinId)
+	return 0, ErrNotFindCoinPrice
 }
