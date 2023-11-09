@@ -10,10 +10,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
-const (
-	minETHWei = 1e-18
-)
-
 // FollowerGasPrice struct.
 type FollowerGasPrice struct {
 	cfg      Config
@@ -55,7 +51,7 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	// convert the eth gas price to okb gas price
 	if f.cfg.EnableFollowerAdjustByL2L1Price {
 		l1CoinPrice, l2CoinPrice := f.kafkaPrc.GetL1L2CoinPrice()
-		if l1CoinPrice < minETHWei || l2CoinPrice < minOKBWei {
+		if l1CoinPrice < minCoinPrice || l2CoinPrice < minCoinPrice {
 			log.Warn("the L1 or L2 native coin price too small...")
 			return
 		}
