@@ -59,7 +59,7 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 			log.Warn("the L1 or L2 native coin price too small...")
 			return
 		}
-		res = new(big.Float).Mul(big.NewFloat(0).SetFloat64(l2CoinPrice/l1CoinPrice), res)
+		res = new(big.Float).Mul(big.NewFloat(0).SetFloat64(l1CoinPrice/l2CoinPrice), res)
 		log.Debug("L2 pre gas price value: ", res.String(), ". L1 coin price: ", l1CoinPrice, ". L2 coin price: ", l2CoinPrice)
 	}
 
