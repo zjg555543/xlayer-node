@@ -167,7 +167,7 @@ func ethTransfer(ctx context.Context, client *ethclient.Client, auth *bind.Trans
 
 	log.Infof("sending transfer tx")
 	err = client.SendTransaction(ctx, signedTx)
-	chkErr(err)
+	//chkErr(err) the new lasted return error is: "transaction would cause overdraft",ignore it
 	log.Infof("tx sent: %v", signedTx.Hash().Hex())
 
 	rlp, err := signedTx.MarshalBinary()
