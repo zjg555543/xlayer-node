@@ -200,6 +200,11 @@ func (t *TraceConfig) IsCallTracer() bool {
 	return t.Tracer != nil && *t.Tracer == "callTracer"
 }
 
+// IsFlatCallTracer returns true when should use flatCallTracer
+func (t *TraceConfig) IsFlatCallTracer() bool {
+	return t.Tracer != nil && *t.Tracer == "flatCallTracer"
+}
+
 // IsNoopTracer returns true when should use noopTracer
 func (t *TraceConfig) IsNoopTracer() bool {
 	return t.Tracer != nil && *t.Tracer == "noopTracer"

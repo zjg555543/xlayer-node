@@ -439,7 +439,7 @@ func (d *DebugEndpoints) buildStructLogs(stateStructLogs []instrumentation.Struc
 func isBuiltInTracer(tracer string) bool {
 	// built-in tracers
 	switch tracer {
-	case "callTracer", "4byteTracer", "prestateTracer", "noopTracer":
+	case "callTracer", "flatCallTracer", "4byteTracer", "prestateTracer", "noopTracer":
 		return true
 	default:
 		return false
