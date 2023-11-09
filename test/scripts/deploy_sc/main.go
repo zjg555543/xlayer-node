@@ -132,12 +132,14 @@ func main() {
 		log.Debugf("Sending TX to transfer ETH")
 		to := common.HexToAddress(receiverAddr)
 		tx = ethTransfer(ctx, client, auth, to, transferAmount, nil)
-		err = operations.WaitTxToBeMined(ctx, client, tx, txTimeout)
-		chkErr(err)
+		fmt.Println()
+
 		// Invalid ETH Transfer
 		log.Debugf("Sending Invalid TX to transfer ETH")
 		nonce := tx.Nonce() + 1
 		ethTransfer(ctx, client, auth, to, transferAmount, &nonce)
+		err = operations.WaitTxToBeMined(ctx, client, tx, txTimeout)
+		chkErr(err)
 		fmt.Println()
 	}
 }
@@ -165,7 +167,8 @@ func ethTransfer(ctx context.Context, client *ethclient.Client, auth *bind.Trans
 
 	log.Infof("sending transfer tx")
 	err = client.SendTransaction(ctx, signedTx)
-	//chkErr(err) the new lasted return error is: "transaction would cause overdraft",ignore it
+	// The latest geth client return error is: "transaction would cause overdraft",ignore it
+	// chkErr(err)
 	log.Infof("tx sent: %v", signedTx.Hash().Hex())
 
 	rlp, err := signedTx.MarshalBinary()
