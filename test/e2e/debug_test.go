@@ -599,6 +599,7 @@ func TestDebugTraceBlock(t *testing.T) {
 				require.Nil(t, response.Error)
 				require.NotNil(t, response.Result)
 
+				results[network.Name] = response.Result
 				// lyh
 				response, err = client.JSONRPCCall(network.URL, "eth_getBlockByHash", receipt.BlockHash.String(), false)
 				require.NoError(t, err)
@@ -612,7 +613,6 @@ func TestDebugTraceBlock(t *testing.T) {
 					log.Info("********lyh*********", network.Name, "txhash", receipt.TxHash.Hex(), "txindex", receipt.TransactionIndex, "no unmarshal result", string(response.Result))
 				}
 
-				results[network.Name] = response.Result
 			}
 
 			referenceTransactions := []interface{}{}
