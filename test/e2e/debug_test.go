@@ -519,7 +519,7 @@ func TestDebugTraceBlock(t *testing.T) {
 		},
 	}
 
-	results := map[string]json.RawMessage{}
+	results := map[string][]interface{}{}
 
 	type testCase struct {
 		name              string
@@ -599,7 +599,11 @@ func TestDebugTraceBlock(t *testing.T) {
 				require.Nil(t, response.Error)
 				require.NotNil(t, response.Result)
 
-				results[network.Name] = response.Result
+				resultTransactions := []interface{}{}
+				err = json.Unmarshal(response.Result, &resultTransactions)
+				require.NoError(t, err)
+
+				results[network.Name] = []interface{}{resultTransactions[receipt.TransactionIndex]}
 				// lyh
 				response, err = client.JSONRPCCall(network.URL, "eth_getBlockByHash", receipt.BlockHash.String(), false)
 				require.NoError(t, err)
@@ -612,16 +616,10 @@ func TestDebugTraceBlock(t *testing.T) {
 				} else {
 					log.Info("********lyh********* ", network.Name, " txhash ", receipt.TxHash.Hex(), ", txindex ", receipt.TransactionIndex, ", no unmarshal result ", string(response.Result))
 				}
-
 			}
 
-			referenceTransactions := []interface{}{}
-			err = json.Unmarshal(results[l1NetworkName], &referenceTransactions)
-			require.NoError(t, err)
-
-			resultTransactions := []interface{}{}
-			err = json.Unmarshal(results[l2NetworkName], &resultTransactions)
-			require.NoError(t, err)
+			referenceTransactions := results[l1NetworkName]
+			resultTransactions := results[l2NetworkName]
 
 			log.Info("********lyh********* ", ", L1 Transactions lens ", len(referenceTransactions), ", L2 Transactions lens ", len(resultTransactions))
 
@@ -644,16 +642,12 @@ func TestDebugTraceBlock(t *testing.T) {
 					continue
 				}
 
-				resultTransactions := []interface{}{}
-				err = json.Unmarshal(result, &resultTransactions)
-				require.NoError(t, err)
-
 				for transactionIndex := range referenceTransactions {
 					referenceTransactionMap := referenceTransactions[transactionIndex].(map[string]interface{})
 					referenceResultMap := referenceTransactionMap["result"].(map[string]interface{})
 					referenceStructLogsMap := referenceResultMap["structLogs"].([]interface{})
 
-					resultTransactionMap := resultTransactions[transactionIndex].(map[string]interface{})
+					resultTransactionMap := result[transactionIndex].(map[string]interface{})
 					resultResultMap := resultTransactionMap["result"].(map[string]interface{})
 					resultStructLogsMap := resultResultMap["structLogs"].([]interface{})
 

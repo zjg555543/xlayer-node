@@ -314,7 +314,7 @@ func TestDebugTraceBlockCallTracer(t *testing.T) {
 		},
 	}
 
-	results := map[string]json.RawMessage{}
+	results := map[string][]interface{}{}
 
 	type testCase struct {
 		name              string
@@ -395,7 +395,11 @@ func TestDebugTraceBlockCallTracer(t *testing.T) {
 				require.Nil(t, response.Error)
 				require.NotNil(t, response.Result)
 
-				results[network.Name] = response.Result
+				resultTransactions := []interface{}{}
+				err = json.Unmarshal(response.Result, &resultTransactions)
+				require.NoError(t, err)
+
+				results[network.Name] = []interface{}{resultTransactions[receipt.TransactionIndex]}
 
 				// lyh
 				response, err = client.JSONRPCCall(network.URL, "eth_getBlockByHash", receipt.BlockHash.String(), false)
@@ -411,13 +415,8 @@ func TestDebugTraceBlockCallTracer(t *testing.T) {
 				}
 			}
 
-			referenceTransactions := []interface{}{}
-			err = json.Unmarshal(results[l1NetworkName], &referenceTransactions)
-			require.NoError(t, err)
-
-			resultTransactions := []interface{}{}
-			err = json.Unmarshal(results[l2NetworkName], &resultTransactions)
-			require.NoError(t, err)
+			referenceTransactions := results[l1NetworkName]
+			resultTransactions := results[l2NetworkName]
 
 			log.Info("********lyh********* ", ", L1 Transactions lens ", len(referenceTransactions), ", L2 Transactions lens ", len(resultTransactions))
 
@@ -438,13 +437,9 @@ func TestDebugTraceBlockCallTracer(t *testing.T) {
 					continue
 				}
 
-				resultTransactions := []interface{}{}
-				err = json.Unmarshal(result, &resultTransactions)
-				require.NoError(t, err)
-
 				for transactionIndex := range referenceTransactions {
 					referenceTransactionMap := referenceTransactions[transactionIndex].(map[string]interface{})
-					resultTransactionMap := resultTransactions[transactionIndex].(map[string]interface{})
+					resultTransactionMap := result[transactionIndex].(map[string]interface{})
 
 					compareCallFrame(t, referenceTransactionMap, resultTransactionMap, networkName)
 				}
