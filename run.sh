@@ -1,14 +1,78 @@
-wget https://github.com/okx/Xgon-node/raw/scf/snap/xgon_devnet.zip && unzip xgon_devnet.zip && cd xgon_devnet_config
+#!/bin/bash
 
-wget https://github.com/okx/Xgon-node/raw/scf/snap/aprover_db_1697611693_v0.2.6-RC3-18-gd16d4a42_d16d4a42.sql.tar.gz
-wget https://github.com/okx/Xgon-node/raw/scf/snap/astate_db_1697611693_v0.2.6-RC3-18-gd16d4a42_d16d4a42.sql.tar.gz
+l1_rpc_from_input=$1
+snap_flag_from_input=$2
+need_snap=false
 
+function fix_l1_rpc() {
+	env_l1rpc="XGON_NODE_ETHERMAN_URL =  \"$l1_rpc_from_input\""
+	cp example.env .env
+	echo $env_l1rpc >>.env
+}
 
-rm -rf ./xagon_devnet_test
-docker-compose --env-file .env -f ./docker-compose.yml up -d zkevm-state-db
-sleep 5
+function check_use_snap() {
+	if [ "$snap_flag_from_input" == "snap" ]; then
+		need_snap=true
+	fi
+}
 
-docker run --network=zkevm -v ./:/data  okexchain/xagon-node:origin_release_v0.1.0_20231013105844 /app/xagon-node restore --cfg /data/node.config.toml -is /data/astate_db_1697611693_v0.2.6-RC3-18-gd16d4a42_d16d4a42.sql.tar.gz -ih /data/aprover_db_1697611693_v0.2.6-RC3-18-gd16d4a42_d16d4a42.sql.tar.gz
-sleep 2
+function linux_and_mac() {
+	wget https://static.okex.org/cdn/chain/xgon/snapshot/testnet.zip && unzip testnet.zip && cd testnet
+	fix_l1_rpc
 
-docker-compose --env-file .env -f ./docker-compose.yml up -d
+	if $need_snap == true; then
+		wget https://static.okex.org/cdn/chain/xgon/snapshot/testnet-latest
+		latest_snap=$(cat testnet-latest)
+		wget https://static.okex.org/cdn/chain/xgon/snapshot/"$latest_snap"
+		tar -zxvf $latest_snap
+		docker-compose --env-file .env -f ./docker-compose.yml up -d xgon-state-db
+		sleep 5
+		docker run --network=xgon -v "$(pwd)":/data okexchain/xgon-node:origin_release_v0.1.0_20231107071509 /app/xgon-node restore --cfg /data/config/node.config.toml -is /data/xgon-testnet-snp/state_db.sql.tar.gz -ih /data/xgon-testnet-snp/prover_db.sql.tar.gz
+		sleep 5
+	else
+		echo "not need snap"
+	fi
+
+	docker-compose --env-file .env -f ./docker-compose.yml up -d
+}
+
+function windows() {
+	curl -LO https://static.okex.org/cdn/chain/xgon/snapshot/testnet.zip
+	tar -xf testnet.zip
+	cd testnet
+	fix_l1_rpc
+
+	if $need_snap == true; then
+		curl -LO https://static.okex.org/cdn/chain/xgon/snapshot/testnet-latest
+		latest_snap=$(cat testnet-latest)
+		curl -LO https://static.okex.org/cdn/chain/xgon/snapshot/"$latest_snap"
+		tar -zxvf $latest_snap
+		docker-compose --env-file .env -f ./docker-compose.yml up -d xgon-state-db
+		timeout /t 5
+		set CURRENT_DIR=%cd%
+		docker run --network=xgon -v "%CURRENT_DIR%":/data okexchain/xgon-node:origin_release_v0.1.0_20231107071509 /app/xgon-node restore --cfg /data/config/node.config.toml -is /data/xgon-testnet-snp/state_db.sql.tar.gz -ih /data/xgon-testnet-snp/prover_db.sql.tar.gz
+		timeout /t 5
+	else
+		echo "not need snap"
+	fi
+
+	docker-compose --env-file .env -f ./docker-compose.yml up -d
+}
+
+check_use_snap
+
+uNames=$(uname -s)
+osName=${uNames:0:4}
+if [ "$osName" == "Darw" ]; then # Darwin
+	echo "Mac OS X"
+	linux_and_mac
+elif [ "$osName" == "Linu" ]; then # Linux
+	echo "GNU/Linux"
+	linux_and_mac
+elif [ "$osName" == "MING" ]; then # MINGW, windows, git-bash
+	echo "Windows, git-bash"
+	# windows
+else
+	echo "unknown os"
+fi
+
