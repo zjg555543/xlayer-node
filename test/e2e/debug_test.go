@@ -608,9 +608,9 @@ func TestDebugTraceBlock(t *testing.T) {
 				bc := make(map[string]interface{})
 				err = json.Unmarshal(response.Result, &bc)
 				if err == nil {
-					log.Info("********lyh*********", network.Name, "txhash", receipt.TxHash.Hex(), "txindex", receipt.TransactionIndex, "result", bc)
+					log.Info("********lyh********* ", network.Name, ", txhash ", receipt.TxHash.Hex(), ", txindex ", receipt.TransactionIndex, ", result ", bc)
 				} else {
-					log.Info("********lyh*********", network.Name, "txhash", receipt.TxHash.Hex(), "txindex", receipt.TransactionIndex, "no unmarshal result", string(response.Result))
+					log.Info("********lyh********* ", network.Name, " txhash ", receipt.TxHash.Hex(), ", txindex ", receipt.TransactionIndex, ", no unmarshal result ", string(response.Result))
 				}
 
 			}
@@ -623,20 +623,20 @@ func TestDebugTraceBlock(t *testing.T) {
 			err = json.Unmarshal(results[l2NetworkName], &resultTransactions)
 			require.NoError(t, err)
 
-			log.Info("********lyh*********", "L1 Transactions lens", len(referenceTransactions), "L2 Transactions lens", len(resultTransactions))
+			log.Info("********lyh********* ", ", L1 Transactions lens ", len(referenceTransactions), ", L2 Transactions lens ", len(resultTransactions))
 
 			for transactionIndex := range referenceTransactions {
 				referenceTransactionMap := referenceTransactions[transactionIndex].(map[string]interface{})
 				referenceResultMap := referenceTransactionMap["result"].(map[string]interface{})
 				referenceStructLogsMap := referenceResultMap["structLogs"].([]interface{})
-				log.Info("********lyh*********", "L1 StructLogsMap", referenceStructLogsMap)
+				log.Info("********lyh********* ", ", L1 StructLogsMap ", referenceStructLogsMap)
 			}
 
 			for i := range resultTransactions {
 				resultTransactionMap := resultTransactions[i].(map[string]interface{})
 				resultResultMap := resultTransactionMap["result"].(map[string]interface{})
 				resultStructLogsMap := resultResultMap["structLogs"].([]interface{})
-				log.Info("********lyh*********", "L2 StructLogsMap", resultStructLogsMap)
+				log.Info("********lyh********* ", ", L2 StructLogsMap ", resultStructLogsMap)
 			}
 
 			for networkName, result := range results {
