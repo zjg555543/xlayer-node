@@ -113,6 +113,7 @@ type flatCallTracer struct {
 	ctx               *tracers.Context // Holds tracer context data
 	reason            error            // Textual reason for the interruption
 	activePrecompiles []common.Address // Updated on CaptureStart based on given rules
+	limit             int
 }
 
 type flatCallTracerConfig struct {
@@ -139,6 +140,15 @@ func NewFlatCallTracer(ctx *tracers.Context, cfg json.RawMessage) (tracers.Trace
 	}
 
 	return &flatCallTracer{tracer: t, ctx: ctx, config: config}, nil
+}
+
+// SetFlatCallTracerLimit set the limit for flatCallFrame.
+func SetFlatCallTracerLimit(t tracers.Tracer, l int) tracers.Tracer {
+	if flatTracer, ok := t.(*flatCallTracer); ok {
+		flatTracer.limit = l
+		return flatTracer
+	}
+	return t
 }
 
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
@@ -216,6 +226,10 @@ func (t *flatCallTracer) GetResult() (json.RawMessage, error) {
 	flat, err := flatFromNested(&t.tracer.callstack[0], []int{}, t.config.ConvertParityErrors, t.ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	if t.limit > 0 && len(flat) > t.limit {
+		flat = flat[:t.limit]
 	}
 
 	res, err := json.Marshal(flat)

@@ -28,6 +28,7 @@ var defaultTraceConfig = &traceConfig{
 	EnableMemory:     false,
 	EnableReturnData: false,
 	Tracer:           nil,
+	Limit:            0,
 }
 
 // DebugEndpoints is the debug jsonrpc endpoint
@@ -54,6 +55,7 @@ type traceConfig struct {
 	EnableReturnData bool            `json:"enableReturnData"`
 	Tracer           *string         `json:"tracer"`
 	TracerConfig     json.RawMessage `json:"tracerConfig"`
+	Limit            int             `json:"limit"`
 }
 
 // StructLogRes represents the debug trace information for each opcode
@@ -313,6 +315,7 @@ func (d *DebugEndpoints) buildTraceTransaction(ctx context.Context, hash common.
 		EnableReturnData: traceCfg.EnableReturnData,
 		Tracer:           traceCfg.Tracer,
 		TracerConfig:     traceCfg.TracerConfig,
+		Limit:            traceCfg.Limit,
 	}
 	result, err := d.state.DebugTransaction(ctx, hash, stateTraceConfig, dbTx)
 	if errors.Is(err, state.ErrNotFound) {
@@ -430,6 +433,10 @@ func (d *DebugEndpoints) buildStructLogs(stateStructLogs []instrumentation.Struc
 		}
 
 		structLogs = append(structLogs, structLogRes)
+	}
+
+	if cfg.Limit > 0 && len(structLogs) > cfg.Limit {
+		structLogs = structLogs[:cfg.Limit]
 	}
 	return structLogs
 }
