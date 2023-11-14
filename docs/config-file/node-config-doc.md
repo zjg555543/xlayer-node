@@ -583,14 +583,14 @@ Password="pool_password"
 
 **Type:** : `string`
 
-**Default:** `"xgon-pool-db"`
+**Default:** `"x1-pool-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("xgon-pool-db"):
+**Example setting the default value** ("x1-pool-db"):
 ```
 [Pool.DB]
-Host="xgon-pool-db"
+Host="x1-pool-db"
 ```
 
 #### <a name="Pool_DB_Port"></a>7.6.5. `Pool.DB.Port`
@@ -762,6 +762,7 @@ FreeGasAddress="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 | - [TraceBatchUseHTTPS](#RPC_TraceBatchUseHTTPS )                             | No      | boolean | No         | -          | TraceBatchUseHTTPS enables, in the debug_traceBatchByNum endpoint, the use of the HTTPS protocol (instead of HTTP)<br />to do the parallel requests to RPC.debug_traceTransaction endpoint |
 | - [EnablePendingTransactionFilter](#RPC_EnablePendingTransactionFilter )     | No      | boolean | No         | -          | EnablePendingTransactionFilter enables pending transaction filter that can support query L2 pending transaction                                                                            |
 | - [Nacos](#RPC_Nacos )                                                       | No      | object  | No         | -          | Nacos configuration                                                                                                                                                                        |
+| - [NacosWs](#RPC_NacosWs )                                                   | No      | object  | No         | -          | NacosWs configuration                                                                                                                                                                      |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -1050,6 +1051,74 @@ ApplicationName=""
 **Example setting the default value** (""):
 ```
 [RPC.Nacos]
+ExternalListenAddr=""
+```
+
+### <a name="RPC_NacosWs"></a>8.13. `[RPC.NacosWs]`
+
+**Type:** : `object`
+**Description:** NacosWs configuration
+
+| Property                                                 | Pattern | Type   | Deprecated | Definition | Title/Description                                                                          |
+| -------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------------------------------------------ |
+| - [URLs](#RPC_NacosWs_URLs )                             | No      | string | No         | -          | URLs nacos server urls for discovery service of rest api, url is separated by ","          |
+| - [NamespaceId](#RPC_NacosWs_NamespaceId )               | No      | string | No         | -          | NamespaceId nacos namepace id for discovery service of rest api                            |
+| - [ApplicationName](#RPC_NacosWs_ApplicationName )       | No      | string | No         | -          | ApplicationName rest application name in  nacos                                            |
+| - [ExternalListenAddr](#RPC_NacosWs_ExternalListenAddr ) | No      | string | No         | -          | ExternalListenAddr Set the rest-server external ip and port, when it is launched by Docker |
+
+#### <a name="RPC_NacosWs_URLs"></a>8.13.1. `RPC.NacosWs.URLs`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** URLs nacos server urls for discovery service of rest api, url is separated by ","
+
+**Example setting the default value** (""):
+```
+[RPC.NacosWs]
+URLs=""
+```
+
+#### <a name="RPC_NacosWs_NamespaceId"></a>8.13.2. `RPC.NacosWs.NamespaceId`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** NamespaceId nacos namepace id for discovery service of rest api
+
+**Example setting the default value** (""):
+```
+[RPC.NacosWs]
+NamespaceId=""
+```
+
+#### <a name="RPC_NacosWs_ApplicationName"></a>8.13.3. `RPC.NacosWs.ApplicationName`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** ApplicationName rest application name in  nacos
+
+**Example setting the default value** (""):
+```
+[RPC.NacosWs]
+ApplicationName=""
+```
+
+#### <a name="RPC_NacosWs_ExternalListenAddr"></a>8.13.4. `RPC.NacosWs.ExternalListenAddr`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** ExternalListenAddr Set the rest-server external ip and port, when it is launched by Docker
+
+**Example setting the default value** (""):
+```
+[RPC.NacosWs]
 ExternalListenAddr=""
 ```
 
@@ -2795,12 +2864,12 @@ Factor=0.15
 
 **Type:** : `string`
 
-**Default:** `"xgon-prover:50071"`
+**Default:** `"x1-prover:50071"`
 
-**Example setting the default value** ("xgon-prover:50071"):
+**Example setting the default value** ("x1-prover:50071"):
 ```
 [Executor]
-URI="xgon-prover:50071"
+URI="x1-prover:50071"
 ```
 
 ### <a name="Executor_MaxResourceExhaustedAttempts"></a>15.2. `Executor.MaxResourceExhaustedAttempts`
@@ -2868,14 +2937,14 @@ MaxGRPCMessageSize=100000000
 
 **Type:** : `string`
 
-**Default:** `"xgon-prover:50061"`
+**Default:** `"x1-prover:50061"`
 
 **Description:** URI is the server URI.
 
-**Example setting the default value** ("xgon-prover:50061"):
+**Example setting the default value** ("x1-prover:50061"):
 ```
 [MTClient]
-URI="xgon-prover:50061"
+URI="x1-prover:50061"
 ```
 
 ## <a name="StateDB"></a>17. `[StateDB]`
@@ -2939,14 +3008,14 @@ Password="state_password"
 
 **Type:** : `string`
 
-**Default:** `"xgon-state-db"`
+**Default:** `"x1-state-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("xgon-state-db"):
+**Example setting the default value** ("x1-state-db"):
 ```
 [StateDB]
-Host="xgon-state-db"
+Host="x1-state-db"
 ```
 
 ### <a name="StateDB_Port"></a>17.5. `StateDB.Port`
@@ -3272,14 +3341,14 @@ Password="prover_pass"
 
 **Type:** : `string`
 
-**Default:** `"xgon-state-db"`
+**Default:** `"x1-state-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("xgon-state-db"):
+**Example setting the default value** ("x1-state-db"):
 ```
 [HashDB]
-Host="xgon-state-db"
+Host="x1-state-db"
 ```
 
 ### <a name="HashDB_Port"></a>20.5. `HashDB.Port`

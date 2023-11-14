@@ -214,7 +214,7 @@
 						"Host": {
 							"type": "string",
 							"description": "Host address of database",
-							"default": "xgon-pool-db"
+							"default": "x1-pool-db"
 						},
 						"Port": {
 							"type": "string",
@@ -391,6 +391,33 @@
 					"additionalProperties": false,
 					"type": "object",
 					"description": "Nacos configuration"
+				},
+				"NacosWs": {
+					"properties": {
+						"URLs": {
+							"type": "string",
+							"description": "URLs nacos server urls for discovery service of rest api, url is separated by \",\"",
+							"default": ""
+						},
+						"NamespaceId": {
+							"type": "string",
+							"description": "NamespaceId nacos namepace id for discovery service of rest api",
+							"default": ""
+						},
+						"ApplicationName": {
+							"type": "string",
+							"description": "ApplicationName rest application name in  nacos",
+							"default": ""
+						},
+						"ExternalListenAddr": {
+							"type": "string",
+							"description": "ExternalListenAddr Set the rest-server external ip and port, when it is launched by Docker",
+							"default": ""
+						}
+					},
+					"additionalProperties": false,
+					"type": "object",
+					"description": "NacosWs configuration"
 				}
 			},
 			"additionalProperties": false,
@@ -1122,7 +1149,7 @@
 			"properties": {
 				"URI": {
 					"type": "string",
-					"default": "xgon-prover:50071"
+					"default": "x1-prover:50071"
 				},
 				"MaxResourceExhaustedAttempts": {
 					"type": "integer",
@@ -1153,7 +1180,7 @@
 				"URI": {
 					"type": "string",
 					"description": "URI is the server URI.",
-					"default": "xgon-prover:50061"
+					"default": "x1-prover:50061"
 				}
 			},
 			"additionalProperties": false,
@@ -1180,7 +1207,7 @@
 				"Host": {
 					"type": "string",
 					"description": "Host address of database",
-					"default": "xgon-state-db"
+					"default": "x1-state-db"
 				},
 				"Port": {
 					"type": "string",
@@ -1308,7 +1335,7 @@
 				"Host": {
 					"type": "string",
 					"description": "Host address of database",
-					"default": "xgon-state-db"
+					"default": "x1-state-db"
 				},
 				"Port": {
 					"type": "string",
