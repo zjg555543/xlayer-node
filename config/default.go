@@ -63,6 +63,7 @@ WriteTimeout = "60s"
 MaxRequestsPerIPAndSecond = 500
 SequencerNodeURI = ""
 EnableL2SuggestedGasPricePolling = true
+GasLimitFactor = 1
 TraceBatchUseHTTPS = true
 	[RPC.WebSockets]
 		Enabled = true

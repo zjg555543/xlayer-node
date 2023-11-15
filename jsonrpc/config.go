@@ -47,6 +47,19 @@ type Config struct {
 
 	// NacosWs configuration
 	NacosWs NacosConfig `mapstructure:"NacosWs"`
+
+	// GasLimitFactor is used to multiply the suggested gas provided by the network
+	// in order to allow a enough gas to be set for all the transactions default value is 1.
+	//
+	// ex:
+	// suggested gas limit: 100
+	// GasLimitFactor: 1
+	// gas limit = 100
+	//
+	// suggested gas limit: 100
+	// GasLimitFactor: 1.1
+	// gas limit = 110
+	GasLimitFactor float64 `mapstructure:"GasLimitFactor"`
 }
 
 // WebSocketsConfig has parameters to config the rpc websocket support
