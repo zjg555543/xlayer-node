@@ -748,21 +748,22 @@ FreeGasAddress="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 **Type:** : `object`
 **Description:** Configuration for RPC service. THis one offers a extended Ethereum JSON-RPC API interface to interact with the node
 
-| Property                                                                     | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                                                                          |
-| ---------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| - [Host](#RPC_Host )                                                         | No      | string  | No         | -          | Host defines the network adapter that will be used to serve the HTTP requests                                                                                                              |
-| - [Port](#RPC_Port )                                                         | No      | integer | No         | -          | Port defines the port to serve the endpoints via HTTP                                                                                                                                      |
-| - [ReadTimeout](#RPC_ReadTimeout )                                           | No      | string  | No         | -          | Duration                                                                                                                                                                                   |
-| - [WriteTimeout](#RPC_WriteTimeout )                                         | No      | string  | No         | -          | Duration                                                                                                                                                                                   |
-| - [MaxRequestsPerIPAndSecond](#RPC_MaxRequestsPerIPAndSecond )               | No      | number  | No         | -          | MaxRequestsPerIPAndSecond defines how much requests a single IP can<br />send within a single second                                                                                       |
-| - [SequencerNodeURI](#RPC_SequencerNodeURI )                                 | No      | string  | No         | -          | SequencerNodeURI is used allow Non-Sequencer nodes<br />to relay transactions to the Sequencer node                                                                                        |
-| - [MaxCumulativeGasUsed](#RPC_MaxCumulativeGasUsed )                         | No      | integer | No         | -          | MaxCumulativeGasUsed is the max gas allowed per batch                                                                                                                                      |
-| - [WebSockets](#RPC_WebSockets )                                             | No      | object  | No         | -          | WebSockets configuration                                                                                                                                                                   |
-| - [EnableL2SuggestedGasPricePolling](#RPC_EnableL2SuggestedGasPricePolling ) | No      | boolean | No         | -          | EnableL2SuggestedGasPricePolling enables polling of the L2 gas price to block tx in the RPC with lower gas price.                                                                          |
-| - [TraceBatchUseHTTPS](#RPC_TraceBatchUseHTTPS )                             | No      | boolean | No         | -          | TraceBatchUseHTTPS enables, in the debug_traceBatchByNum endpoint, the use of the HTTPS protocol (instead of HTTP)<br />to do the parallel requests to RPC.debug_traceTransaction endpoint |
-| - [EnablePendingTransactionFilter](#RPC_EnablePendingTransactionFilter )     | No      | boolean | No         | -          | EnablePendingTransactionFilter enables pending transaction filter that can support query L2 pending transaction                                                                            |
-| - [Nacos](#RPC_Nacos )                                                       | No      | object  | No         | -          | Nacos configuration                                                                                                                                                                        |
-| - [NacosWs](#RPC_NacosWs )                                                   | No      | object  | No         | -          | NacosWs configuration                                                                                                                                                                      |
+| Property                                                                     | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| - [Host](#RPC_Host )                                                         | No      | string  | No         | -          | Host defines the network adapter that will be used to serve the HTTP requests                                                                                                                                                                                                                                                                      |
+| - [Port](#RPC_Port )                                                         | No      | integer | No         | -          | Port defines the port to serve the endpoints via HTTP                                                                                                                                                                                                                                                                                              |
+| - [ReadTimeout](#RPC_ReadTimeout )                                           | No      | string  | No         | -          | Duration                                                                                                                                                                                                                                                                                                                                           |
+| - [WriteTimeout](#RPC_WriteTimeout )                                         | No      | string  | No         | -          | Duration                                                                                                                                                                                                                                                                                                                                           |
+| - [MaxRequestsPerIPAndSecond](#RPC_MaxRequestsPerIPAndSecond )               | No      | number  | No         | -          | MaxRequestsPerIPAndSecond defines how much requests a single IP can<br />send within a single second                                                                                                                                                                                                                                               |
+| - [SequencerNodeURI](#RPC_SequencerNodeURI )                                 | No      | string  | No         | -          | SequencerNodeURI is used allow Non-Sequencer nodes<br />to relay transactions to the Sequencer node                                                                                                                                                                                                                                                |
+| - [MaxCumulativeGasUsed](#RPC_MaxCumulativeGasUsed )                         | No      | integer | No         | -          | MaxCumulativeGasUsed is the max gas allowed per batch                                                                                                                                                                                                                                                                                              |
+| - [WebSockets](#RPC_WebSockets )                                             | No      | object  | No         | -          | WebSockets configuration                                                                                                                                                                                                                                                                                                                           |
+| - [EnableL2SuggestedGasPricePolling](#RPC_EnableL2SuggestedGasPricePolling ) | No      | boolean | No         | -          | EnableL2SuggestedGasPricePolling enables polling of the L2 gas price to block tx in the RPC with lower gas price.                                                                                                                                                                                                                                  |
+| - [TraceBatchUseHTTPS](#RPC_TraceBatchUseHTTPS )                             | No      | boolean | No         | -          | TraceBatchUseHTTPS enables, in the debug_traceBatchByNum endpoint, the use of the HTTPS protocol (instead of HTTP)<br />to do the parallel requests to RPC.debug_traceTransaction endpoint                                                                                                                                                         |
+| - [EnablePendingTransactionFilter](#RPC_EnablePendingTransactionFilter )     | No      | boolean | No         | -          | EnablePendingTransactionFilter enables pending transaction filter that can support query L2 pending transaction                                                                                                                                                                                                                                    |
+| - [Nacos](#RPC_Nacos )                                                       | No      | object  | No         | -          | Nacos configuration                                                                                                                                                                                                                                                                                                                                |
+| - [NacosWs](#RPC_NacosWs )                                                   | No      | object  | No         | -          | NacosWs configuration                                                                                                                                                                                                                                                                                                                              |
+| - [GasLimitFactor](#RPC_GasLimitFactor )                                     | No      | number  | No         | -          | GasLimitFactor is used to multiply the suggested gas provided by the network<br />in order to allow a enough gas to be set for all the transactions default value is 1.<br /><br />ex:<br />suggested gas limit: 100<br />GasLimitFactor: 1<br />gas limit = 100<br /><br />suggested gas limit: 100<br />GasLimitFactor: 1.1<br />gas limit = 110 |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -1120,6 +1121,30 @@ ApplicationName=""
 ```
 [RPC.NacosWs]
 ExternalListenAddr=""
+```
+
+### <a name="RPC_GasLimitFactor"></a>8.14. `RPC.GasLimitFactor`
+
+**Type:** : `number`
+
+**Default:** `1`
+
+**Description:** GasLimitFactor is used to multiply the suggested gas provided by the network
+in order to allow a enough gas to be set for all the transactions default value is 1.
+
+ex:
+suggested gas limit: 100
+GasLimitFactor: 1
+gas limit = 100
+
+suggested gas limit: 100
+GasLimitFactor: 1.1
+gas limit = 110
+
+**Example setting the default value** (1):
+```
+[RPC]
+GasLimitFactor=1
 ```
 
 ## <a name="Synchronizer"></a>9. `[Synchronizer]`
