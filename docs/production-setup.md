@@ -1,81 +1,105 @@
-# Production Setup
+# Setup Production zkNode
+X1 is now available on the Testnet for developers to launch smart contracts, execute transactions, and experiment with the network. This tutorial extends the exploration by allowing developers to launch their own node on the Public Testnet.
+Before we begin, this document is fairly technical and requires prior exposure to Docker and CLI. Post spinning up your zkNode instance, you will be able to run the Synchronizer and utilize the JSON-RPC interface.
 
-This guide describes how to run a node that:
+## Prerequisites
+This tutorial assumes that you have docker-compose already installed. If you need any help with the installation, please check the [official docker-compose installation guide](https://docs.docker.com/compose/install/).
 
-- Synchronizes the network
-- Expose a JSON RPC interface, acting as an archive node
+### Minimum System Requirements
+<Tip title="CAUTION">zkProver does not work on ARM-based Macs yet, and using WSL/WSL2 on Windows is not advisable. Currently, zkProver optimizations require CPUs that support the AVX2 instruction, which means some non-M1 computers, such as AMD, won't work with the software regardless of the OS.</Tip> 
+ 
+- 16GB RAM
+- 4-core CPU
+- 20GB Storage (This will increase over time) 
 
-Note that sequencing and proving functionalities are not covered in this document **yet**.
+### Network Components
+Here is a list of crucial network components that are required before you can run the zkNode:
+- Ethereum Node - Use geth or any service providing a JSON RPC interface for accessing the L1 network
+- X1-Node (or zkNode)  - L2 Network
+  - Synchronizer - Responsible for synchronizing data between L1 and L2
+  - JSON RPC Server - Interface to L2 network 
+  - State DB - Save the L2 account, block and tx data.
 
-## Requirements
+Let's set up each of the above components!
 
-- A machine to run the X1 node with the following requirements:
-  - Hardware: 32G RAM, 4 cores, 128G Disk with high IOPS (as the network is super young the current disk requirements are quite low, but they will increase overtime. Also note that this requirement is true if the DBs run on the same machine, but it's recommended to run Postgres on dedicated infra). Currently ARM-based CPUs are not supported
-  - Software: Ubuntu 22.04, Docker
-- A L1 node: we recommend using geth, but what it's actually needed is access to a JSON RPC interface for the L1 network (Goerli for X1 testnet, Ethereum mainnet for X1 mainnet)
+## Ethereum Node Setup
+The Ethereum RPC Node is the first component to be deployed because zkNode needs to synchronize blocks and transactions on L1. You can invoke the ETH RPC (Testnet: Sepolia) service through any of the following methods:
+- Third-party RPC services, such as [Infura](https://www.infura.io/) or [Ankr](https://www.ankr.com/).
+- Set up your own Ethereum node. Follow the instructions provided in this [guide to set up and install Geth](https://geth.ethereum.org/docs/getting-started/installing-geth).
 
-## Setup
+## Installing
+Once the L1 RPC component is complete, we can start the zkNode setup. This is the most straightforward way to run a zkNode and it's fine for most use cases. 
+Furthermore, this method is purely subjective and feel free to run this software in a different manner. For example, Docker is not required, you could simply use the Go binaries directly.
+Let's start setting up our zkNode:
 
-This is the most straightforward path to run a X1 node, and it's perfectly fine for most use cases, however if you are interested in providing service to many users it's recommended to do some tweaking over the default configuration. Furthermore, this is quite opinionated, feel free to run this software in a different way, for instance it's not needed to use Docker, you could use the Go and C++ binaries directly.
+1. Download the installation scrip
+``` bash
+mkdir -p ./x1-node && cd ./x1-node
 
-tl;dr:
+wget https://static.okex.org/cdn/chain/x1/snapshot/run_x1_testnet.sh && chmod +x run_x1_testnet.sh && ./run_x1_testnet.sh init && cp ./testnet/example.env ./testnet/.env
+```
+2. The example.env file must be modified according to your configurations. Edit the .env file with your favourite editor (we'll use vim in this guide): ```vim ./testnet/.env.```
+``` bash
+# URL of a JSON RPC for Sepolia
+X1_NODE_ETHERMAN_URL = "http://your.L1node.url"
 
-```bash
-# DOWNLOAD ARTIFACTS
-ZKEVM_NET=mainnet
-ZKEVM_DIR=./path/to/install # CHANGE THIS
-ZKEVM_CONFIG_DIR=./path/to/config  # CHANGE THIS
-curl -L https://github.com/okx/x1-node/releases/latest/download/$ZKEVM_NET.zip > $ZKEVM_NET.zip && unzip -o $ZKEVM_DIR.zip -d $ZKEVM_DIR && rm $ZKEVM_DIR.zip
-mkdir -p $ZKEVM_CONFIG_DIR && cp $ZKEVM_DIR/$ZKEVM_NET/example.env $ZKEVM_CONFIG_DIR/.env
+# PATH WHERE THE STATEDB POSTGRES CONTAINER WILL STORE PERSISTENT DATA
+X1_NODE_STATEDB_DATA_DIR = "./x1_testnet_data/statedb"
 
-# EDIT THIS env file:
-nano $ZKEVM_CONFIG_DIR/.env
-
-# RUN:
-docker compose --env-file $ZKEVM_CONFIG_DIR/.env -f $ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml up -d
+# PATH WHERE THE POOLDB POSTGRES CONTAINER WILL STORE PERSISTENT DATA
+X1_NODE_POOLDB_DATA_DIR = "/x1_testnet_data/pooldb"
+```
+3. Restore the latest L2 snapshot  locally database for synchronizing  L2 data quickly.
+``` bash
+./run_x1_testnet.sh restore 
 ```
 
-### Explained step by step:
+## Starting
+Use the below command to start the zkNode instance:
+``` bash
+./run_x1_testnet.sh start
 
-1. Define network: `ZKEVM_NET=testnet` or `ZKEVM_NET=mainnet`
-2. Define installation path: `ZKEVM_DIR=./path/to/install`
-3. Define a config directory: `ZKEVM_CONFIG_DIR=./path/to/config`
-4. It's recommended to source this env vars in your `~/.bashrc`, `~/.zshrc` or whatever you're using
-5. Download and extract the artifacts: `curl -L https://github.com/okx/x1-node/releases/latest/download/$X1_NET.zip > $X1_NET.zip && unzip -o $X1_NET.zip -d $X1_DIR && rm $X1_NET.zip`. Note you may need to install `unzip` for this command to work. 
+docker ps -a
+```
 
-> **NOTE:** Take into account this works for the latest release (mainnet), in case you want to deploy a pre-release (testnet) you should get the artifacts directly for that release and not using the "latest" link depicted here. [Here](https://github.com/okx) you can check the node release deployed for each network.
+You will see a list of the following containers :
+  - x1-rpc
+  - x1-sync
+  - x1-state-db
+  - x1-pool-db
+  - x1-prover
 
-6. Copy the file with the env parameters into config directory: `mkdir -p $ZKEVM_CONFIG_DIR && cp $ZKEVM_DIR/$ZKEVM_NET/example.env $ZKEVM_CONFIG_DIR/.env`
-7. Edit the env file, with your favourite editor. The example will use nano: `nano $ZKEVM_CONFIG_DIR/.env`. This file contains the configuration that anyone should modify. For advanced configuration:
-   1. Copy the config files into the config directory `cp $ZKEVM_DIR/$ZKEVM_NET/config/environments/testnet/* $ZKEVM_CONFIG_DIR/`
-   2. Make sure the modify the `ZKEVM_ADVANCED_CONFIG_DIR` from `$ZKEVM_CONFIG_DIR/.env` with the correct path
-   3. Edit the different configuration files in the $ZKEVM_CONFIG_DIR directory and make the necessary changes
-8. Run the node: `docker compose --env-file $ZKEVM_CONFIG_DIR/.env -f $ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml up -d`. You may need to run this command using `sudo` depending on your Docker setup.
-9. Make sure that all components are running: `docker compose --env-file $ZKEVM_CONFIG_DIR/.env -f $ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml ps`. You should see the following containers:
-   1. x1-rpc
-   2. x1-sync
-   3. x1-state-db
-   4. x1-pool-db
-   5. x1-prover
+You should now be able to run queries to the JSON-RPC endpoint at http://localhost:8545.
+Run the following query to get the most recently synchronized L2 block; if you call it every few seconds, you should see the number grow:
+``` bash
+curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":83}' http://localhost:8545
+```
 
-If everything has gone as expected you should be able to run queries to the JSON RPC at `http://localhost:8545`. For instance you can run the following query that fetches the latest synchronized L2 block, if you call this every few seconds, you should see the number increasing:
+## Stopping
+Use the below command to stop the zkNode instance:
+``` bash
+./run_x1_testnet.sh stop
+```
 
-`curl -H "Content-Type: application/json" -X POST --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":83}' http://localhost:8545`
+## Restarting
+Use the below command to stop the zkNode instance:
+``` bash
+./run_x1_testnet.sh restart
+```
+## Updating
+To update the zkNode software, run the below command, and the file ```./testnet/.env``` will be retained, the other config will be deleted.
+``` bash
+./run_x1_testnet.sh update
+```
 
 ## Troubleshooting
+- It's possible that the machine you're using already uses some of the necessary ports. In this case, you can change them directly ```./testnet/docker-compose.yml```.
+- If one or more containers are crashing, please check the logs using the command below:
+``` bash
+docker ps -a
 
-- It's possible that the machine you're using already uses some of the necessary ports. In this case you can change them directly at `$ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml`
-- If one or more containers are crashing please check the logs using `docker compose --env-file $ZKEVM_CONFIG_DIR/.env -f $ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml logs <cointainer_name>`
-
-## Stop
-
-```bash
-docker compose --env-file $ZKEVM_CONFIG_DIR/.env -f $ZKEVM_DIR/$ZKEVM_NET/docker-compose.yml down
+docker logs <cointainer_name>
 ```
-
-## Updating
-
-In order to update the software, you have to repeat the steps of the setup, but taking care of not overriding the config that you have modified. Basically, instead of running `cp $ZKEVM_DIR/$ZKEVM_NET/example.env $ZKEVM_CONFIG_DIR/.env`, check if the variables of `$ZKEVM_DIR/$ZKEVM_NET/example.env` have been renamed or there are new ones, and update `$ZKEVM_CONFIG_DIR/.env` accordingly.
 
 ## Advanced setup
 

@@ -17,8 +17,9 @@ This documentation will help you running the following components:
 
 ## Requirements
 
-The current version of the environment requires `go`, `docker` and `docker-compose` to be previously installed, check the links below to understand how to install them:
+The current version of the environment requires `Foundryup`, `go`, `docker` and `docker-compose` to be previously installed, check the links below to understand how to install them:
 
+- <https://book.getfoundry.sh/getting-started/installation>
 - <https://go.dev/doc/install>
 - <https://www.docker.com/get-started>
 - <https://docs.docker.com/compose/install/>
@@ -75,6 +76,8 @@ If you need sample data already deployed to the network, we have the following s
 **To add some examples of transactions and smart contracts:**
 
 ```bash
+cast send --legacy --from 0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 --private-key 0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38 --rpc-url http://127.0.0.1:8123 0xC949254d682D8c9ad5682521675b8F43b102aec4 --value 10ether
+
 make deploy-sc
 ```
 
@@ -191,11 +194,11 @@ To configure your Metamask to use your local environment, follow these steps:
 
 | Address | Description |
 |---|---|
+| 0x82109a709138A2953C720D3d775168717b668ba6 | L1 OKB token |
+| 0x82109a709138A2953C720D3d775168717b668ba6 | L2 WETH token |
 | 0x0D9088C72Cd4F08e9dDe474D8F5394147f64b22C | Proof of Efficiency |
 | 0x10B65c586f795aF3eCCEe594fE4E38E1F059F780 | Bridge |
 | 0xcFE6D77a653b988203BfAc9C6a69eA9D583bdC2b | Matic token |
-| 0x82109a709138A2953C720D3d775168717b668ba6 | L1 OKB token |
-| 0x82109a709138A2953C720D3d775168717b668ba6 | L2 WETH token |
 | 0xEd236da21Ff62bC7B62608AdB818da49E8549fa7 | GlobalExitRootManager |
 
 ## Admin Account

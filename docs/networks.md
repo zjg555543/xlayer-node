@@ -1,5 +1,5 @@
-# X1 testnet networks
+# X1 networks
 
 | Network Name | ChainID | RPC URL | Explorer | Bridge Info |
 |--------------|---------|---------|----------|------------------|
-| Public Testnet | `1402` | https://rpc.public.x1-test.net | https://explorer.public.x1-test.net | https://public.x1-test.net/
+| Public Testnet | `195` | https://x1testrpc.okx.com/ <br> https://testrpc.x1.tech | https://www.oklink.com/x1-test | https://www.okx.com/x1/bridge-test
