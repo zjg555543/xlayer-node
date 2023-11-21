@@ -576,7 +576,7 @@ services:
 
   x1-bridge-service:
     container_name: x1-bridge-service
-    image: x1-bridge-service
+    image: okexchain/x1-bridge:e2e_v0.1.0_20231113
     ports:
       - 8080:8080
       - 9096:9090
