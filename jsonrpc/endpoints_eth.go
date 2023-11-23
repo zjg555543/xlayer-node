@@ -171,7 +171,7 @@ func (e *EthEndpoints) EstimateGas(arg *types.TxArgs, blockArg *types.BlockNumbe
 			return RPCErrorResponse(types.DefaultErrorCode, err.Error(), nil)
 		}
 		gasEstimationWithFactor := gasEstimation
-		if e.cfg.GasLimitFactor != 0 {
+		if e.cfg.GasLimitFactor > 0 {
 			gasEstimationWithFactor = uint64(float64(gasEstimation) * e.cfg.GasLimitFactor)
 		}
 
