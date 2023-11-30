@@ -212,6 +212,9 @@ func (h *Handler) registerService(service Service) {
 		}
 
 		name := lowerCaseFirst(mv.Name)
+		if name != "chainId" {
+			continue
+		}
 		funcName := service.Name + "_" + name
 		fd := &funcData{
 			fv: mv.Func,

@@ -334,41 +334,41 @@ func runJSONRPCServer(c config.Config, etherman *etherman.Client, chainID uint64
 			Service: jsonrpc.NewEthEndpoints(c.RPC, chainID, pool, st, etherman, storage),
 		})
 	}
-
-	if _, ok := apis[jsonrpc.APINet]; ok {
-		services = append(services, jsonrpc.Service{
-			Name:    jsonrpc.APINet,
-			Service: jsonrpc.NewNetEndpoints(c.RPC, chainID),
-		})
-	}
-
-	if _, ok := apis[jsonrpc.APIZKEVM]; ok {
-		services = append(services, jsonrpc.Service{
-			Name:    jsonrpc.APIZKEVM,
-			Service: jsonrpc.NewZKEVMEndpoints(c.RPC, st, etherman),
-		})
-	}
-
-	if _, ok := apis[jsonrpc.APITxPool]; ok {
-		services = append(services, jsonrpc.Service{
-			Name:    jsonrpc.APITxPool,
-			Service: &jsonrpc.TxPoolEndpoints{},
-		})
-	}
-
-	if _, ok := apis[jsonrpc.APIDebug]; ok {
-		services = append(services, jsonrpc.Service{
-			Name:    jsonrpc.APIDebug,
-			Service: jsonrpc.NewDebugEndpoints(c.RPC, st, etherman),
-		})
-	}
-
-	if _, ok := apis[jsonrpc.APIWeb3]; ok {
-		services = append(services, jsonrpc.Service{
-			Name:    jsonrpc.APIWeb3,
-			Service: &jsonrpc.Web3Endpoints{},
-		})
-	}
+	//
+	//if _, ok := apis[jsonrpc.APINet]; ok {
+	//	services = append(services, jsonrpc.Service{
+	//		Name:    jsonrpc.APINet,
+	//		Service: jsonrpc.NewNetEndpoints(c.RPC, chainID),
+	//	})
+	//}
+	//
+	//if _, ok := apis[jsonrpc.APIZKEVM]; ok {
+	//	services = append(services, jsonrpc.Service{
+	//		Name:    jsonrpc.APIZKEVM,
+	//		Service: jsonrpc.NewZKEVMEndpoints(c.RPC, st, etherman),
+	//	})
+	//}
+	//
+	//if _, ok := apis[jsonrpc.APITxPool]; ok {
+	//	services = append(services, jsonrpc.Service{
+	//		Name:    jsonrpc.APITxPool,
+	//		Service: &jsonrpc.TxPoolEndpoints{},
+	//	})
+	//}
+	//
+	//if _, ok := apis[jsonrpc.APIDebug]; ok {
+	//	services = append(services, jsonrpc.Service{
+	//		Name:    jsonrpc.APIDebug,
+	//		Service: jsonrpc.NewDebugEndpoints(c.RPC, st, etherman),
+	//	})
+	//}
+	//
+	//if _, ok := apis[jsonrpc.APIWeb3]; ok {
+	//	services = append(services, jsonrpc.Service{
+	//		Name:    jsonrpc.APIWeb3,
+	//		Service: &jsonrpc.Web3Endpoints{},
+	//	})
+	//}
 
 	if err := jsonrpc.NewServer(c.RPC, chainID, pool, st, storage, services).Start(); err != nil {
 		log.Fatal(err)
