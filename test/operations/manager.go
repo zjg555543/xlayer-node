@@ -55,7 +55,7 @@ const (
 	DefaultWaitPeriodSendSequence                          = "15s"
 	DefaultLastBatchVirtualizationTimeMaxWaitPeriod        = "10s"
 	MaxBatchesForL1                                 uint64 = 10
-	MaxTxSizeForL1                                  uint64 = 131072
+	DefaultMaxTxSizeForL1                           uint64 = 131072
 )
 
 var (
@@ -142,7 +142,7 @@ func (m *Manager) CheckConsolidatedRoot(expectedRoot string) error {
 }
 
 // SetGenesisAccountsBalance creates the genesis block in the state.
-func (m *Manager) SetGenesisAccountsBalance(genesisAccounts map[string]big.Int) error {
+func (m *Manager) SetGenesisAccountsBalance(genesisBlockNumber uint64, genesisAccounts map[string]big.Int) error {
 	var genesisActions []*state.GenesisAction
 	for address, balanceValue := range genesisAccounts {
 		action := &state.GenesisAction{
@@ -153,12 +153,12 @@ func (m *Manager) SetGenesisAccountsBalance(genesisAccounts map[string]big.Int) 
 		genesisActions = append(genesisActions, action)
 	}
 
-	return m.SetGenesis(genesisActions)
+	return m.SetGenesis(genesisBlockNumber, genesisActions)
 }
 
-func (m *Manager) SetGenesis(genesisActions []*state.GenesisAction) error {
+func (m *Manager) SetGenesis(genesisBlockNumber uint64, genesisActions []*state.GenesisAction) error {
 	genesisBlock := state.Block{
-		BlockNumber: 303,
+		BlockNumber: genesisBlockNumber,
 		BlockHash:   state.ZeroHash,
 		ParentHash:  state.ZeroHash,
 		ReceivedAt:  time.Now(),
@@ -183,7 +183,7 @@ func (m *Manager) SetGenesis(genesisActions []*state.GenesisAction) error {
 }
 
 // SetForkID sets the initial forkID in db for testing purposes
-func (m *Manager) SetForkID(forkID uint64) error {
+func (m *Manager) SetForkID(blockNum uint64, forkID uint64) error {
 	dbTx, err := m.st.BeginStateTransaction(m.ctx)
 	if err != nil {
 		return err
@@ -195,7 +195,7 @@ func (m *Manager) SetForkID(forkID uint64) error {
 		ToBatchNumber:   math.MaxUint64,
 		ForkId:          forkID,
 		Version:         "forkID",
-		BlockNumber:     303,
+		BlockNumber:     blockNum,
 	}
 	err = m.st.AddForkIDInterval(m.ctx, fID, dbTx)
 
@@ -263,7 +263,7 @@ func ApplyL2Txs(ctx context.Context, txs []*types.Transaction, auth *bind.Transa
 	}
 
 	l2BlockNumbers := make([]*big.Int, 0, len(sentTxs))
-	for i, tx := range sentTxs {
+	for _, tx := range sentTxs {
 		// check transaction nonce against transaction reported L2 block number
 		receipt, err := client.TransactionReceipt(ctx, tx.Hash())
 		if err != nil {
@@ -272,7 +272,7 @@ func ApplyL2Txs(ctx context.Context, txs []*types.Transaction, auth *bind.Transa
 
 		// get L2 block number
 		l2BlockNumbers = append(l2BlockNumbers, receipt.BlockNumber)
-		expectedNonce := initialNonce + uint64(i)
+		expectedNonce := receipt.BlockNumber.Uint64() - 1 + 8 //nolint:gomnd
 		if tx.Nonce() != expectedNonce {
 			return nil, fmt.Errorf("mismatching nonce for tx %v: want %d, got %d\n", tx.Hash(), expectedNonce, tx.Nonce())
 		}
@@ -474,15 +474,15 @@ func initState(maxCumulativeGasUsed uint64) (*state.State, error) {
 		return nil, err
 	}
 
-	ctx := context.Background()
-	stateDb := state.NewPostgresStorage(sqlDB)
-	executorClient, _, _ := executor.NewExecutorClient(ctx, executorConfig)
-	stateDBClient, _, _ := merkletree.NewMTDBServiceClient(ctx, merkleTreeConfig)
-	stateTree := merkletree.NewStateTree(stateDBClient)
-
 	stateCfg := state.Config{
 		MaxCumulativeGasUsed: maxCumulativeGasUsed,
 	}
+
+	ctx := context.Background()
+	stateDb := state.NewPostgresStorage(stateCfg, sqlDB)
+	executorClient, _, _ := executor.NewExecutorClient(ctx, executorConfig)
+	stateDBClient, _, _ := merkletree.NewMTDBServiceClient(ctx, merkleTreeConfig)
+	stateTree := merkletree.NewStateTree(stateDBClient)
 
 	eventStorage, err := nileventstorage.NewNilEventStorage()
 	if err != nil {
@@ -628,7 +628,7 @@ func GetDefaultOperationsConfig() *Config {
 			WaitPeriodSendSequence:                   DefaultWaitPeriodSendSequence,
 			LastBatchVirtualizationTimeMaxWaitPeriod: DefaultWaitPeriodSendSequence,
 			MaxBatchesForL1:                          MaxBatchesForL1,
-			MaxTxSizeForL1:                           MaxTxSizeForL1,
+			MaxTxSizeForL1:                           DefaultMaxTxSizeForL1,
 			SenderAddress:                            DefaultSequencerAddress,
 			PrivateKey:                               DefaultSequencerPrivateKey},
 	}
