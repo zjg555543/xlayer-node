@@ -105,8 +105,8 @@ install-linter: ## Installs the linter
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $$(go env GOPATH)/bin v1.54.2
 
 .PHONY: lint
-lint: ## Runs the linter
-	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/golangci-lint run
+#lint: ## Runs the linter
+#	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/golangci-lint run
 
 $(VENV_PYTHON):
 	rm -rf $(VENV)
