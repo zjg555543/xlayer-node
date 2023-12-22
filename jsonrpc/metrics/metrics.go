@@ -12,7 +12,7 @@ const (
 	requestPrefix             = prefix + "request_"
 	requestsHandledName       = requestPrefix + "handled"
 	requestDurationName       = requestPrefix + "duration"
-  connName                  = requestPrefix + "connection"
+	connName                  = requestPrefix + "connection"
 	requestMethodName         = requestPrefix + "method"
 	requestMethodDurationName = requestPrefix + "method_duration"
 
