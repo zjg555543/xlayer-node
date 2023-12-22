@@ -323,8 +323,8 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 	const limit = 10000
 
 	for err == nil {
-		log.Debugf("Current entry number: %d", entry)
-		log.Debugf("Current batch number: %d", currentBatchNumber)
+		log.Infof("Current entry number: %d", entry)
+		log.Infof("Current batch number: %d", currentBatchNumber)
 		// Get Next Batch
 		batches, err := stateDB.GetDSBatches(ctx, currentBatchNumber, currentBatchNumber+limit, readWIPBatch, nil)
 		if err != nil {
@@ -364,6 +364,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 				// Empty batch
 				// Is WIP Batch?
 				if batch.StateRoot == (common.Hash{}) {
+					log.Errorf("Empty WIP batch: %d", batch.BatchNumber)
 					continue
 				}
 				// Check if there is a GER update
@@ -422,6 +423,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 					return err
 				}
 
+				log.Infof("AddStreamEntry EntryTypeL2BlockStart: BatchNumber:%v, L2BlockNumber:%v", blockStart.BatchNumber, blockStart.L2BlockNumber)
 				_, err = streamServer.AddStreamEntry(EntryTypeL2BlockStart, blockStart.Encode())
 				if err != nil {
 					return err
@@ -452,6 +454,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 					StateRoot:     l2block.StateRoot,
 				}
 
+				log.Infof("AddStreamEntry EntryTypeL2BlockEnd: L2BlockNumber:%v", blockEnd.L2BlockNumber)
 				_, err = streamServer.AddStreamEntry(EntryTypeL2BlockEnd, blockEnd.Encode())
 				if err != nil {
 					return err
@@ -522,6 +525,9 @@ func computeFullBatches(batches []*DSBatch, l2Blocks []*DSL2Block, l2Txs []*DSL2
 			if l2Block.BatchNumber > batch.BatchNumber {
 				break
 			}
+		}
+		for _, l2Block := range fullBatch.L2Blocks {
+			log.Infof("computeFullBatches: BatchNumber:%v, L2BlockNumber:%v", l2Block.BatchNumber, l2Block.L2BlockNumber)
 		}
 
 		fullBatches = append(fullBatches, fullBatch)
