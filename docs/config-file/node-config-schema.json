@@ -509,6 +509,19 @@
 					"additionalProperties": false,
 					"type": "object",
 					"description": "NacosWs configuration"
+				},
+				"GasLimitFactor": {
+					"type": "number",
+					"description": "GasLimitFactor is used to multiply the suggested gas provided by the network\nin order to allow a enough gas to be set for all the transactions default value is 1.\n\nex:\nsuggested gas limit: 100\nGasLimitFactor: 1\ngas limit = 100\n\nsuggested gas limit: 100\nGasLimitFactor: 1.1\ngas limit = 110",
+					"default": 1
+				},
+				"DisableAPIs": {
+					"items": {
+						"type": "string"
+					},
+					"type": "array",
+					"description": "DisableAPIs disable some API",
+					"default": []
 				}
 			},
 			"additionalProperties": false,
@@ -793,6 +806,16 @@
 							"type": "boolean",
 							"description": "SequentialReprocessFullBatch indicates if the reprocess of a closed batch (sanity check) must be done in a\nsequential way (instead than in parallel)",
 							"default": false
+						},
+						"FullBatchSleepDuration": {
+							"type": "string",
+							"title": "Duration",
+							"description": "FullBatchSleepDuration is the time the finalizer sleeps between each full batch iteration",
+							"default": "0s",
+							"examples": [
+								"1m",
+								"300ms"
+							]
 						}
 					},
 					"additionalProperties": false,

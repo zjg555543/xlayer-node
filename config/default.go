@@ -91,6 +91,8 @@ MaxLogsCount = 10000
 MaxLogsBlockRange = 10000
 MaxNativeBlockHashBlockRange = 60000
 EnableHttpLog = true
+GasLimitFactor = 1
+DisableAPIs = []
 	[RPC.WebSockets]
 		Enabled = true
 		Host = "0.0.0.0"
@@ -135,6 +137,7 @@ MaxTxLifetime = "3h"
 		TimestampResolution = "10s"
 		StopSequencerOnBatchNum = 0
 		SequentialReprocessFullBatch = false
+		FullBatchSleepDuration = "0s"
 	[Sequencer.DBManager]
 		PoolRetrievalInterval = "500ms"
 		L2ReorgRetrievalInterval = "5s"
