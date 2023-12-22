@@ -208,6 +208,7 @@ func (d *dbManager) sendDataToStreamer() {
 					log.Errorf("failed to get storage at for l2block %v: %v", l2Block.L2BlockNumber, err)
 				}
 				l2Transaction.StateRoot = common.BigToHash(imStateRoot)
+
 				_, err = d.streamServer.AddStreamEntry(state.EntryTypeL2Tx, l2Transaction.Encode())
 				if err != nil {
 					log.Errorf("failed to add l2tx stream entry for l2block %v: %v", l2Block.L2BlockNumber, err)
@@ -300,7 +301,7 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 	batch.BatchL2Data = append(batch.BatchL2Data, txData...)
 
 	if !tx.isForcedBatch {
-		err = d.state.UpdateBatchL2Data(ctx, tx.batchNumber, batch.BatchL2Data, dbTx)
+		err = d.state.UpdateBatchL2DataAndLER(ctx, tx.batchNumber, batch.BatchL2Data, tx.batchResponse.NewLocalExitRoot, dbTx)
 		if err != nil {
 			err2 := dbTx.Rollback(ctx)
 			if err2 != nil {

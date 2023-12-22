@@ -28,7 +28,6 @@ const (
 	EntryTypeUpdateGER datastreamer.EntryType = 4
 	// BookMarkTypeL2Block represents a L2 block bookmark
 	BookMarkTypeL2Block byte = 0
-
 	// SystemSC is the system smart contract address
 	SystemSC = "0x000000000000000000000000000000005ca1ab1e"
 	// posConstant is the constant used to compute the position of the intermediate state root
@@ -358,7 +357,6 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 
 		// Gererate full batches
 		fullBatches := computeFullBatches(batches, l2Blocks, l2Txs)
-
 		currentBatchNumber += limit
 
 		for _, batch := range fullBatches {
@@ -441,6 +439,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 					} else {
 						tx.StateRoot = common.BytesToHash((*imStateRoots)[blockStart.L2BlockNumber])
 					}
+
 					entry, err = streamServer.AddStreamEntry(EntryTypeL2Tx, tx.Encode())
 					if err != nil {
 						return err

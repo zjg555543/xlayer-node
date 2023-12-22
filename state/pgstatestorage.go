@@ -1502,7 +1502,7 @@ func (p *PostgresStorage) GetTransactionEGPLogByHash(ctx context.Context, transa
 
 // AddL2Block adds a new L2 block to the State Store
 func (p *PostgresStorage) AddL2Block(ctx context.Context, batchNumber uint64, l2Block *types.Block, receipts []*types.Receipt, txsEGPData []StoreTxEGPData, dbTx pgx.Tx) error {
-	log.Infof("[AddL2Block] adding l2 block: %v", l2Block.NumberU64())
+	log.Debugf("[AddL2Block] adding l2 block: %v", l2Block.NumberU64())
 	start := time.Now()
 
 	e := p.getExecQuerier(dbTx)
@@ -1577,7 +1577,7 @@ func (p *PostgresStorage) AddL2Block(ctx context.Context, batchNumber uint64, l2
 			}
 		}
 	}
-	log.Infof("[AddL2Block] l2 block %v took %v to be added", l2Block.NumberU64(), time.Since(start))
+	log.Debugf("[AddL2Block] l2 block %v took %v to be added", l2Block.NumberU64(), time.Since(start))
 	return nil
 }
 
@@ -2528,6 +2528,15 @@ func (p *PostgresStorage) UpdateBatchL2Data(ctx context.Context, batchNumber uin
 	return err
 }
 
+// UpdateBatchL2DataAndLER updates data tx data in a batch and the local exit root
+func (p *PostgresStorage) UpdateBatchL2DataAndLER(ctx context.Context, batchNumber uint64, batchL2Data []byte, localExitRoot common.Hash, dbTx pgx.Tx) error {
+	const updateL2DataSQL = "UPDATE state.batch SET raw_txs_data = $2, local_exit_root = $3 WHERE batch_num = $1"
+
+	e := p.getExecQuerier(dbTx)
+	_, err := e.Exec(ctx, updateL2DataSQL, batchNumber, batchL2Data, localExitRoot.String())
+	return err
+}
+
 // AddAccumulatedInputHash adds the accumulated input hash
 func (p *PostgresStorage) AddAccumulatedInputHash(ctx context.Context, batchNum uint64, accInputHash common.Hash, dbTx pgx.Tx) error {
 	const addAccInputHashBatchSQL = "UPDATE state.batch SET acc_input_hash = $1 WHERE batch_num = $2"
@@ -2857,6 +2866,7 @@ func (p *PostgresStorage) GetDSBatches(ctx context.Context, firstBatchNumber, la
 	if !readWIPBatch {
 		getBatchByNumberSQL += " AND b.state_root is not null"
 	}
+
 	e := p.getExecQuerier(dbTx)
 	rows, err := e.Query(ctx, getBatchByNumberSQL, firstBatchNumber, lastBatchNumber)
 	if err != nil {

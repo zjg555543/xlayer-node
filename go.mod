@@ -1,6 +1,6 @@
 module github.com/0xPolygonHermez/zkevm-node
 
-go 1.19
+go 1.21
 
 require (
 	github.com/0xPolygon/cdk-data-availability v0.0.0-20230830141533-4064ada790a6
