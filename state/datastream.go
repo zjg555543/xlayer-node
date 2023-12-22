@@ -526,9 +526,6 @@ func computeFullBatches(batches []*DSBatch, l2Blocks []*DSL2Block, l2Txs []*DSL2
 				break
 			}
 		}
-		for _, l2Block := range fullBatch.L2Blocks {
-			log.Infof("computeFullBatches: BatchNumber:%v, L2BlockNumber:%v", l2Block.BatchNumber, l2Block.L2BlockNumber)
-		}
 
 		fullBatches = append(fullBatches, fullBatch)
 	}
