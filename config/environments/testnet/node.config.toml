@@ -61,6 +61,7 @@ MaxRequestsPerIPAndSecond = 5000
 SequencerNodeURI = "https://rpc.public.x1-test.net/"
 EnableL2SuggestedGasPricePolling = false
 GasLimitFactor = 1
+DisableAPIs = []
 	[RPC.WebSockets]
 		Enabled = true
 		Port = 8546

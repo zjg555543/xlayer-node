@@ -83,6 +83,9 @@ type Config struct {
 	// GasLimitFactor: 1.1
 	// gas limit = 110
 	GasLimitFactor float64 `mapstructure:"GasLimitFactor"`
+
+	// DisableAPIs disable some API
+	DisableAPIs []string `mapstructure:"DisableAPIs"`
 }
 
 // WebSocketsConfig has parameters to config the rpc websocket support
