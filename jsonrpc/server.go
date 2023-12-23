@@ -10,6 +10,7 @@ import (
 	"mime"
 	"net"
 	"net/http"
+	"sync"
 	"syscall"
 	"time"
 
@@ -51,6 +52,9 @@ type Server struct {
 	srv        *http.Server
 	wsSrv      *http.Server
 	wsUpgrader websocket.Upgrader
+
+	apolloConfig ApolloInterface
+	rwMutex      sync.RWMutex
 }
 
 // Service defines a struct that will provide public methods to be exposed
@@ -74,6 +78,8 @@ func NewServer(
 	s types.StateInterface,
 	storage storageInterface,
 	services []Service,
+
+	apolloConfig ApolloInterface,
 ) *Server {
 	if cfg.WebSockets.Enabled {
 		s.StartToMonitorNewL2Blocks()
@@ -89,6 +95,8 @@ func NewServer(
 		config:  cfg,
 		handler: handler,
 		chainID: chainID,
+
+		apolloConfig: apolloConfig,
 	}
 	return srv
 }
@@ -100,6 +108,10 @@ func (s *Server) Start() error {
 
 	if s.config.WebSockets.Enabled {
 		go s.startWS()
+	}
+
+	if s.apolloConfig != nil && s.apolloConfig.Enable() {
+		s.apolloConfig.SetApolloCallBack(s)
 	}
 
 	return s.startHTTP()
@@ -324,7 +336,20 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 
 func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWriter, data []byte) int {
 	// Checking if batch requests are enabled
-	if !s.config.BatchRequestsEnabled {
+	var batchRequestEnable bool
+	var batchRequestLimit uint
+	// if apollo is enabled, get the config from apollo
+	if GetInstance().Enable() {
+		GetInstance().RLock()
+		batchRequestEnable = GetInstance().BatchRequestsEnabled
+		batchRequestLimit = GetInstance().BatchRequestsLimit
+		GetInstance().RUnlock()
+	} else {
+		batchRequestEnable = s.config.BatchRequestsEnabled
+		batchRequestLimit = s.config.BatchRequestsLimit
+	}
+
+	if !batchRequestEnable {
 		handleInvalidRequest(w, types.ErrBatchRequestsDisabled, http.StatusBadRequest)
 		return 0
 	}
@@ -337,8 +362,8 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	}
 
 	// Checking if batch requests limit is exceeded
-	if s.config.BatchRequestsLimit > 0 {
-		if len(requests) > int(s.config.BatchRequestsLimit) {
+	if batchRequestLimit > 0 {
+		if len(requests) > int(batchRequestLimit) {
 			handleInvalidRequest(w, types.ErrBatchRequestsLimitExceeded, http.StatusRequestEntityTooLarge)
 			return 0
 		}

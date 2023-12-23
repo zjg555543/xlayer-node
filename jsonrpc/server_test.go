@@ -68,7 +68,7 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 	if _, ok := apis[APIEth]; ok {
 		services = append(services, Service{
 			Name:    APIEth,
-			Service: NewEthEndpoints(cfg, chainID, pool, st, etherman, storage),
+			Service: NewEthEndpoints(cfg, chainID, pool, st, etherman, storage, nil),
 		})
 	}
 
@@ -106,7 +106,7 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 			Service: &Web3Endpoints{},
 		})
 	}
-	server := NewServer(cfg, chainID, pool, st, storage, services)
+	server := NewServer(cfg, chainID, pool, st, storage, services, nil)
 
 	go func() {
 		err := server.Start()

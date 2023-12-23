@@ -218,7 +218,7 @@ func start(cliCtx *cli.Context) error {
 			for _, a := range cliCtx.StringSlice(config.FlagHTTPAPI) {
 				apis[a] = true
 			}
-			go runJSONRPCServer(*c, etherman, l2ChainID, poolInstance, st, apis)
+			go runJSONRPCServer(*c, etherman, l2ChainID, poolInstance, st, apis, apolloClient)
 		case SYNCHRONIZER:
 			ev.Component = event.Component_Synchronizer
 			ev.Description = "Running synchronizer"
@@ -338,7 +338,7 @@ func runSynchronizer(cfg config.Config, etherman *etherman.Client, ethTxManagerS
 	}
 }
 
-func runJSONRPCServer(c config.Config, etherman *etherman.Client, chainID uint64, pool *pool.Pool, st *state.State, apis map[string]bool) {
+func runJSONRPCServer(c config.Config, etherman *etherman.Client, chainID uint64, pool *pool.Pool, st *state.State, apis map[string]bool, apolloConfig jsonrpc.ApolloInterface) {
 	var err error
 	storage := jsonrpc.NewStorage()
 	c.RPC.MaxCumulativeGasUsed = c.State.Batch.Constraints.MaxCumulativeGasUsed
@@ -397,7 +397,7 @@ func runJSONRPCServer(c config.Config, etherman *etherman.Client, chainID uint64
 		})
 	}
 
-	if err := jsonrpc.NewServer(c.RPC, chainID, pool, st, storage, services).Start(); err != nil {
+	if err := jsonrpc.NewServer(c.RPC, chainID, pool, st, storage, services, apolloConfig).Start(); err != nil {
 		log.Fatal(err)
 	}
 }
