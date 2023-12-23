@@ -13,7 +13,7 @@ type DefaultGasPricer struct {
 	ctx        context.Context
 	l1GasPrice uint64
 
-	Apollo
+	apolloConfig Apollo
 }
 
 // newDefaultGasPriceSuggester init default gas price suggester.
@@ -29,7 +29,7 @@ func newDefaultGasPriceSuggester(ctx context.Context, cfg Config, pool poolInter
 		pool:       pool,
 		l1GasPrice: new(big.Int).Mul(defaultGasPriceDivByFactor, big.NewInt(100)).Uint64(), // nolint:gomnd
 
-		Apollo: fetch,
+		apolloConfig: fetch,
 	}
 	gpe.setDefaultGasPrice()
 	return gpe
@@ -37,7 +37,9 @@ func newDefaultGasPriceSuggester(ctx context.Context, cfg Config, pool poolInter
 
 // UpdateGasPriceAvg not needed for default strategy.
 func (d *DefaultGasPricer) UpdateGasPriceAvg() {
-	d.FetchL2GasPricerConfig(&d.cfg)
+	if d.apolloConfig != nil {
+		d.apolloConfig.FetchL2GasPricerConfig(&d.cfg)
+	}
 
 	err := d.pool.SetGasPrices(d.ctx, d.cfg.DefaultGasPriceWei, d.l1GasPrice)
 	if err != nil {
