@@ -59,6 +59,8 @@ func (c *Client) LoadConfig() (loaded bool) {
 			switch namespace {
 			case L2GasPricer:
 				c.loadL2GasPricer(value)
+			case JsonRPCRO:
+				c.loadJsonRPC(value)
 			}
 			return true
 		})
@@ -76,10 +78,11 @@ func (c *CustomChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 	for key, value := range changeEvent.Changes {
 		if value.ChangeType == storage.MODIFIED {
 			switch changeEvent.Namespace {
-			case L2GasPricerHalt:
+			case L2GasPricerHalt, JsonRPCROHalt:
 				c.fireHalt(key, value)
 			case L2GasPricer:
 				c.fireL2GasPricer(key, value)
+			case JsonRPCRO:
 			}
 		}
 	}
