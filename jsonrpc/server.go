@@ -484,7 +484,7 @@ func RPCErrorResponseWithData(code int, message string, data *[]byte, err error,
 		if err != nil {
 			log.Debugf("%v: %v", message, err.Error())
 		} else {
-			log.Debugf(message)
+			log.Debug(message)
 		}
 	}
 	return nil, types.NewRPCErrorWithData(code, message, data)
