@@ -77,7 +77,7 @@ func (c *CustomChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 		if value.ChangeType == storage.MODIFIED {
 			switch changeEvent.Namespace {
 			case L2GasPricerHalt:
-				c.fireL2GasPricerHalt(key, value)
+				c.fireHalt(key, value)
 			case L2GasPricer:
 				c.fireL2GasPricer(key, value)
 			}

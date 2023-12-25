@@ -2,9 +2,11 @@ package apollo
 
 import (
 	"bytes"
+	"os"
 
 	"github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/apolloconfig/agollo/v4/storage"
 	"github.com/mitchellh/mapstructure"
 	"github.com/spf13/viper"
 )
@@ -27,4 +29,19 @@ func (c *Client) unmarshal(value interface{}) (*config.Config, error) {
 		return nil, err
 	}
 	return &dstConf, nil
+}
+
+const (
+	// Halt is the key for l2gaspricer halt
+	Halt = "Halt"
+)
+
+func (c *Client) fireHalt(key string, value *storage.ConfigChange) {
+	switch key {
+	case Halt:
+		if value.OldValue.(string) != value.NewValue.(string) {
+			log.Infof("l2gaspricer halt changed from %s to %s", value.OldValue.(string), value.NewValue.(string))
+			os.Exit(1)
+		}
+	}
 }

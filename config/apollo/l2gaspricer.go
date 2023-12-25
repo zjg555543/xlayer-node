@@ -1,8 +1,6 @@
 package apollo
 
 import (
-	"os"
-
 	"github.com/0xPolygonHermez/zkevm-node/gasprice"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/apolloconfig/agollo/v4/storage"
@@ -15,21 +13,6 @@ func (c *Client) loadL2GasPricer(value interface{}) {
 	}
 	c.config.L2GasPriceSuggester = dstConf.L2GasPriceSuggester
 	log.Infof("loaded l2gaspricer from apollo config: %+v", value.(string))
-}
-
-const (
-	// Halt is the key for l2gaspricer halt
-	Halt = "Halt"
-)
-
-func (c *Client) fireL2GasPricerHalt(key string, value *storage.ConfigChange) {
-	switch key {
-	case Halt:
-		if value.OldValue.(string) != value.NewValue.(string) {
-			log.Infof("l2gaspricer halt changed from %s to %s", value.OldValue.(string), value.NewValue.(string))
-			os.Exit(1)
-		}
-	}
 }
 
 // fireL2GasPricer fires the l2gaspricer config change
@@ -45,10 +28,10 @@ func (c *Client) fireL2GasPricer(key string, value *storage.ConfigChange) {
 	}
 	log.Infof("apollo l2gaspricer old config : %+v", c.config.L2GasPriceSuggester)
 	log.Infof("apollo l2gaspricer config changed: %+v", value.NewValue.(string))
-	c.update(&c.config.L2GasPriceSuggester, newConf.L2GasPriceSuggester)
+	c.updateL2GasPricer(&c.config.L2GasPriceSuggester, newConf.L2GasPriceSuggester)
 }
 
-func (c *Client) update(dstConfig *gasprice.Config, srcConfig gasprice.Config) {
+func (c *Client) updateL2GasPricer(dstConfig *gasprice.Config, srcConfig gasprice.Config) {
 	if c == nil || !c.config.Apollo.Enable || dstConfig == nil {
 		log.Infof("apollo is not enabled %v %v %v", c, dstConfig, srcConfig)
 		return
@@ -80,5 +63,5 @@ func (c *Client) FetchL2GasPricerConfig(config *gasprice.Config) {
 	if c == nil || !c.config.Apollo.Enable || config == nil {
 		return
 	}
-	c.update(config, c.config.L2GasPriceSuggester)
+	c.updateL2GasPricer(config, c.config.L2GasPriceSuggester)
 }
