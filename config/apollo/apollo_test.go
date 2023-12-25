@@ -12,7 +12,7 @@ func TestApolloClient_LoadConfig(t *testing.T) {
 		Apollo: types.ApolloConfig{
 			IP:            "",
 			AppID:         "x1-devnet",
-			NamespaceName: "l2gaspricer.txt,l2gaspricer.properties",
+			NamespaceName: "l2gaspricer.txt,l2gaspricerHalt.properties",
 			Enable:        false,
 		},
 	}
