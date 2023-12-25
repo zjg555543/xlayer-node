@@ -28,6 +28,8 @@ func (c *Client) fireL2GasPricer(key string, value *storage.ConfigChange) {
 	}
 	log.Infof("apollo l2gaspricer old config : %+v", c.config.L2GasPriceSuggester)
 	log.Infof("apollo l2gaspricer config changed: %+v", value.NewValue.(string))
+	c.Lock()
+	defer c.Unlock()
 	c.updateL2GasPricer(&c.config.L2GasPriceSuggester, newConf.L2GasPriceSuggester)
 }
 
@@ -63,5 +65,8 @@ func (c *Client) FetchL2GasPricerConfig(config *gasprice.Config) {
 	if c == nil || !c.config.Apollo.Enable || config == nil {
 		return
 	}
+	c.RLock()
+	defer c.RUnlock()
+
 	c.updateL2GasPricer(config, c.config.L2GasPriceSuggester)
 }

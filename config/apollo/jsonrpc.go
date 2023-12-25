@@ -35,6 +35,8 @@ func (c *Client) fireJsonRPC(key string, value *storage.ConfigChange) {
 	}
 	log.Infof("apollo l2gaspricer old config : %+v", c.config.L2GasPriceSuggester)
 	log.Infof("apollo l2gaspricer config changed: %+v", value.NewValue.(string))
+	c.Lock()
+	defer c.Unlock()
 	c.updateJsonRPC(&c.config.RPC, newConf.RPC)
 }
 
@@ -88,11 +90,14 @@ func (c *Client) updateJsonRPC(dstConfig *jsonrpc.Config, srcConfig jsonrpc.Conf
 	}
 }
 
-// // FetchL2GasPricerConfig fetches the l2gaspricer config, called from gasprice module
-// func (c *Client) FetchL2GasPricerConfig(config *gasprice.Config) {
-// 	if c == nil || !c.config.Apollo.Enable || config == nil {
-// 		return
-// 	}
-// 	c.update(config, c.config.L2GasPriceSuggester)
-// }
-//
+// FetchJsonRPCConfig fetches the json-rpc config, called from json-rpc module
+func (c *Client) FetchJsonRPCConfig(config *jsonrpc.Config) {
+	if c == nil || !c.config.Apollo.Enable || config == nil {
+		return
+	}
+
+	c.RLock()
+	c.RUnlock()
+
+	c.updateJsonRPC(config, c.config.RPC)
+}

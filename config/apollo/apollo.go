@@ -2,6 +2,7 @@ package apollo
 
 import (
 	"strings"
+	"sync"
 
 	nodeconfig "github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -14,6 +15,7 @@ import (
 type Client struct {
 	agollo.Client
 	config *nodeconfig.Config
+	sync.RWMutex
 }
 
 // NewClient creates a new apollo client
@@ -40,6 +42,7 @@ func NewClient(conf *nodeconfig.Config) *Client {
 	apc := &Client{
 		client,
 		conf,
+		sync.RWMutex{},
 	}
 	client.AddChangeListener(&CustomChangeListener{apc})
 
