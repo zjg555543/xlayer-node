@@ -93,6 +93,14 @@ MaxNativeBlockHashBlockRange = 60000
 EnableHttpLog = true
 GasLimitFactor = 1
 DisableAPIs = []
+	[RPC.RateLimit]
+		Enabled = false
+		RateLimitApis = []
+		RateLimitCount = 100
+		RateLimitDuration = 1
+		SpecialApis = [
+			{Api = "eth_getBlockByHash", Count = 1, Duration = 1}
+		]
 	[RPC.WebSockets]
 		Enabled = true
 		Host = "0.0.0.0"

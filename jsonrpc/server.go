@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/time/rate"
 	"io"
 	"mime"
 	"net"
@@ -20,6 +19,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/didip/tollbooth/v6"
 	"github.com/gorilla/websocket"
+	"golang.org/x/time/rate"
 )
 
 const (
