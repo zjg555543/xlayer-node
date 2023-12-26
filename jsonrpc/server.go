@@ -99,6 +99,7 @@ func NewServer(
 			srv.rateLimit[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
 		}
 		for _, api := range cfg.RateLimit.SpecialApis {
+			log.Infof("special api rate limit enabled, api: %v, count: %d, duration: %d", api.Api, api.Count, api.Duration)
 			srv.rateLimit[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
 		}
 	}
