@@ -93,8 +93,8 @@ type Config struct {
 
 type RateLimitConfig struct {
 
-	// Enable defines if the rate limit is enabled or disabled
-	Enable bool `mapstructure:"Enable"`
+	// Enabled defines if the rate limit is enabled or disabled
+	Enabled bool `mapstructure:"Enabled"`
 
 	// RateLimitApis defines the apis that need to be rate limited
 	RateLimitApis []string `mapstructure:"RateLimitApis"`

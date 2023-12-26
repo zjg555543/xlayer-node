@@ -92,7 +92,8 @@ func NewServer(
 		handler: handler,
 		chainID: chainID,
 	}
-	if cfg.RateLimit.Enable {
+	if cfg.RateLimit.Enabled {
+		log.Infof("rate limit enabled, api: %v, count: %d, duration: %d", cfg.RateLimit.RateLimitApis, cfg.RateLimit.RateLimitCount, cfg.RateLimit.RateLimitDuration)
 		srv.rateLimit = make(map[string]*rate.Limiter)
 		for _, api := range cfg.RateLimit.RateLimitApis {
 			srv.rateLimit[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
@@ -311,7 +312,7 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 		handleInvalidRequest(w, err, http.StatusBadRequest)
 		return 0
 	}
-	if s.rateLimit != nil && !s.rateLimit[request.Method].Allow() {
+	if s.rateLimit != nil && s.rateLimit[request.Method] != nil && !s.rateLimit[request.Method].Allow() {
 		handleInvalidRequest(w, err, http.StatusTooManyRequests)
 		return 0
 	}
@@ -357,7 +358,7 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	}
 
 	for _, request := range requests {
-		if s.rateLimit != nil && !s.rateLimit[request.Method].Allow() {
+		if s.rateLimit != nil && s.rateLimit[request.Method] != nil && !s.rateLimit[request.Method].Allow() {
 			handleInvalidRequest(w, err, http.StatusTooManyRequests)
 			return 0
 		}
