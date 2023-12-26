@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"golang.org/x/time/rate"
 	"io"
 	"mime"
 	"net"
@@ -51,6 +52,7 @@ type Server struct {
 	srv        *http.Server
 	wsSrv      *http.Server
 	wsUpgrader websocket.Upgrader
+	rateLimit  map[string]*rate.Limiter
 }
 
 // Service defines a struct that will provide public methods to be exposed
@@ -89,6 +91,12 @@ func NewServer(
 		config:  cfg,
 		handler: handler,
 		chainID: chainID,
+	}
+	if cfg.RateLimit.Enable {
+		srv.rateLimit = make(map[string]*rate.Limiter)
+		for _, api := range cfg.RateLimit.RateLimitApis {
+			srv.rateLimit[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
+		}
 	}
 	return srv
 }
@@ -303,6 +311,10 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 		handleInvalidRequest(w, err, http.StatusBadRequest)
 		return 0
 	}
+	if s.rateLimit != nil && !s.rateLimit[request.Method].Allow() {
+		handleInvalidRequest(w, err, http.StatusTooManyRequests)
+		return 0
+	}
 	defer metrics.RequestMethodCount(request.Method)
 	defer metrics.RequestMethodDuration(request.Method, st)
 	req := handleRequest{Request: request, HttpRequest: httpRequest}
@@ -340,6 +352,13 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	if s.config.BatchRequestsLimit > 0 {
 		if len(requests) > int(s.config.BatchRequestsLimit) {
 			handleInvalidRequest(w, types.ErrBatchRequestsLimitExceeded, http.StatusRequestEntityTooLarge)
+			return 0
+		}
+	}
+
+	for _, request := range requests {
+		if s.rateLimit != nil && !s.rateLimit[request.Method].Allow() {
+			handleInvalidRequest(w, err, http.StatusTooManyRequests)
 			return 0
 		}
 	}

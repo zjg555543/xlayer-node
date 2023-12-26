@@ -86,6 +86,24 @@ type Config struct {
 
 	// DisableAPIs disable some API
 	DisableAPIs []string `mapstructure:"DisableAPIs"`
+
+	// RateLimit enable rate limit
+	RateLimit RateLimitConfig `mapstructure:"RateLimit"`
+}
+
+type RateLimitConfig struct {
+
+	// Enable defines if the rate limit is enabled or disabled
+	Enable bool `mapstructure:"Enable"`
+
+	// RateLimitApis defines the apis that need to be rate limited
+	RateLimitApis []string `mapstructure:"RateLimitApis"`
+
+	// RateLimitBurst defines the maximum burst size of requests
+	RateLimitCount int `mapstructure:"RateLimitCount"`
+
+	// RateLimitDuration defines the time window for the rate limit
+	RateLimitDuration int `mapstructure:"RateLimitDuration"`
 }
 
 // WebSocketsConfig has parameters to config the rpc websocket support
