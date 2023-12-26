@@ -98,6 +98,9 @@ func NewServer(
 		for _, api := range cfg.RateLimit.RateLimitApis {
 			srv.rateLimit[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
 		}
+		for _, api := range cfg.RateLimit.SpecialApis {
+			srv.rateLimit[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
+		}
 	}
 	return srv
 }
