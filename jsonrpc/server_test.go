@@ -106,7 +106,7 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 			Service: &Web3Endpoints{},
 		})
 	}
-	server := NewServer(cfg, chainID, pool, st, storage, services, nil)
+	server := NewServer(cfg, chainID, pool, st, storage, services)
 
 	go func() {
 		err := server.Start()

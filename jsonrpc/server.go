@@ -10,7 +10,6 @@ import (
 	"mime"
 	"net"
 	"net/http"
-	"sync"
 	"syscall"
 	"time"
 
@@ -52,8 +51,6 @@ type Server struct {
 	srv        *http.Server
 	wsSrv      *http.Server
 	wsUpgrader websocket.Upgrader
-
-	rwMutex sync.RWMutex
 }
 
 // Service defines a struct that will provide public methods to be exposed

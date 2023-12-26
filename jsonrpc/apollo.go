@@ -6,6 +6,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 )
 
+// ApolloConfig is the apollo RPC dynamic config
 type ApolloConfig struct {
 	EnableApollo         bool     `json:"enable"`
 	BatchRequestsEnabled bool     `json:"batchRequestsEnabled"`
@@ -18,10 +19,12 @@ type ApolloConfig struct {
 
 var apolloConfig = &ApolloConfig{}
 
+// GetInstance returns the singleton instance
 func GetInstance() *ApolloConfig {
 	return apolloConfig
 }
 
+// Enable returns true if apollo is enabled
 func (c *ApolloConfig) Enable() bool {
 	if c == nil || !c.EnableApollo {
 		return false
@@ -29,46 +32,6 @@ func (c *ApolloConfig) Enable() bool {
 	c.RLock()
 	defer c.RUnlock()
 	return c.EnableApollo
-}
-
-func (c *ApolloConfig) GetBatchRequestsEnabled() bool {
-	if c == nil || !c.EnableApollo {
-		return false
-	}
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.BatchRequestsEnabled
-}
-
-func (c *ApolloConfig) GetBatchRequestsLimit() uint {
-	if c == nil || !c.EnableApollo {
-		return 20
-	}
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.BatchRequestsLimit
-}
-
-func (c *ApolloConfig) GetGasLimitFactor() float64 {
-	if c == nil || !c.EnableApollo {
-		return 1.0
-	}
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.GasLimitFactor
-}
-
-func (c *ApolloConfig) GetDisableAPIs() []string {
-	if c == nil || !c.EnableApollo {
-		return nil
-	}
-	c.RLock()
-	defer c.RUnlock()
-
-	return c.DisableAPIs
 }
 
 func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
@@ -79,6 +42,7 @@ func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
 	copy(c.DisableAPIs, disableAPIs)
 }
 
+// UpdateConfig updates the apollo config
 func UpdateConfig(apolloConfig Config) {
 	GetInstance().Lock()
 	GetInstance().EnableApollo = true
@@ -93,7 +57,7 @@ func (e *EthEndpoints) isDisabled(rpc string) bool {
 	if GetInstance().Enable() {
 		GetInstance().RLock()
 		defer GetInstance().RUnlock()
-		return len(GetInstance().DisableAPIs) > 0 && types.Contains(GetInstance().GetDisableAPIs(), rpc)
+		return len(GetInstance().DisableAPIs) > 0 && types.Contains(GetInstance().DisableAPIs, rpc)
 	}
 
 	return len(e.cfg.DisableAPIs) > 0 && types.Contains(e.cfg.DisableAPIs, rpc)

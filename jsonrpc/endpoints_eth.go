@@ -197,7 +197,7 @@ func (e *EthEndpoints) EstimateGas(arg *types.TxArgs, blockArg *types.BlockNumbe
 
 		if GetInstance().Enable() {
 			GetInstance().RLock()
-			gasLimitFactor = GetInstance().GetGasLimitFactor()
+			gasLimitFactor = GetInstance().GasLimitFactor
 			GetInstance().RUnlock()
 		} else {
 			gasLimitFactor = e.cfg.GasLimitFactor
