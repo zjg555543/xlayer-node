@@ -30,18 +30,5 @@ func (c *Client) fireJsonRPC(key string, value *storage.ConfigChange) {
 	}
 	log.Infof("apollo json-rpc old config : %+v", c.config.RPC)
 	log.Infof("apollo json-rpc config changed: %+v", value.NewValue.(string))
-	c.updateJsonRPC(newConf.RPC)
-}
-
-// updateJsonRPC updates the json-rpc config
-// BatchRequestsEnabled
-// BatchRequestsLimit
-// GasLimitFactor
-// DisableAPIs
-func (c *Client) updateJsonRPC(srcConfig jsonrpc.Config) {
-	if c == nil || !c.config.Apollo.Enable {
-		log.Infof("apollo is not enabled %v %v", c, srcConfig)
-		return
-	}
-	jsonrpc.UpdateConfig(srcConfig)
+	jsonrpc.UpdateConfig(newConf.RPC)
 }
