@@ -313,7 +313,7 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 		return 0
 	}
 	if s.rateLimit != nil && s.rateLimit[request.Method] != nil && !s.rateLimit[request.Method].Allow() {
-		handleInvalidRequest(w, err, http.StatusTooManyRequests)
+		handleInvalidRequest(w, errors.New("server is too busy"), http.StatusTooManyRequests)
 		return 0
 	}
 	defer metrics.RequestMethodCount(request.Method)
