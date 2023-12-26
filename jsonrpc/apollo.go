@@ -79,26 +79,7 @@ func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
 	copy(c.DisableAPIs, disableAPIs)
 }
 
-// ApolloInterface provides apollo configure
-type ApolloInterface interface {
-	// Enable returns true if apollo is enabled
-	Enable() bool
-
-	// SetApolloCallBack sets the callback for apollo config change
-	SetApolloCallBack(ApolloCallBack)
-}
-
-// ApolloCallBack is the callback for apollo config change
-type ApolloCallBack interface {
-	// UpdateConfig updates the json-rpc config
-	UpdateConfig(conf Config)
-}
-
-func (s *Server) UpdateConfig(apolloConfig Config) {
-	if s == nil || !s.apolloConfig.Enable() {
-		return
-	}
-
+func UpdateConfig(apolloConfig Config) {
 	GetInstance().Lock()
 	GetInstance().EnableApollo = true
 	GetInstance().BatchRequestsEnabled = apolloConfig.BatchRequestsEnabled

@@ -43,13 +43,5 @@ func (c *Client) updateJsonRPC(srcConfig jsonrpc.Config) {
 		log.Infof("apollo is not enabled %v %v", c, srcConfig)
 		return
 	}
-	c.jsonRPCCallBack.UpdateConfig(srcConfig)
-}
-
-func (c *Client) SetApolloCallBack(cb jsonrpc.ApolloCallBack) {
-	c.jsonRPCCallBack = cb
-}
-
-func (c *Client) Enable() bool {
-	return c != nil && c.config.Apollo.Enable
+	jsonrpc.UpdateConfig(srcConfig)
 }

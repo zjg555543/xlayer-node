@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	nodeconfig "github.com/0xPolygonHermez/zkevm-node/config"
-	"github.com/0xPolygonHermez/zkevm-node/jsonrpc"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/apolloconfig/agollo/v4"
 	"github.com/apolloconfig/agollo/v4/env/config"
@@ -15,8 +14,6 @@ import (
 type Client struct {
 	agollo.Client
 	config *nodeconfig.Config
-
-	jsonRPCCallBack jsonrpc.ApolloCallBack
 }
 
 // NewClient creates a new apollo client

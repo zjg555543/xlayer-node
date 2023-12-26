@@ -68,7 +68,7 @@ func newMockedServer(t *testing.T, cfg Config) (*mockedServer, *mocksWrapper, *e
 	if _, ok := apis[APIEth]; ok {
 		services = append(services, Service{
 			Name:    APIEth,
-			Service: NewEthEndpoints(cfg, chainID, pool, st, etherman, storage, nil),
+			Service: NewEthEndpoints(cfg, chainID, pool, st, etherman, storage),
 		})
 	}
 
