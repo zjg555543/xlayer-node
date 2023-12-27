@@ -52,7 +52,6 @@ type Server struct {
 	srv        *http.Server
 	wsSrv      *http.Server
 	wsUpgrader websocket.Upgrader
-	rateLimit  map[string]*rate.Limiter
 }
 
 // Service defines a struct that will provide public methods to be exposed
@@ -94,14 +93,15 @@ func NewServer(
 	}
 	if cfg.RateLimit.Enabled {
 		log.Infof("rate limit enabled, api: %v, count: %d, duration: %d", cfg.RateLimit.RateLimitApis, cfg.RateLimit.RateLimitCount, cfg.RateLimit.RateLimitDuration)
-		srv.rateLimit = make(map[string]*rate.Limiter)
+		rlm := make(map[string]*rate.Limiter)
 		for _, api := range cfg.RateLimit.RateLimitApis {
-			srv.rateLimit[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
+			rlm[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
 		}
 		for _, api := range cfg.RateLimit.SpecialApis {
 			log.Infof("special api rate limit enabled, api: %v, count: %d, duration: %d", api.Api, api.Count, api.Duration)
-			srv.rateLimit[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
+			rlm[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
 		}
+		getApolloConfig().rateLimit = rlm
 	}
 	return srv
 }
@@ -316,7 +316,8 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 		handleInvalidRequest(w, err, http.StatusBadRequest)
 		return 0
 	}
-	if s.rateLimit != nil && s.rateLimit[request.Method] != nil && !s.rateLimit[request.Method].Allow() {
+
+	if !s.methodRateLimitAllow(request.Method) {
 		handleInvalidRequest(w, errors.New("server is too busy"), http.StatusTooManyRequests)
 		return 0
 	}
@@ -375,7 +376,7 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	}
 
 	for _, request := range requests {
-		if s.rateLimit != nil && s.rateLimit[request.Method] != nil && !s.rateLimit[request.Method].Allow() {
+		if !s.methodRateLimitAllow(request.Method) {
 			handleInvalidRequest(w, err, http.StatusTooManyRequests)
 			return 0
 		}
