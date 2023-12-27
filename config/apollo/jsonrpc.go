@@ -12,6 +12,7 @@ func (c *Client) loadJsonRPC(value interface{}) {
 		log.Fatalf("failed to unmarshal json-rpc config: %v", err)
 	}
 	c.config.RPC = dstConf.RPC
+	c.config.RPC.DisableAPIs = make([]string, len(dstConf.RPC.DisableAPIs))
 	copy(c.config.RPC.DisableAPIs, dstConf.RPC.DisableAPIs)
 
 	log.Infof("loaded json-rpc from apollo config: %+v", value.(string))
