@@ -19,8 +19,8 @@ type ApolloConfig struct {
 
 var apolloConfig = &ApolloConfig{}
 
-// GetInstance returns the singleton instance
-func GetInstance() *ApolloConfig {
+// getApolloConfig returns the singleton instance
+func getApolloConfig() *ApolloConfig {
 	return apolloConfig
 }
 
@@ -44,20 +44,20 @@ func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
 
 // UpdateConfig updates the apollo config
 func UpdateConfig(apolloConfig Config) {
-	GetInstance().Lock()
-	GetInstance().EnableApollo = true
-	GetInstance().BatchRequestsEnabled = apolloConfig.BatchRequestsEnabled
-	GetInstance().BatchRequestsLimit = apolloConfig.BatchRequestsLimit
-	GetInstance().GasLimitFactor = apolloConfig.GasLimitFactor
-	GetInstance().setDisableAPIs(apolloConfig.DisableAPIs)
-	GetInstance().Unlock()
+	getApolloConfig().Lock()
+	getApolloConfig().EnableApollo = true
+	getApolloConfig().BatchRequestsEnabled = apolloConfig.BatchRequestsEnabled
+	getApolloConfig().BatchRequestsLimit = apolloConfig.BatchRequestsLimit
+	getApolloConfig().GasLimitFactor = apolloConfig.GasLimitFactor
+	getApolloConfig().setDisableAPIs(apolloConfig.DisableAPIs)
+	getApolloConfig().Unlock()
 }
 
 func (e *EthEndpoints) isDisabled(rpc string) bool {
-	if GetInstance().Enable() {
-		GetInstance().RLock()
-		defer GetInstance().RUnlock()
-		return len(GetInstance().DisableAPIs) > 0 && types.Contains(GetInstance().DisableAPIs, rpc)
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		defer getApolloConfig().RUnlock()
+		return len(getApolloConfig().DisableAPIs) > 0 && types.Contains(getApolloConfig().DisableAPIs, rpc)
 	}
 
 	return len(e.cfg.DisableAPIs) > 0 && types.Contains(e.cfg.DisableAPIs, rpc)

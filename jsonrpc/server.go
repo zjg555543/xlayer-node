@@ -327,11 +327,11 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	var batchRequestEnable bool
 	var batchRequestLimit uint
 	// if apollo is enabled, get the config from apollo
-	if GetInstance().Enable() {
-		GetInstance().RLock()
-		batchRequestEnable = GetInstance().BatchRequestsEnabled
-		batchRequestLimit = GetInstance().BatchRequestsLimit
-		GetInstance().RUnlock()
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		batchRequestEnable = getApolloConfig().BatchRequestsEnabled
+		batchRequestLimit = getApolloConfig().BatchRequestsLimit
+		getApolloConfig().RUnlock()
 	} else {
 		batchRequestEnable = s.config.BatchRequestsEnabled
 		batchRequestLimit = s.config.BatchRequestsLimit

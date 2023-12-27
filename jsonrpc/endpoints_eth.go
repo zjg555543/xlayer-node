@@ -195,10 +195,10 @@ func (e *EthEndpoints) EstimateGas(arg *types.TxArgs, blockArg *types.BlockNumbe
 		gasEstimationWithFactor := gasEstimation
 		var gasLimitFactor float64
 
-		if GetInstance().Enable() {
-			GetInstance().RLock()
-			gasLimitFactor = GetInstance().GasLimitFactor
-			GetInstance().RUnlock()
+		if getApolloConfig().Enable() {
+			getApolloConfig().RLock()
+			gasLimitFactor = getApolloConfig().GasLimitFactor
+			getApolloConfig().RUnlock()
 		} else {
 			gasLimitFactor = e.cfg.GasLimitFactor
 		}
