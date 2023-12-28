@@ -4,8 +4,6 @@ import (
 	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
-	"github.com/0xPolygonHermez/zkevm-node/log"
-	"golang.org/x/time/rate"
 )
 
 // ApolloConfig is the apollo RPC dynamic config
@@ -17,7 +15,6 @@ type ApolloConfig struct {
 	DisableAPIs          []string        `json:"disableAPIs"`
 	RateLimit            RateLimitConfig `json:"rateLimit"`
 
-	rateLimit map[string]*rate.Limiter
 	sync.RWMutex
 }
 
@@ -46,25 +43,6 @@ func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
 	copy(c.DisableAPIs, disableAPIs)
 }
 
-func (c *ApolloConfig) setRateLimit(rateLimit RateLimitConfig) {
-	if c == nil || !c.EnableApollo {
-		return
-	}
-	c.RateLimit = rateLimit
-	c.RateLimit.RateLimitApis = make([]string, len(rateLimit.RateLimitApis))
-	copy(c.RateLimit.RateLimitApis, rateLimit.RateLimitApis)
-	c.RateLimit.SpecialApis = make([]RateLimitItem, len(rateLimit.SpecialApis))
-	copy(c.RateLimit.SpecialApis, rateLimit.SpecialApis)
-	c.rateLimit = updateRateLimit(c.RateLimit)
-}
-
-// InitRateLimit initializes the rate limit config
-func InitRateLimit(rateLimit RateLimitConfig) {
-	getApolloConfig().Lock()
-	defer getApolloConfig().Unlock()
-	getApolloConfig().rateLimit = updateRateLimit(rateLimit)
-}
-
 // UpdateConfig updates the apollo config
 func UpdateConfig(apolloConfig Config) {
 	getApolloConfig().Lock()
@@ -73,7 +51,7 @@ func UpdateConfig(apolloConfig Config) {
 	getApolloConfig().BatchRequestsLimit = apolloConfig.BatchRequestsLimit
 	getApolloConfig().GasLimitFactor = apolloConfig.GasLimitFactor
 	getApolloConfig().setDisableAPIs(apolloConfig.DisableAPIs)
-	getApolloConfig().setRateLimit(apolloConfig.RateLimit)
+	setRateLimit(apolloConfig.RateLimit)
 	getApolloConfig().Unlock()
 }
 
@@ -85,31 +63,4 @@ func (e *EthEndpoints) isDisabled(rpc string) bool {
 	}
 
 	return len(e.cfg.DisableAPIs) > 0 && types.Contains(e.cfg.DisableAPIs, rpc)
-}
-
-func updateRateLimit(rateLimit RateLimitConfig) map[string]*rate.Limiter {
-	log.Infof("rate limit config updated, config: %+v", rateLimit)
-	if rateLimit.Enabled {
-		log.Infof("rate limit enabled, api: %v, count: %d, duration: %d", rateLimit.RateLimitApis, rateLimit.RateLimitCount, rateLimit.RateLimitDuration)
-		rlm := make(map[string]*rate.Limiter)
-		for _, api := range rateLimit.RateLimitApis {
-			rlm[api] = rate.NewLimiter(rate.Limit(rateLimit.RateLimitCount), rateLimit.RateLimitDuration)
-		}
-		for _, api := range rateLimit.SpecialApis {
-			log.Infof("special api rate limit enabled, api: %v, count: %d, duration: %d", api.Api, api.Count, api.Duration)
-			rlm[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
-		}
-		return rlm
-	}
-	return nil
-}
-
-func methodRateLimitAllow(method string) bool {
-	getApolloConfig().RLock()
-	rlm := getApolloConfig().rateLimit
-	getApolloConfig().RUnlock()
-	if rlm != nil && rlm[method] != nil && !rlm[method].Allow() {
-		return false
-	}
-	return true
 }
