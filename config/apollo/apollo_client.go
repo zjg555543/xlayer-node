@@ -15,6 +15,28 @@ func (c *Client) loadL2GasPricer(value interface{}) {
 	log.Infof("loaded l2gaspricer from apollo config: %+v", value.(string))
 }
 
+func (c *Client) loadL2PoolBlockedAddress(value interface{}) {
+	//lines := strings.Split(value.(string), "\n")
+	//if err != nil {
+	//	log.Fatalf("failed to unmarshal l2gaspricer config: %v", err)
+	//}
+	//
+	//c.config.L2GasPriceSuggester = dstConf.L2GasPriceSuggester
+	//log.Infof("loaded l2gaspricer from apollo config: %+v", value.(string))
+}
+
+func getAddressFromStr(addressStr string) {
+	//lines := strings.Split(str, "\n")
+	//for _, add := range addressStr {
+	//	sig := strings.Split(add, ",")
+	//
+	//	// 遍历每个部分并打印
+	//	for _, part := range parts {
+	//		fmt.Println(part)
+	//	}
+	//}
+}
+
 // fireL2GasPricer fires the l2gaspricer config change
 // DefaultGasPriceWei
 // MaxGasPriceWei

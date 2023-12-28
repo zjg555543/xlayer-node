@@ -1,19 +1,19 @@
 package apollo
 
 import (
-	"strings"
-
 	nodeconfig "github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/apolloconfig/agollo/v4"
 	"github.com/apolloconfig/agollo/v4/env/config"
 	"github.com/apolloconfig/agollo/v4/storage"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Client is the apollo client
 type Client struct {
 	agollo.Client
-	config *nodeconfig.Config
+	config         *nodeconfig.Config
+	blockedAddress *[]common.Address
 }
 
 // NewClient creates a new apollo client
@@ -38,8 +38,8 @@ func NewClient(conf *nodeconfig.Config) *Client {
 	}
 
 	apc := &Client{
-		client,
-		conf,
+		//client,
+		//conf,
 	}
 	client.AddChangeListener(&CustomChangeListener{apc})
 
@@ -48,21 +48,23 @@ func NewClient(conf *nodeconfig.Config) *Client {
 
 // LoadConfig loads the config
 func (c *Client) LoadConfig() (loaded bool) {
-	if c == nil {
-		return false
-	}
-	namespaces := strings.Split(c.config.Apollo.NamespaceName, ",")
-	for _, namespace := range namespaces {
-		cache := c.GetConfigCache(namespace)
-		cache.Range(func(key, value interface{}) bool {
-			loaded = true
-			switch namespace {
-			case L2GasPricer:
-				c.loadL2GasPricer(value)
-			}
-			return true
-		})
-	}
+	//if c == nil {
+	//	return false
+	//}
+	//namespaces := strings.Split(c.config.Apollo.NamespaceName, ",")
+	//for _, namespace := range namespaces {
+	//	cache := c.GetConfigCache(namespace)
+	//	cache.Range(func(key, value interface{}) bool {
+	//		loaded = true
+	//		switch namespace {
+	//		case L2GasPricer:
+	//			c.loadL2GasPricer(value)
+	//		}
+	//		case L2PoolBlockedAddress:
+	//			c.
+	//		return true
+	//	})
+	//}
 	return
 }
 
