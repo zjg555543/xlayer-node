@@ -17,8 +17,8 @@ type ApolloConfig struct {
 
 var apolloConfig = &ApolloConfig{}
 
-// GetInstance returns the singleton instance
-func GetInstance() *ApolloConfig {
+// getApolloConfig returns the singleton instance
+func getApolloConfig() *ApolloConfig {
 	return apolloConfig
 }
 
@@ -34,18 +34,18 @@ func (c *ApolloConfig) Enable() bool {
 
 // UpdateConfig updates the apollo config
 func UpdateConfig(apolloConfig Config) {
-	GetInstance().Lock()
-	GetInstance().EnableApollo = true
-	GetInstance().FullBatchSleepDuration = apolloConfig.Finalizer.FullBatchSleepDuration
-	GetInstance().Unlock()
+	getApolloConfig().Lock()
+	getApolloConfig().EnableApollo = true
+	getApolloConfig().FullBatchSleepDuration = apolloConfig.Finalizer.FullBatchSleepDuration
+	getApolloConfig().Unlock()
 }
 
 func getFullBatchSleepDuration(localDuration, timestampResolution time.Duration) time.Duration {
 	var ret time.Duration
-	if GetInstance().Enable() {
-		GetInstance().RLock()
-		defer GetInstance().RUnlock()
-		ret = GetInstance().FullBatchSleepDuration.Duration
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		defer getApolloConfig().RUnlock()
+		ret = getApolloConfig().FullBatchSleepDuration.Duration
 	} else {
 		ret = localDuration
 	}

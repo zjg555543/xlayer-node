@@ -2,7 +2,9 @@ package apollo
 
 import (
 	"bytes"
+	"math/rand"
 	"os"
+	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -33,14 +35,17 @@ func (c *Client) unmarshal(value interface{}) (*config.Config, error) {
 
 const (
 	// Halt is the key for l2gaspricer halt
-	Halt = "Halt"
+	Halt         = "Halt"
+	maxHaltDelay = 20
 )
 
 func (c *Client) fireHalt(key string, value *storage.ConfigChange) {
 	switch key {
 	case Halt:
 		if value.OldValue.(string) != value.NewValue.(string) {
-			log.Infof("l2gaspricer halt changed from %s to %s", value.OldValue.(string), value.NewValue.(string))
+			delay := time.Second * time.Duration(rand.Intn(maxHaltDelay))
+			log.Infof("halt changed from %s to %s delay halt %v", value.OldValue.(string), value.NewValue.(string), delay)
+			time.Sleep(delay)
 			os.Exit(1)
 		}
 	}
