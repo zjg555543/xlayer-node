@@ -402,8 +402,8 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 
 			fullBatchSleepDuration := getFullBatchSleepDuration(f.cfg.FullBatchSleepDuration.Duration, f.cfg.TimestampResolution.Duration)
 			if fullBatchSleepDuration > 0 {
-				time.Sleep(fullBatchSleepDuration)
 				log.Infof("Slow down sequencer: %v", fullBatchSleepDuration)
+				time.Sleep(fullBatchSleepDuration)
 			}
 		}
 
