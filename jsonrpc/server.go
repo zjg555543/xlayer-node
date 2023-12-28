@@ -362,16 +362,13 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 		}
 	}
 
-	for _, request := range requests {
-		if !methodRateLimitAllow(request.Method) {
-			handleInvalidRequest(w, errors.New("server is too busy"), http.StatusTooManyRequests)
-			return 0
-		}
-	}
-
 	responses := make([]types.Response, 0, len(requests))
 
 	for _, request := range requests {
+		if !methodRateLimitAllow(request.Method) {
+			responses = append(responses, types.NewResponse(request, nil, types.NewRPCError(types.InvalidParamsErrorCode, "server is too busy")))
+			continue
+		}
 		st := time.Now()
 		metrics.RequestMethodCount(request.Method)
 		req := handleRequest{Request: request, HttpRequest: httpRequest}
