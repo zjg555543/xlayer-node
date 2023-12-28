@@ -27,4 +27,8 @@ const (
 	JsonRPCLight = "jsonrpc-light.txt"
 	// JsonRPCLightHalt is the json-rpc-light halt namespace,change the Halt to different value will halt json-rpc-light
 	JsonRPCLightHalt = "jsonrpc-light-halt"
+	// JsonRPCBridge is the json-rpc-bridge namespace, the content of the namespace is the config for json-rpc-light with toml format
+	JsonRPCBridge = "jsonrpc-bridge.txt"
+	// JsonRPCBridgeHalt is the json-rpc-bridge halt namespace,change the Halt to different value will halt json-rpc-light
+	JsonRPCBridgeHalt = "jsonrpc-bridge-halt"
 )

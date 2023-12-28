@@ -80,13 +80,13 @@ func (c *CustomChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 	for key, value := range changeEvent.Changes {
 		if value.ChangeType == storage.MODIFIED {
 			switch changeEvent.Namespace {
-			case L2GasPricerHalt, SequencerHalt,JsonRPCROHalt, JsonRPCExplorerHalt, JsonRPCSubgraphHalt, JsonRPCLightHalt:
+			case L2GasPricerHalt, SequencerHalt, JsonRPCROHalt, JsonRPCExplorerHalt, JsonRPCSubgraphHalt, JsonRPCLightHalt, JsonRPCBridgeHalt:
 				c.fireHalt(key, value)
 			case L2GasPricer:
 				c.fireL2GasPricer(key, value)
 			case Sequencer:
 				c.fireSequencer(key, value)
-			case JsonRPCRO, JsonRPCExplorer, JsonRPCSubgraph, JsonRPCLight:
+			case JsonRPCRO, JsonRPCExplorer, JsonRPCSubgraph, JsonRPCLight, JsonRPCBridge:
 				c.fireJsonRPC(key, value)
 			}
 		}
