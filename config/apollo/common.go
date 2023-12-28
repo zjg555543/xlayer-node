@@ -2,7 +2,8 @@ package apollo
 
 import (
 	"bytes"
-	"math/rand"
+	"crypto/rand"
+	"math/big"
 	"os"
 	"time"
 
@@ -43,7 +44,8 @@ func (c *Client) fireHalt(key string, value *storage.ConfigChange) {
 	switch key {
 	case Halt:
 		if value.OldValue.(string) != value.NewValue.(string) {
-			delay := time.Second * time.Duration(rand.Intn(maxHaltDelay))
+			random, _ := rand.Int(rand.Reader, big.NewInt(maxHaltDelay))
+			delay := time.Second * time.Duration(random.Int64())
 			log.Infof("halt changed from %s to %s delay halt %v", value.OldValue.(string), value.NewValue.(string), delay)
 			time.Sleep(delay)
 			os.Exit(1)
