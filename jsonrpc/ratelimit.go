@@ -16,9 +16,7 @@ var rateLimit = &RateLimit{}
 
 // InitRateLimit initializes the rate limit config
 func InitRateLimit(rlc RateLimitConfig) {
-	rateLimit.Lock()
-	defer rateLimit.Unlock()
-	rateLimit.rlm = updateRateLimit(rlc)
+	setRateLimit(rlc)
 }
 
 func setRateLimit(rlc RateLimitConfig) {
