@@ -19,7 +19,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/didip/tollbooth/v6"
 	"github.com/gorilla/websocket"
-	"golang.org/x/time/rate"
 )
 
 const (
@@ -90,18 +89,6 @@ func NewServer(
 		config:  cfg,
 		handler: handler,
 		chainID: chainID,
-	}
-	if cfg.RateLimit.Enabled {
-		log.Infof("rate limit enabled, api: %v, count: %d, duration: %d", cfg.RateLimit.RateLimitApis, cfg.RateLimit.RateLimitCount, cfg.RateLimit.RateLimitDuration)
-		rlm := make(map[string]*rate.Limiter)
-		for _, api := range cfg.RateLimit.RateLimitApis {
-			rlm[api] = rate.NewLimiter(rate.Limit(cfg.RateLimit.RateLimitCount), cfg.RateLimit.RateLimitDuration)
-		}
-		for _, api := range cfg.RateLimit.SpecialApis {
-			log.Infof("special api rate limit enabled, api: %v, count: %d, duration: %d", api.Api, api.Count, api.Duration)
-			rlm[api.Api] = rate.NewLimiter(rate.Limit(api.Count), api.Duration)
-		}
-		getApolloConfig().rateLimit = rlm
 	}
 	return srv
 }
@@ -317,7 +304,7 @@ func (s *Server) handleSingleRequest(httpRequest *http.Request, w http.ResponseW
 		return 0
 	}
 
-	if !s.methodRateLimitAllow(request.Method) {
+	if !methodRateLimitAllow(request.Method) {
 		handleInvalidRequest(w, errors.New("server is too busy"), http.StatusTooManyRequests)
 		return 0
 	}
@@ -376,7 +363,7 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 	}
 
 	for _, request := range requests {
-		if !s.methodRateLimitAllow(request.Method) {
+		if !methodRateLimitAllow(request.Method) {
 			handleInvalidRequest(w, err, http.StatusTooManyRequests)
 			return 0
 		}

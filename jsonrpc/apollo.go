@@ -46,6 +46,25 @@ func (c *ApolloConfig) setDisableAPIs(disableAPIs []string) {
 	copy(c.DisableAPIs, disableAPIs)
 }
 
+func (c *ApolloConfig) setRateLimit(rateLimit RateLimitConfig) {
+	if c == nil || !c.EnableApollo {
+		return
+	}
+	c.RateLimit = rateLimit
+	c.RateLimit.RateLimitApis = make([]string, len(rateLimit.RateLimitApis))
+	copy(c.RateLimit.RateLimitApis, rateLimit.RateLimitApis)
+	c.RateLimit.SpecialApis = make([]RateLimitItem, len(rateLimit.SpecialApis))
+	copy(c.RateLimit.SpecialApis, rateLimit.SpecialApis)
+	c.rateLimit = updateRateLimit(c.RateLimit)
+}
+
+// InitRateLimit initializes the rate limit config
+func InitRateLimit(rateLimit RateLimitConfig) {
+	getApolloConfig().Lock()
+	defer getApolloConfig().Unlock()
+	getApolloConfig().rateLimit = updateRateLimit(rateLimit)
+}
+
 // UpdateConfig updates the apollo config
 func UpdateConfig(apolloConfig Config) {
 	getApolloConfig().Lock()
@@ -54,8 +73,7 @@ func UpdateConfig(apolloConfig Config) {
 	getApolloConfig().BatchRequestsLimit = apolloConfig.BatchRequestsLimit
 	getApolloConfig().GasLimitFactor = apolloConfig.GasLimitFactor
 	getApolloConfig().setDisableAPIs(apolloConfig.DisableAPIs)
-	getApolloConfig().RateLimit = apolloConfig.RateLimit
-	getApolloConfig().rateLimit = updateRateLimit(apolloConfig.RateLimit)
+	getApolloConfig().setRateLimit(apolloConfig.RateLimit)
 	getApolloConfig().Unlock()
 }
 
@@ -86,8 +104,10 @@ func updateRateLimit(rateLimit RateLimitConfig) map[string]*rate.Limiter {
 	return nil
 }
 
-func (s *Server) methodRateLimitAllow(method string) bool {
+func methodRateLimitAllow(method string) bool {
+	getApolloConfig().RLock()
 	rlm := getApolloConfig().rateLimit
+	getApolloConfig().RUnlock()
 	if rlm != nil && rlm[method] != nil && !rlm[method].Allow() {
 		return false
 	}
