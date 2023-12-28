@@ -1,11 +1,11 @@
 package jsonrpc
 
 import (
-	"golang.org/x/time/rate"
 	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"golang.org/x/time/rate"
 )
 
 // ApolloConfig is the apollo RPC dynamic config
