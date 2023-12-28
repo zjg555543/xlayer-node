@@ -7,6 +7,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
+// RateLimit is the rate limit config
 type RateLimit struct {
 	rlm map[string]*rate.Limiter
 	sync.RWMutex
@@ -19,12 +20,14 @@ func InitRateLimit(rlc RateLimitConfig) {
 	setRateLimit(rlc)
 }
 
+// setRateLimit sets the rate limit config
 func setRateLimit(rlc RateLimitConfig) {
 	rateLimit.Lock()
 	defer rateLimit.Unlock()
 	rateLimit.rlm = updateRateLimit(rlc)
 }
 
+// updateRateLimit updates the rate limit config
 func updateRateLimit(rateLimit RateLimitConfig) map[string]*rate.Limiter {
 	log.Infof("rate limit config updated, config: %+v", rateLimit)
 	if rateLimit.Enabled {
@@ -42,6 +45,7 @@ func updateRateLimit(rateLimit RateLimitConfig) map[string]*rate.Limiter {
 	return nil
 }
 
+// methodRateLimitAllow returns true if the method is allowed by the rate limit
 func methodRateLimitAllow(method string) bool {
 	rateLimit.RLock()
 	rlm := rateLimit.rlm
