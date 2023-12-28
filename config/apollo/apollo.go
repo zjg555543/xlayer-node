@@ -13,7 +13,7 @@ import (
 type Client struct {
 	agollo.Client
 	config         *nodeconfig.Config
-	blockedAddress *[]common.Address
+	blockedAddress *[]common.Address //nolint:gomnd
 }
 
 // NewClient creates a new apollo client

@@ -15,6 +15,7 @@ func (c *Client) loadL2GasPricer(value interface{}) {
 	log.Infof("loaded l2gaspricer from apollo config: %+v", value.(string))
 }
 
+//nolint:gomnd
 func (c *Client) loadL2PoolBlockedAddress(value interface{}) {
 	//lines := strings.Split(value.(string), "\n")
 	//if err != nil {
@@ -23,8 +24,10 @@ func (c *Client) loadL2PoolBlockedAddress(value interface{}) {
 	//
 	//c.config.L2GasPriceSuggester = dstConf.L2GasPriceSuggester
 	//log.Infof("loaded l2gaspricer from apollo config: %+v", value.(string))
+	return
 }
 
+//nolint:gomnd
 func getAddressFromStr(addressStr string) {
 	//lines := strings.Split(str, "\n")
 	//for _, add := range addressStr {
@@ -35,6 +38,7 @@ func getAddressFromStr(addressStr string) {
 	//		fmt.Println(part)
 	//	}
 	//}
+	return
 }
 
 // fireL2GasPricer fires the l2gaspricer config change
