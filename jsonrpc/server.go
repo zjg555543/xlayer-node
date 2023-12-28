@@ -364,7 +364,7 @@ func (s *Server) handleBatchRequest(httpRequest *http.Request, w http.ResponseWr
 
 	for _, request := range requests {
 		if !methodRateLimitAllow(request.Method) {
-			handleInvalidRequest(w, err, http.StatusTooManyRequests)
+			handleInvalidRequest(w, errors.New("server is too busy"), http.StatusTooManyRequests)
 			return 0
 		}
 	}
