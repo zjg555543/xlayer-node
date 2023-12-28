@@ -1,9 +1,10 @@
 package jsonrpc
 
 import (
+	"sync"
+
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"golang.org/x/time/rate"
-	"sync"
 )
 
 type RateLimit struct {
