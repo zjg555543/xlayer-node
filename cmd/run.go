@@ -51,6 +51,9 @@ func start(cliCtx *cli.Context) error {
 		return err
 	}
 	setupLog(c.Log)
+	log.Infof("config: %+v", c)
+	log.Infof("apollo enable env vars: %v", os.Getenv("ZKEVM_NODE_APOLLO_ENABLE"))
+	log.Infof("apollo namespace env vars: %v", os.Getenv("ZKEVM_NODE_APOLLO_NAMESPACENAME"))
 
 	if c.Log.Environment == log.EnvironmentDevelopment {
 		zkevm.PrintVersion(os.Stdout)
