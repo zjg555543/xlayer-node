@@ -104,20 +104,6 @@ func (_m *DbManagerMock) CreateFirstBatch(ctx context.Context, l2coinbase common
 	return r0
 }
 
-// DeleteBatchByNumber provides a mock function with given fields: ctx, batchNumber, dbTx
-func (_m *DbManagerMock) DeleteBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
-	ret := _m.Called(ctx, batchNumber, dbTx)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, pgx.Tx) error); ok {
-		r0 = rf(ctx, batchNumber, dbTx)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // DeleteTransactionFromPool provides a mock function with given fields: ctx, txHash
 func (_m *DbManagerMock) DeleteTransactionFromPool(ctx context.Context, txHash common.Hash) error {
 	ret := _m.Called(ctx, txHash)
@@ -146,7 +132,7 @@ func (_m *DbManagerMock) FlushMerkleTree(ctx context.Context) error {
 	return r0
 }
 
-// GetBalanceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
+// GetBalanceByStateRoot provides a mock function with given fields: ctx, address, root
 func (_m *DbManagerMock) GetBalanceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -559,7 +545,7 @@ func (_m *DbManagerMock) GetLatestVirtualBatchTimestamp(ctx context.Context, dbT
 	return r0, r1
 }
 
-// GetStorageAt provides a mock function with given fields: ctx, l2coinbase, position, root
+// GetStorageAt provides a mock function with given fields: ctx, address, position, root
 func (_m *DbManagerMock) GetStorageAt(ctx context.Context, address common.Address, position *big.Int, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, position, root)
 

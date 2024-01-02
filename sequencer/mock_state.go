@@ -118,20 +118,6 @@ func (_m *StateMock) CountReorgs(ctx context.Context, dbTx pgx.Tx) (uint64, erro
 	return r0, r1
 }
 
-// DeleteBatchByNumber provides a mock function with given fields: ctx, batchNumber, dbTx
-func (_m *StateMock) DeleteBatchByNumber(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error {
-	ret := _m.Called(ctx, batchNumber, dbTx)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, uint64, pgx.Tx) error); ok {
-		r0 = rf(ctx, batchNumber, dbTx)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // ExecuteBatch provides a mock function with given fields: ctx, batch, updateMerkleTree, dbTx
 func (_m *StateMock) ExecuteBatch(ctx context.Context, batch state.Batch, updateMerkleTree bool, dbTx pgx.Tx) (*executor.ProcessBatchResponse, error) {
 	ret := _m.Called(ctx, batch, updateMerkleTree, dbTx)
@@ -172,7 +158,7 @@ func (_m *StateMock) FlushMerkleTree(ctx context.Context) error {
 	return r0
 }
 
-// GetBalanceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
+// GetBalanceByStateRoot provides a mock function with given fields: ctx, address, root
 func (_m *StateMock) GetBalanceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -734,7 +720,7 @@ func (_m *StateMock) GetLatestVirtualBatchTimestamp(ctx context.Context, dbTx pg
 	return r0, r1
 }
 
-// GetNonceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
+// GetNonceByStateRoot provides a mock function with given fields: ctx, address, root
 func (_m *StateMock) GetNonceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -760,7 +746,7 @@ func (_m *StateMock) GetNonceByStateRoot(ctx context.Context, address common.Add
 	return r0, r1
 }
 
-// GetStorageAt provides a mock function with given fields: ctx, l2coinbase, position, root
+// GetStorageAt provides a mock function with given fields: ctx, address, position, root
 func (_m *StateMock) GetStorageAt(ctx context.Context, address common.Address, position *big.Int, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, position, root)
 

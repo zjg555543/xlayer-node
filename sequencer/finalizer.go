@@ -1,7 +1,6 @@
 package sequencer
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -611,6 +610,7 @@ func (f *finalizer) newWIPBatch(ctx context.Context) (*WipBatch, error) {
 		f.processRequest.OldStateRoot = stateRoot
 		f.processRequest.GlobalExitRoot = batch.globalExitRoot
 		f.processRequest.Transactions = make([]byte, 0, 1)
+		f.processRequest.Coinbase = f.l2coinbase
 	}
 	metrics.GetLogStatistics().CumulativeTiming(metrics.FinalizeBatchOpenBatch, time.Since(tsOpenBatch))
 
@@ -1084,6 +1084,7 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 		}
 	}
 
+	coinbase := f.l2coinbase
 	batchNum := lastBatch.BatchNumber
 	lastBatchNum = &batchNum
 
@@ -1104,27 +1105,11 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 			return err
 		}
 	} else {
-		if bytes.Equal(lastBatch.Coinbase.Bytes(), f.l2coinbase.Bytes()) {
-			f.batch, err = f.dbManager.GetWIPBatch(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to get work-in-progress batch, err: %w", err)
-			}
-		} else {
-			oldGER := lastBatch.GlobalExitRoot
-			if err := f.dbManager.DeleteBatchByNumber(ctx, *lastBatchNum, nil); err != nil {
-				return fmt.Errorf("failed to delete last no-closed batch, err: %w", err)
-			}
-			lastBatch, err = f.dbManager.GetLastBatch(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to get last batch again, err: %w", err)
-			}
-			oldStateRoot := lastBatch.StateRoot
-
-			f.batch, err = f.openWIPBatch(ctx, *lastBatchNum, oldGER, oldStateRoot)
-			if err != nil {
-				return err
-			}
+		f.batch, err = f.dbManager.GetWIPBatch(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to get work-in-progress batch, err: %w", err)
 		}
+		coinbase = f.batch.coinbase
 	}
 	log.Infof("Initial Batch: %+v", f.batch)
 	log.Infof("Initial Batch.StateRoot: %s", f.batch.stateRoot.String())
@@ -1132,12 +1117,13 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 	log.Infof("Initial Batch.Coinbase: %s", f.batch.coinbase.String())
 	log.Infof("Initial Batch.InitialStateRoot: %s", f.batch.initialStateRoot.String())
 	log.Infof("Initial Batch.localExitRoot: %s", f.batch.localExitRoot.String())
+	log.Infof("Set coinbase for the process request: %s", coinbase)
 
 	f.processRequest = state.ProcessRequest{
 		BatchNumber:    *lastBatchNum,
 		OldStateRoot:   f.batch.stateRoot,
 		GlobalExitRoot: f.batch.globalExitRoot,
-		Coinbase:       f.l2coinbase,
+		Coinbase:       coinbase,
 		Timestamp:      f.batch.timestamp,
 		Transactions:   make([]byte, 0, 1),
 		Caller:         stateMetrics.SequencerCallerLabel,

@@ -624,7 +624,6 @@ func TestFinalizer_syncWithState(t *testing.T) {
 		expectedErr             error
 		getLastBatchByNumberErr error
 		getLatestGERErr         error
-		isDifferentCoinbase     bool
 	}{
 		{
 			name:          "Success Closed Batch",
@@ -699,7 +698,6 @@ func TestFinalizer_syncWithState(t *testing.T) {
 				Timestamp:      testNow(),
 				GlobalExitRoot: oldHash,
 			},
-			isDifferentCoinbase: true,
 		},
 		{
 			name:            "Error Failed to get last batch",
@@ -800,15 +798,7 @@ func TestFinalizer_syncWithState(t *testing.T) {
 						dbTxMock.On("Rollback", ctx).Return(nil).Once()
 					}
 				} else {
-					if tc.isDifferentCoinbase {
-						dbManagerMock.Mock.On("DeleteBatchByNumber", ctx, *tc.lastBatchNum, nil).Return(nil).Once()
-						dbManagerMock.Mock.On("GetLastBatch", ctx).Return(tc.batches[0], tc.getLastBatchErr).Once()
-						dbManagerMock.On("BeginStateTransaction", ctx).Return(dbTxMock, nil).Once()
-						dbManagerMock.On("OpenBatch", ctx, tc.expectedProcessingCtx, dbTxMock).Return(tc.openBatchErr).Once()
-						dbTxMock.On("Commit", ctx).Return(nil).Once()
-					} else {
-						dbManagerMock.Mock.On("GetWIPBatch", ctx).Return(tc.expectedBatch, tc.getWIPBatchErr).Once()
-					}
+					dbManagerMock.Mock.On("GetWIPBatch", ctx).Return(tc.expectedBatch, tc.getWIPBatchErr).Once()
 				}
 			}
 
