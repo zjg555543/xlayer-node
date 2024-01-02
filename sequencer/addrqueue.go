@@ -10,7 +10,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-// addrQueue is a struct that stores the ready and notReady txs for a specific from l2coinbase
+// addrQueue is a struct that stores the ready and notReady txs for a specific from address
 type addrQueue struct {
 	from              common.Address
 	fromStr           string

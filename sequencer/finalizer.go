@@ -124,7 +124,6 @@ func newFinalizer(
 	streamServer *datastreamer.StreamServer,
 ) *finalizer {
 	f := finalizer{
-
 		cfg:                cfg,
 		closingSignalCh:    closingSignalCh,
 		isSynced:           isSynced,

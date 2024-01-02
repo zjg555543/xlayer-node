@@ -113,6 +113,8 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	)
 	metrics.SequencesSentToL1(float64(sequenceCount))
 
+	log.Infof("Try to send seq num[%v,%v], l2coinbase:%v", sequences[0].BatchNumber, sequences[len(sequences)-1].BatchNumber, l2coinbase.String())
+
 	// add sequence to be monitored
 	signaturesAndAddrs, err := s.getSignaturesAndAddrsFromDataCommittee(ctx, sequences, l2coinbase)
 	if err != nil {
@@ -198,9 +200,11 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		//  All coinbase of sequences must be same
 		if len(sequences) == 0 {
 			l2coinbase.SetBytes(batch.Coinbase.Bytes())
+			log.Infof("Set the first sequence coinbase: %v", l2coinbase.String())
 		}
 		if !bytes.Equal(l2coinbase.Bytes(), batch.Coinbase.Bytes()) {
-			break
+			log.Infof("Return sequences size:%v. Different sequence coinbase, old:%v, new:%v", len(sequences), l2coinbase.String(), batch.Coinbase.String())
+			return sequences, l2coinbase, nil
 		}
 		sequences = append(sequences, seq)
 		if s.isValidium() {
