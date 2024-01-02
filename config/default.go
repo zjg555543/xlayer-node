@@ -11,14 +11,27 @@ Environment = "development" # "production" or "development"
 Level = "info"
 Outputs = ["stderr"]
 
-[StateDB]
-User = "state_user"
-Password = "state_password"
-Name = "state_db"
-Host = "xgon-state-db"
-Port = "5432"
-EnableLog = false
-MaxConns = 200
+[State]
+	[State.DB]
+	User = "state_user"
+	Password = "state_password"
+	Name = "state_db"
+	Host = "x1-state-db"
+	Port = "5432"
+	EnableLog = false	
+	MaxConns = 200
+	[State.Batch]
+		[State.Batch.Constraints]
+		MaxTxsPerBatch = 300
+		MaxBatchBytesSize = 120000
+		MaxCumulativeGasUsed = 30000000
+		MaxKeccakHashes = 2145
+		MaxPoseidonHashes = 252357
+		MaxPoseidonPaddings = 135191
+		MaxMemAligns = 236585
+		MaxArithmetics = 236585
+		MaxBinaries = 473170
+		MaxSteps = 7570538
 
 [Pool]
 FreeClaimGasLimit = 150000
@@ -32,11 +45,20 @@ PollMinAllowedGasPriceInterval = "15s"
 AccountQueue = 64
 GlobalQueue = 1024
 FreeGasAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-	[Pool.DB]
+    [Pool.EffectiveGasPrice]
+	Enabled = false
+	L1GasPriceFactor = 0.25
+	ByteGasCost = 16
+	ZeroByteGasCost = 4
+	NetProfit = 1
+	BreakEvenFactor = 1.1	
+	FinalDeviationPct = 10
+	L2GasPriceSuggesterFactor = 0.5
+    [Pool.DB]
 	User = "pool_user"
 	Password = "pool_password"
 	Name = "pool_db"
-	Host = "xgon-pool-db"
+	Host = "x1-pool-db"
 	Port = "5432"
 	EnableLog = false
 	MaxConns = 200
@@ -63,31 +85,43 @@ WriteTimeout = "60s"
 MaxRequestsPerIPAndSecond = 500
 SequencerNodeURI = ""
 EnableL2SuggestedGasPricePolling = true
-TraceBatchUseHTTPS = true
+BatchRequestsEnabled = false
+BatchRequestsLimit = 20
+MaxLogsCount = 10000
+MaxLogsBlockRange = 10000
+MaxNativeBlockHashBlockRange = 60000
+EnableHttpLog = true
+GasLimitFactor = 1
+DisableAPIs = []
 	[RPC.WebSockets]
 		Enabled = true
 		Host = "0.0.0.0"
 		Port = 8546
+		ReadLimit = 104857600
 
 [Synchronizer]
 SyncInterval = "1s"
 SyncChunkSize = 100
 TrustedSequencerURL = "" # If it is empty or not specified, then the value is read from the smc
+L1SynchronizationMode = "sequential" # "sequential" or "parallel"
+	[Synchronizer.L1ParallelSynchronization]
+		MaxClients = 10
+		MaxPendingNoProcessedBlocks = 25
+		RequestLastBlockPeriod = "5s"
+		RequestLastBlockTimeout = "5s"
+		RequestLastBlockMaxRetries = 3
+		StatisticsPeriod = "5m"
+		TimeoutMainLoop = "5m"
+		RollupInfoRetriesSpacing= "5s"
+		FallbackToSequentialModeOnSynchronized = false
+		[Synchronizer.L1ParallelSynchronization.PerformanceWarning]
+			AceptableInacctivityTime = "5s"
+			ApplyAfterNumRollupReceived = 10
 
 [Sequencer]
 WaitPeriodPoolIsEmpty = "1s"
 BlocksAmountForTxsToBeDeleted = 100
 FrequencyToCheckTxsForDelete = "12h"
-MaxTxsPerBatch = 300
-MaxBatchBytesSize = 120000
-MaxCumulativeGasUsed = 30000000
-MaxKeccakHashes = 2145
-MaxPoseidonHashes = 252357
-MaxPoseidonPaddings = 135191
-MaxMemAligns = 236585
-MaxArithmetics = 236585
-MaxBinaries = 473170
-MaxSteps = 7570538
 TxLifetimeCheckTimeout = "10m"
 MaxTxLifetime = "3h"
 L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
@@ -104,14 +138,13 @@ L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 		TimestampResolution = "10s"
 		StopSequencerOnBatchNum = 0
 		SequentialReprocessFullBatch = false
+		FullBatchSleepDuration = "0s"
 	[Sequencer.DBManager]
 		PoolRetrievalInterval = "500ms"
 		L2ReorgRetrievalInterval = "5s"
-	[Sequencer.EffectiveGasPrice]
-		MaxBreakEvenGasPriceDeviationPercentage = 10
-		L1GasPriceFactor = 0.25
-		ByteGasCost = 16
-		MarginFactor = 1
+	[Sequencer.StreamServer]
+		Port = 0
+		Filename = ""
 		Enabled = false
 
 [SequenceSender]
@@ -121,6 +154,7 @@ MaxTxSizeForL1 = 131072
 MaxBatchesForL1 = 10
 PrivateKey = {Path = "/pk/sequencer.keystore", Password = "testonly"}
 UseValidium = true
+GasOffset = 80000
 
 [Aggregator]
 Host = "0.0.0.0"
@@ -132,6 +166,7 @@ TxProfitabilityMinReward = "1.1"
 ProofStatePollingInterval = "5s"
 CleanupLockedProofsInterval = "2m"
 GeneratingProofCleanupThreshold = "10m"
+GasOffset = 0
 
 [L2GasPriceSuggester]
 Type = "follower"
@@ -143,10 +178,10 @@ CleanHistoryPeriod = "1h"
 CleanHistoryTimeRetention = "5m"
 
 [MTClient]
-URI = "xgon-prover:50061"
+URI = "x1-prover:50061"
 
 [Executor]
-URI = "xgon-prover:50071"
+URI = "x1-prover:50071"
 MaxResourceExhaustedAttempts = 3
 WaitOnResourceExhaustion = "1s"
 MaxGRPCMessageSize = 100000000
@@ -160,7 +195,7 @@ Enabled = false
 User = "prover_user"
 Password = "prover_pass"
 Name = "prover_db"
-Host = "xgon-state-db"
+Host = "x1-state-db"
 Port = "5432"
 EnableLog = false
 MaxConns = 200

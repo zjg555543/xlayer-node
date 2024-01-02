@@ -20,15 +20,17 @@ const (
 	// MaxEffectivePercentage is the maximum value that can be used as effective percentage
 	MaxEffectivePercentage = uint8(255)
 	// Decoding constants
-	headerByteLength               uint64 = 1
-	sLength                        uint64 = 32
-	rLength                        uint64 = 32
-	vLength                        uint64 = 1
-	c0                             uint64 = 192 // 192 is c0. This value is defined by the rlp protocol
-	ff                             uint64 = 255 // max value of rlp header
-	shortRlp                       uint64 = 55  // length of the short rlp codification
-	f7                             uint64 = 247 // 192 + 55 = c0 + shortRlp
-	efficiencyPercentageByteLength uint64 = 1
+	headerByteLength uint64 = 1
+	sLength          uint64 = 32
+	rLength          uint64 = 32
+	vLength          uint64 = 1
+	c0               uint64 = 192 // 192 is c0. This value is defined by the rlp protocol
+	ff               uint64 = 255 // max value of rlp header
+	shortRlp         uint64 = 55  // length of the short rlp codification
+	f7               uint64 = 247 // 192 + 55 = c0 + shortRlp
+
+	// EfficiencyPercentageByteLength is the length of the effective percentage in bytes
+	EfficiencyPercentageByteLength uint64 = 1
 )
 
 // EncodeTransactions RLP encodes the given transactions
@@ -59,7 +61,6 @@ func prepareRPLTxData(tx types.Transaction) ([]byte, error) {
 	sign := 1 - (v.Uint64() & 1)
 
 	nonce, gasPrice, gas, to, value, data, chainID := tx.Nonce(), tx.GasPrice(), tx.Gas(), tx.To(), tx.Value(), tx.Data(), tx.ChainId()
-	log.Debug(nonce, " ", gasPrice, " ", gas, " ", to, " ", value, " ", len(data), " ", chainID, " ")
 
 	rlpFieldsToEncode := []interface{}{
 		nonce,
@@ -70,7 +71,7 @@ func prepareRPLTxData(tx types.Transaction) ([]byte, error) {
 		data,
 	}
 
-	if tx.ChainId().Uint64() > 0 {
+	if !IsPreEIP155Tx(tx) {
 		rlpFieldsToEncode = append(rlpFieldsToEncode, chainID)
 		rlpFieldsToEncode = append(rlpFieldsToEncode, uint(0))
 		rlpFieldsToEncode = append(rlpFieldsToEncode, uint(0))
@@ -207,7 +208,7 @@ func DecodeTxs(txsData []byte, forkID uint64) ([]types.Transaction, []byte, []ui
 		endPos := pos + length + rLength + sLength + vLength + headerByteLength
 
 		if forkID >= forkID5 {
-			endPos += efficiencyPercentageByteLength
+			endPos += EfficiencyPercentageByteLength
 		}
 
 		if endPos > txDataLength {
@@ -336,6 +337,13 @@ func toPostgresInterval(duration string) (string, error) {
 	}
 
 	return fmt.Sprintf("%s %s", duration[:len(duration)-1], pgUnit), nil
+}
+
+// IsPreEIP155Tx checks if the tx is a tx that has a chainID as zero and
+// V field is either 27 or 28
+func IsPreEIP155Tx(tx types.Transaction) bool {
+	v, _, _ := tx.RawSignatureValues()
+	return tx.ChainId().Uint64() == 0 && (v.Uint64() == 27 || v.Uint64() == 28)
 }
 
 // CheckLogOrder checks the order of the logs. The order should be incremental

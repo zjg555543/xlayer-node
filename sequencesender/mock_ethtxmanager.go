@@ -20,8 +20,10 @@ type ethTxManagerMock struct {
 	mock.Mock
 }
 
+
+
 // Add provides a mock function with given fields: ctx, owner, id, from, to, value, data, dbTx
-func (_m *ethTxManagerMock) Add(ctx context.Context, owner string, id string, from common.Address, to *common.Address, value *big.Int, data []byte, dbTx pgx.Tx) error {
+func (_m *ethTxManagerMock) Add(ctx context.Context, owner, id string, from common.Address, to *common.Address, value *big.Int, data []byte, gasOffset uint64, dbTx pgx.Tx) error {
 	ret := _m.Called(ctx, owner, id, from, to, value, data, dbTx)
 
 	var r0 error

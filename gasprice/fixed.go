@@ -12,8 +12,8 @@ import (
 
 const (
 	// OKBWei OKB wei
-	OKBWei    = 1e18
-	minOKBWei = 1e-18
+	OKBWei       = 1e18
+	minCoinPrice = 1e-18
 )
 
 // FixedGasPrice struct
@@ -23,16 +23,20 @@ type FixedGasPrice struct {
 	ctx     context.Context
 	eth     ethermanInterface
 	ratePrc *KafkaProcessor
+
+	apolloConfig Apollo
 }
 
 // newFixedGasPriceSuggester inits l2 fixed price suggester.
-func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface) *FixedGasPrice {
+func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FixedGasPrice {
 	gps := &FixedGasPrice{
 		cfg:     cfg,
 		pool:    pool,
 		ctx:     ctx,
 		eth:     ethMan,
 		ratePrc: newKafkaProcessor(cfg, ctx),
+
+		apolloConfig: fetch,
 	}
 	gps.UpdateGasPriceAvg()
 	return gps
@@ -40,6 +44,9 @@ func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterfa
 
 // UpdateGasPriceAvg updates the gas price.
 func (f *FixedGasPrice) UpdateGasPriceAvg() {
+	if f.apolloConfig != nil {
+		f.apolloConfig.FetchL2GasPricerConfig(&f.cfg)
+	}
 	ctx := context.Background()
 	// Get L1 gasprice
 	l1GasPrice := f.eth.GetL1GasPrice(f.ctx)
@@ -49,7 +56,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	}
 
 	l2CoinPrice := f.ratePrc.GetL2CoinPrice()
-	if l2CoinPrice < minOKBWei {
+	if l2CoinPrice < minCoinPrice {
 		log.Warn("the L2 native coin price too small...")
 		return
 	}
@@ -84,6 +91,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	}
 	log.Debugf("Storing truncated L2 gas price: %v, L2 native coin price: %v", truncateValue, l2CoinPrice)
 	if truncateValue != nil {
+		log.Infof("Set gas prices, L1: %v, L2: %v", l1GasPrice.Uint64(), truncateValue.Uint64())
 		err := f.pool.SetGasPrices(ctx, truncateValue.Uint64(), l1GasPrice.Uint64())
 		if err != nil {
 			log.Errorf("failed to update gas price in poolDB, err: %v", err)

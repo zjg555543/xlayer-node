@@ -163,6 +163,48 @@ func createScDeployRevertedSignedTx(t *testing.T, ctx context.Context, auth *bin
 	return auth.Signer(auth.From, tx)
 }
 
+func createScDeployOutOfGasSignedTx(t *testing.T, ctx context.Context, auth *bind.TransactOpts, client *ethclient.Client, customData map[string]interface{}) (*ethTypes.Transaction, error) {
+	nonce, err := client.PendingNonceAt(ctx, auth.From)
+	require.NoError(t, err)
+
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	require.NoError(t, err)
+
+	scByteCode, err := testutils.ReadBytecode("ConstructorMap/ConstructorMap.bin")
+	require.NoError(t, err)
+	data := common.Hex2Bytes(scByteCode)
+
+	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+		Nonce:    nonce,
+		GasPrice: gasPrice,
+		Gas:      uint64(2000000),
+		Data:     data,
+	})
+
+	return auth.Signer(auth.From, tx)
+}
+
+// func createScCreationCodeStorageOutOfGasSignedTx(t *testing.T, ctx context.Context, auth *bind.TransactOpts, client *ethclient.Client, customData map[string]interface{}) (*ethTypes.Transaction, error) {
+// 	nonce, err := client.PendingNonceAt(ctx, auth.From)
+// 	require.NoError(t, err)
+
+// 	gasPrice, err := client.SuggestGasPrice(ctx)
+// 	require.NoError(t, err)
+
+// 	scByteCode, err := testutils.ReadBytecode("FFFFFFFF/FFFFFFFF.bin")
+// 	require.NoError(t, err)
+// 	data := common.Hex2Bytes(scByteCode)
+
+// 	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+// 		Nonce:    nonce,
+// 		GasPrice: gasPrice,
+// 		Gas:      uint64(150000),
+// 		Data:     data,
+// 	})
+
+// 	return auth.Signer(auth.From, tx)
+// }
+
 func prepareScCallReverted(t *testing.T, ctx context.Context, auth *bind.TransactOpts, client *ethclient.Client) (map[string]interface{}, error) {
 	_, tx, sc, err := Revert2.DeployRevert2(auth, client)
 	require.NoError(t, err)
@@ -555,7 +597,7 @@ func saveTraceResultToFile(t *testing.T, name, network string, signedTx *ethType
 	if skip {
 		return
 	}
-	const path = "/Users/thiago/github.com/okx/xgon-node/dist/%v.json"
+	const path = "/Users/thiago/github.com/okx/x1-node/dist/%v.json"
 	sanitizedFileName := strings.ReplaceAll(name+"_"+network, " ", "_")
 	filePath := fmt.Sprintf(path, sanitizedFileName)
 	b, _ := signedTx.MarshalBinary()

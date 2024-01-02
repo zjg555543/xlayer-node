@@ -1,5 +1,5 @@
 # CONTAINER FOR BUILDING BINARY
-FROM golang:1.19 AS build
+FROM golang:1.21 AS build
 
 # INSTALL DEPENDENCIES
 RUN go install github.com/gobuffalo/packr/v2/packr2@v2.8.3
@@ -13,8 +13,8 @@ RUN cd /src && make build
 
 # CONTAINER FOR RUNNING BINARY
 FROM alpine:3.18.0
-COPY --from=build /src/dist/xgon-node /app/xgon-node
+COPY --from=build /src/dist/x1-node /app/x1-node
 COPY --from=build /src/config/environments/testnet/node.config.toml /app/example.config.toml
 RUN apk update && apk add postgresql15-client
 EXPOSE 8123
-CMD ["/bin/sh", "-c", "/app/xgon-node run"]
+CMD ["/bin/sh", "-c", "/app/x1-node run"]
