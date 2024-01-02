@@ -2382,7 +2382,6 @@ Must be one of:
 | - [MaxTxSizeForL1](#SequenceSender_MaxTxSizeForL1 )                                                     | No      | integer          | No         | -          | // MaxTxSizeForL1 is the maximum size a single transaction can have. This field has<br />// non-trivial consequences: larger transactions than 128KB are significantly harder and<br />// more expensive to propagate; larger transactions also take more resources<br />// to validate whether they fit into the pool or not.                                                                                                |
 | - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                                                                                                                            |
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                                                                                                                               |
-| - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which address is going to receive the fees                                                                                                                                                                                                                                                                                                                                                                 |
 | - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                                                                                                                                   |
@@ -2478,12 +2477,7 @@ MaxBatchesForL1=10
 **Description:** SenderAddress defines which private key the eth tx manager needs to use
 to sign the L1 txs
 
-### <a name="SequenceSender_L2Coinbase"></a>11.6. `SequenceSender.L2Coinbase`
-
-**Type:** : `array of integer`
-**Description:** L2Coinbase defines which address is going to receive the fees
-
-### <a name="SequenceSender_PrivateKey"></a>11.7. `[SequenceSender.PrivateKey]`
+### <a name="SequenceSender_PrivateKey"></a>11.6. `[SequenceSender.PrivateKey]`
 
 **Type:** : `object`
 **Description:** PrivateKey defines all the key store files that are going
@@ -2494,7 +2488,7 @@ to be read in order to provide the private keys to sign the L1 txs
 | - [Path](#SequenceSender_PrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
 | - [Password](#SequenceSender_PrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
 
-#### <a name="SequenceSender_PrivateKey_Path"></a>11.7.1. `SequenceSender.PrivateKey.Path`
+#### <a name="SequenceSender_PrivateKey_Path"></a>11.6.1. `SequenceSender.PrivateKey.Path`
 
 **Type:** : `string`
 
@@ -2508,7 +2502,7 @@ to be read in order to provide the private keys to sign the L1 txs
 Path="/pk/sequencer.keystore"
 ```
 
-#### <a name="SequenceSender_PrivateKey_Password"></a>11.7.2. `SequenceSender.PrivateKey.Password`
+#### <a name="SequenceSender_PrivateKey_Password"></a>11.6.2. `SequenceSender.PrivateKey.Password`
 
 **Type:** : `string`
 
@@ -2522,7 +2516,7 @@ Path="/pk/sequencer.keystore"
 Password="testonly"
 ```
 
-### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.8. `SequenceSender.ForkUpgradeBatchNumber`
+### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.7. `SequenceSender.ForkUpgradeBatchNumber`
 
 **Type:** : `integer`
 
@@ -2536,7 +2530,7 @@ Password="testonly"
 ForkUpgradeBatchNumber=0
 ```
 
-### <a name="SequenceSender_UseValidium"></a>11.9. `SequenceSender.UseValidium`
+### <a name="SequenceSender_UseValidium"></a>11.8. `SequenceSender.UseValidium`
 
 **Type:** : `boolean`
 
@@ -2550,7 +2544,7 @@ ForkUpgradeBatchNumber=0
 UseValidium=true
 ```
 
-### <a name="SequenceSender_GasOffset"></a>11.10. `SequenceSender.GasOffset`
+### <a name="SequenceSender_GasOffset"></a>11.9. `SequenceSender.GasOffset`
 
 **Type:** : `integer`
 

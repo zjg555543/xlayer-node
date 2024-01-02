@@ -959,15 +959,6 @@
 					"minItems": 20,
 					"description": "SenderAddress defines which private key the eth tx manager needs to use\nto sign the L1 txs"
 				},
-				"L2Coinbase": {
-					"items": {
-						"type": "integer"
-					},
-					"type": "array",
-					"maxItems": 20,
-					"minItems": 20,
-					"description": "L2Coinbase defines which address is going to receive the fees"
-				},
 				"PrivateKey": {
 					"properties": {
 						"Path": {
