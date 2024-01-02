@@ -1126,7 +1126,6 @@ func (f *finalizer) syncWithState(ctx context.Context, lastBatchNum *uint64) err
 			}
 		}
 	}
-
 	log.Infof("Initial Batch: %+v", f.batch)
 	log.Infof("Initial Batch.StateRoot: %s", f.batch.stateRoot.String())
 	log.Infof("Initial Batch.GER: %s", f.batch.globalExitRoot.String())

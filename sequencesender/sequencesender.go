@@ -200,10 +200,10 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		//  All coinbase of sequences must be same
 		if len(sequences) == 0 {
 			l2coinbase.SetBytes(batch.Coinbase.Bytes())
-			log.Infof("Set the first sequence coinbase: %v", l2coinbase.String())
+			log.Infof("Set coinbase: %v", l2coinbase.String())
 		}
 		if !bytes.Equal(l2coinbase.Bytes(), batch.Coinbase.Bytes()) {
-			log.Infof("Return sequences size:%v. Different sequence coinbase, old:%v, new:%v", len(sequences), l2coinbase.String(), batch.Coinbase.String())
+			log.Infof("Got different coinbase and return, old:%v, new:%v, sequences size:%v", l2coinbase.String(), batch.Coinbase.String(), len(sequences))
 			return sequences, l2coinbase, nil
 		}
 		sequences = append(sequences, seq)
