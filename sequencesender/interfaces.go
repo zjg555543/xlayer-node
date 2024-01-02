@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/0xPolygonHermez/zkevm-node/etherman"
+	theEtherman "github.com/0xPolygonHermez/zkevm-node/etherman"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -16,14 +16,14 @@ import (
 
 // Consumer interfaces required by the package.
 
-// ethermanInterface contains the methods required to interact with ethereum.
-type ethermanInterface interface {
+// etherman contains the methods required to interact with ethereum.
+type etherman interface {
 	BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error)
 	EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (*types.Transaction, error)
 	GetLastBatchTimestamp() (uint64, error)
 	GetLatestBlockTimestamp(ctx context.Context) (uint64, error)
 	GetLatestBatchNumber() (uint64, error)
-	GetCurrentDataCommittee() (*etherman.DataCommittee, error)
+	GetCurrentDataCommittee() (*theEtherman.DataCommittee, error)
 }
 
 // stateInterface gathers the methods required to interact with the state.

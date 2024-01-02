@@ -8,7 +8,7 @@ import (
 
 	"github.com/0xPolygon/cdk-data-availability/config"
 	cfgTypes "github.com/0xPolygonHermez/zkevm-node/config/types"
-	"github.com/0xPolygonHermez/zkevm-node/etherman"
+	theEtherman "github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/event/nileventstorage"
@@ -58,8 +58,8 @@ func TestSequenceSender_getSequencesToSend(t *testing.T) {
 	state_interface.On("GetTimeForLatestBatchVirtualization", ctx, nil).Return(func(ctx context.Context, dbTx pgx.Tx) (time.Time, error) {
 		return time.Now().Add(-cfg.LastBatchVirtualizationTimeMaxWaitPeriod.Duration), nil
 	})
-	etherman_interface.On("GetCurrentDataCommittee").Return(&etherman.DataCommittee{
-		Members: []etherman.DataCommitteeMember{{
+	etherman_interface.On("GetCurrentDataCommittee").Return(&theEtherman.DataCommittee{
+		Members: []theEtherman.DataCommitteeMember{{
 			URL:  "fake url",
 			Addr: common.HexToAddress("0xff"),
 		}},

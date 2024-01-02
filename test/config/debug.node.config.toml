@@ -88,6 +88,7 @@ BlocksAmountForTxsToBeDeleted = 100
 FrequencyToCheckTxsForDelete = "12h"
 TxLifetimeCheckTimeout = "10m"
 MaxTxLifetime = "3h"
+L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 	[Sequencer.Finalizer]
 		GERDeadlineTimeout = "1s"
 		ForcedBatchDeadlineTimeout = "1s"
@@ -112,7 +113,6 @@ MaxTxLifetime = "3h"
 WaitPeriodSendSequence = "15s"
 LastBatchVirtualizationTimeMaxWaitPeriod = "10s"
 MaxBatchesForL1 = 10
-L2Coinbase = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 PrivateKey = {Path = "./test/sequencer.keystore", Password = "testonly"}
 
 [Aggregator]

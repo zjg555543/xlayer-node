@@ -38,12 +38,12 @@ type SequenceSender struct {
 	privKey      *ecdsa.PrivateKey
 	state        stateInterface
 	ethTxManager ethTxManager
-	etherman     ethermanInterface
+	etherman     etherman
 	eventLog     *event.EventLog
 }
 
 // New inits sequence sender
-func New(cfg Config, state stateInterface, etherman ethermanInterface, manager ethTxManager, eventLog *event.EventLog, privKey *ecdsa.PrivateKey) (*SequenceSender, error) {
+func New(cfg Config, state stateInterface, etherman etherman, manager ethTxManager, eventLog *event.EventLog, privKey *ecdsa.PrivateKey) (*SequenceSender, error) {
 	return &SequenceSender{
 		cfg:          cfg,
 		state:        state,
