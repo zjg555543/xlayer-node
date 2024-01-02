@@ -26,7 +26,7 @@ type Sequencer struct {
 	eventLog *event.EventLog
 	etherman etherman
 
-	address common.Address
+	l2coinbase common.Address
 }
 
 // L2ReorgEvent is the event that is triggered when a reorg happens in the L2
@@ -46,14 +46,14 @@ func New(cfg Config, batchCfg state.BatchConfig, poolCfg pool.Config, txPool txP
 	addr := cfg.L2Coinbase
 
 	sequencer := &Sequencer{
-		cfg:      cfg,
-		batchCfg: batchCfg,
-		poolCfg:  poolCfg,
-		pool:     txPool,
-		state:    state,
-		etherman: etherman,
-		address:  addr,
-		eventLog: eventLog,
+		cfg:        cfg,
+		batchCfg:   batchCfg,
+		poolCfg:    poolCfg,
+		pool:       txPool,
+		state:      state,
+		etherman:   etherman,
+		l2coinbase: addr,
+		eventLog:   eventLog,
 	}
 
 	return sequencer, nil
@@ -104,7 +104,7 @@ func (s *Sequencer) Start(ctx context.Context) {
 		streamServer = dbManager.streamServer
 	}
 
-	finalizer := newFinalizer(s.cfg.Finalizer, s.poolCfg, worker, dbManager, s.state, s.address, s.isSynced, closingSignalCh, s.batchCfg.Constraints, s.eventLog, streamServer)
+	finalizer := newFinalizer(s.cfg.Finalizer, s.poolCfg, worker, dbManager, s.state, s.l2coinbase, s.isSynced, closingSignalCh, s.batchCfg.Constraints, s.eventLog, streamServer)
 	currBatch, processingReq := s.bootstrap(ctx, dbManager, finalizer)
 	go finalizer.Start(ctx, currBatch, processingReq)
 
@@ -163,7 +163,7 @@ func (s *Sequencer) bootstrap(ctx context.Context, dbManager *dbManager, finaliz
 		///////////////////
 		// GENESIS Batch //
 		///////////////////
-		processingCtx := dbManager.CreateFirstBatch(ctx, s.address)
+		processingCtx := dbManager.CreateFirstBatch(ctx, s.l2coinbase)
 		timestamp := processingCtx.Timestamp
 		_, oldStateRoot, err := finalizer.getLastBatchNumAndOldStateRoot(ctx)
 		if err != nil {

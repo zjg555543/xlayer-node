@@ -1934,7 +1934,7 @@ func TestFinalizer_updateWorkerAfterSuccessfulProcessing(t *testing.T) {
 		expectedUpdateCount   int
 	}{
 		{
-			name: "Successful update with one read-write address",
+			name: "Successful update with one read-write l2coinbase",
 			txTracker: &TxTracker{
 				Hash:  oldHash,
 				From:  senderAddr,

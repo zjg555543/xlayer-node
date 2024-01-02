@@ -739,7 +739,7 @@ func (d *dbManager) GetForkIDByBatchNumber(batchNumber uint64) uint64 {
 	return d.state.GetForkIDByBatchNumber(batchNumber)
 }
 
-// GetStorageAt returns the storage at a given address and position
+// GetStorageAt returns the storage at a given l2coinbase and position
 func (d *dbManager) GetStorageAt(ctx context.Context, address common.Address, position *big.Int, root common.Hash) (*big.Int, error) {
 	return d.state.GetStorageAt(ctx, address, position, root)
 }

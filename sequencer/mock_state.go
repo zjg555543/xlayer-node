@@ -172,7 +172,7 @@ func (_m *StateMock) FlushMerkleTree(ctx context.Context) error {
 	return r0
 }
 
-// GetBalanceByStateRoot provides a mock function with given fields: ctx, address, root
+// GetBalanceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
 func (_m *StateMock) GetBalanceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -734,7 +734,7 @@ func (_m *StateMock) GetLatestVirtualBatchTimestamp(ctx context.Context, dbTx pg
 	return r0, r1
 }
 
-// GetNonceByStateRoot provides a mock function with given fields: ctx, address, root
+// GetNonceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
 func (_m *StateMock) GetNonceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -760,7 +760,7 @@ func (_m *StateMock) GetNonceByStateRoot(ctx context.Context, address common.Add
 	return r0, r1
 }
 
-// GetStorageAt provides a mock function with given fields: ctx, address, position, root
+// GetStorageAt provides a mock function with given fields: ctx, l2coinbase, position, root
 func (_m *StateMock) GetStorageAt(ctx context.Context, address common.Address, position *big.Int, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, position, root)
 

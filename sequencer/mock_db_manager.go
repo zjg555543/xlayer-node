@@ -90,7 +90,7 @@ func (_m *DbManagerMock) CountReorgs(ctx context.Context, dbTx pgx.Tx) (uint64, 
 	return r0, r1
 }
 
-// CreateFirstBatch provides a mock function with given fields: ctx, address
+// CreateFirstBatch provides a mock function with given fields: ctx, l2coinbase
 func (_m *DbManagerMock) CreateFirstBatch(ctx context.Context, l2coinbase common.Address) state.ProcessingContext {
 	ret := _m.Called(ctx, l2coinbase)
 
@@ -146,7 +146,7 @@ func (_m *DbManagerMock) FlushMerkleTree(ctx context.Context) error {
 	return r0
 }
 
-// GetBalanceByStateRoot provides a mock function with given fields: ctx, address, root
+// GetBalanceByStateRoot provides a mock function with given fields: ctx, l2coinbase, root
 func (_m *DbManagerMock) GetBalanceByStateRoot(ctx context.Context, address common.Address, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, root)
 
@@ -559,7 +559,7 @@ func (_m *DbManagerMock) GetLatestVirtualBatchTimestamp(ctx context.Context, dbT
 	return r0, r1
 }
 
-// GetStorageAt provides a mock function with given fields: ctx, address, position, root
+// GetStorageAt provides a mock function with given fields: ctx, l2coinbase, position, root
 func (_m *DbManagerMock) GetStorageAt(ctx context.Context, address common.Address, position *big.Int, root common.Hash) (*big.Int, error) {
 	ret := _m.Called(ctx, address, position, root)
 
