@@ -93,7 +93,7 @@ var (
 	pvtKey          = "0x28b2b0318721be8c8339199172cd7cc8f5e273800a35616ec893083a4b32c02e"
 	nonce1          = uint64(1)
 	nonce2          = uint64(2)
-	l2Coinbase      = common.Address{}
+	seqAddr         = common.Address{}
 	oldHash         = common.HexToHash("0x01")
 	newHash         = common.HexToHash("0x02")
 	newHash2        = common.HexToHash("0x03")
@@ -130,7 +130,7 @@ func TestNewFinalizer(t *testing.T) {
 	dbManagerMock.On("GetLastSentFlushID", context.Background()).Return(uint64(0), nil)
 
 	// arrange and act
-	f = newFinalizer(cfg, poolCfg, workerMock, dbManagerMock, executorMock, l2Coinbase, isSynced, closingSignalCh, bc, eventLog, nil)
+	f = newFinalizer(cfg, poolCfg, workerMock, dbManagerMock, executorMock, seqAddr, isSynced, closingSignalCh, bc, eventLog, nil)
 
 	// assert
 	assert.NotNil(t, f)
@@ -138,7 +138,7 @@ func TestNewFinalizer(t *testing.T) {
 	assert.Equal(t, f.worker, workerMock)
 	assert.Equal(t, dbManagerMock, dbManagerMock)
 	assert.Equal(t, f.executor, executorMock)
-	assert.Equal(t, f.l2coinbase, l2Coinbase)
+	assert.Equal(t, f.l2coinbase, seqAddr)
 	assert.Equal(t, f.closingSignalCh, closingSignalCh)
 	assert.Equal(t, f.batchConstraints, bc)
 }
@@ -504,7 +504,7 @@ func TestFinalizer_newWIPBatch(t *testing.T) {
 			forcedBatches: []state.ForcedBatch{{
 				BlockNumber:       1,
 				ForcedBatchNumber: 1,
-				Sequencer:         l2Coinbase,
+				Sequencer:         seqAddr,
 				GlobalExitRoot:    oldHash,
 				RawTxsData:        nil,
 				ForcedAt:          now(),
@@ -654,35 +654,6 @@ func TestFinalizer_syncWithState(t *testing.T) {
 			isBatchClosed: false,
 			batches:       batches,
 			ger:           common.Hash{},
-			expectedBatch: &WipBatch{
-				batchNumber:        one,
-				coinbase:           f.l2coinbase,
-				initialStateRoot:   oldHash,
-				stateRoot:          oldHash,
-				timestamp:          testNow(),
-				globalExitRoot:     oldHash,
-				remainingResources: getMaxRemainingResources(f.batchConstraints),
-			},
-			expectedProcessingCtx: state.ProcessingContext{
-				BatchNumber:    one,
-				Coinbase:       f.l2coinbase,
-				Timestamp:      testNow(),
-				GlobalExitRoot: oldHash,
-			},
-		},
-		{
-			name:          "Success Open Batch with different coinbase",
-			lastBatchNum:  &one,
-			isBatchClosed: false,
-			batches: []*state.Batch{
-				{
-					BatchNumber:    batches[0].BatchNumber,
-					StateRoot:      oldHash,
-					GlobalExitRoot: oldHash,
-					Coinbase:       senderAddr,
-				},
-			},
-			ger: common.Hash{},
 			expectedBatch: &WipBatch{
 				batchNumber:        one,
 				coinbase:           f.l2coinbase,
@@ -897,7 +868,7 @@ func TestFinalizer_processForcedBatches(t *testing.T) {
 					from:          auth.From,
 					batchResponse: batchResponse1,
 					batchNumber:   f.batch.batchNumber + 1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  stateRootHashes[0],
 					isForcedBatch: true,
@@ -908,7 +879,7 @@ func TestFinalizer_processForcedBatches(t *testing.T) {
 					from:          auth.From,
 					batchResponse: batchResponse2,
 					batchNumber:   f.batch.batchNumber + 2,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  stateRootHashes[1],
 					isForcedBatch: true,
@@ -938,7 +909,7 @@ func TestFinalizer_processForcedBatches(t *testing.T) {
 					from:          auth.From,
 					batchResponse: batchResponse1,
 					batchNumber:   f.batch.batchNumber + 1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  stateRootHashes[0],
 					isForcedBatch: true,
@@ -949,7 +920,7 @@ func TestFinalizer_processForcedBatches(t *testing.T) {
 					from:          auth.From,
 					batchResponse: batchResponse2,
 					batchNumber:   f.batch.batchNumber + 2,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  stateRootHashes[1],
 					isForcedBatch: true,
@@ -1733,7 +1704,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 			request: state.ProcessRequest{
 				Transactions: tx1Plustx2,
 				BatchNumber:  1,
-				Coinbase:     l2Coinbase,
+				Coinbase:     seqAddr,
 				Timestamp:    now(),
 				OldStateRoot: oldHash,
 			},
@@ -1744,7 +1715,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 					hash:          signedTx1.Hash(),
 					from:          auth.From,
 					batchNumber:   1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  oldHash,
 					response:      txResponseOne,
@@ -1755,7 +1726,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 					hash:          signedTx2.Hash(),
 					from:          auth.From,
 					batchNumber:   1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  newHash,
 					response:      txResponseTwo,
@@ -1768,7 +1739,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 			name: "Handle forced batch process response with reverted transactions",
 			request: state.ProcessRequest{
 				BatchNumber:  1,
-				Coinbase:     l2Coinbase,
+				Coinbase:     seqAddr,
 				Timestamp:    now(),
 				OldStateRoot: oldHash,
 			},
@@ -1779,7 +1750,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 					hash:          signedTx1.Hash(),
 					from:          auth.From,
 					batchNumber:   1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  oldHash,
 					response:      txResponseReverted,
@@ -1791,7 +1762,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 			name: "Handle forced batch process response with intrinsic ROM err",
 			request: state.ProcessRequest{
 				BatchNumber:  1,
-				Coinbase:     l2Coinbase,
+				Coinbase:     seqAddr,
 				Timestamp:    now(),
 				OldStateRoot: oldHash,
 			},
@@ -1803,7 +1774,7 @@ func Test_handleForcedTxsProcessResp(t *testing.T) {
 					hash:          signedTx1.Hash(),
 					from:          auth.From,
 					batchNumber:   1,
-					coinbase:      l2Coinbase,
+					coinbase:      seqAddr,
 					timestamp:     now(),
 					oldStateRoot:  oldHash,
 					response:      txResponseOne,
@@ -1860,7 +1831,7 @@ func TestFinalizer_storeProcessedTx(t *testing.T) {
 		{
 			name:              "Normal transaction",
 			batchNum:          1,
-			coinbase:          l2Coinbase,
+			coinbase:          seqAddr,
 			timestamp:         time.Now(),
 			previousStateRoot: oldHash,
 			txResponse: &state.ProcessTransactionResponse{
@@ -1869,7 +1840,7 @@ func TestFinalizer_storeProcessedTx(t *testing.T) {
 			isForcedBatch: false,
 			expectedTxToStore: transactionToStore{
 				batchNumber:  1,
-				coinbase:     l2Coinbase,
+				coinbase:     seqAddr,
 				timestamp:    now(),
 				oldStateRoot: oldHash,
 				response: &state.ProcessTransactionResponse{
@@ -1881,7 +1852,7 @@ func TestFinalizer_storeProcessedTx(t *testing.T) {
 		{
 			name:              "Forced transaction",
 			batchNum:          1,
-			coinbase:          l2Coinbase,
+			coinbase:          seqAddr,
 			timestamp:         time.Now(),
 			previousStateRoot: oldHash,
 			txResponse: &state.ProcessTransactionResponse{
@@ -1890,7 +1861,7 @@ func TestFinalizer_storeProcessedTx(t *testing.T) {
 			isForcedBatch: true,
 			expectedTxToStore: transactionToStore{
 				batchNumber:  1,
-				coinbase:     l2Coinbase,
+				coinbase:     seqAddr,
 				timestamp:    now(),
 				oldStateRoot: oldHash,
 				response: &state.ProcessTransactionResponse{
@@ -2548,7 +2519,7 @@ func setupFinalizer(withWipBatch bool) *finalizer {
 		}
 		wipBatch = &WipBatch{
 			batchNumber:        1,
-			coinbase:           l2Coinbase,
+			coinbase:           seqAddr,
 			initialStateRoot:   oldHash,
 			stateRoot:          newHash,
 			localExitRoot:      newHash,
@@ -2568,7 +2539,7 @@ func setupFinalizer(withWipBatch bool) *finalizer {
 		cfg:                cfg,
 		closingSignalCh:    closingSignalCh,
 		isSynced:           isSynced,
-		l2coinbase:         l2Coinbase,
+		l2coinbase:         seqAddr,
 		worker:             workerMock,
 		dbManager:          dbManagerMock,
 		executor:           executorMock,
