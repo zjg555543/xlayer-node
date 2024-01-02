@@ -132,6 +132,7 @@ func (_m *WorkerMock) NewTxTracker(tx pool.Transaction, counters state.ZKCounter
 	} else {
 		r1 = ret.Error(1)
 	}
+
 	return r0, r1
 }
 
