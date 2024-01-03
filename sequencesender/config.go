@@ -29,6 +29,11 @@ type Config struct {
 	// PrivateKey defines all the key store files that are going
 	// to be read in order to provide the private keys to sign the L1 txs
 	PrivateKey types.KeystoreFileConfig `mapstructure:"PrivateKey"`
+
+	// DASignSequencePrivateKey defines all the key store files that are going
+	// to sign batches for DA service
+	DASignSequencePrivateKey types.KeystoreFileConfig `mapstructure:"DASignSequencePrivateKey"`
+
 	// Batch number where there is a forkid change (fork upgrade)
 	ForkUpgradeBatchNumber uint64
 

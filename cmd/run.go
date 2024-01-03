@@ -424,18 +424,24 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 	var seqPrivKey *ecdsa.PrivateKey
 	auth, pk, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
 	if err != nil {
-		log.Fatal(err)
+		log.Warnf("Failed to load sequence sender's private key:%v", err.Error())
 	}
 	log.Infof("from pk %s, from sender %s", crypto.PubkeyToAddress(pk.PublicKey), cfg.SequenceSender.SenderAddress.String())
 	if crypto.PubkeyToAddress(pk.PublicKey) == cfg.SequenceSender.SenderAddress {
+		seqPrivKey = pk
+		cfg.SequenceSender.SenderAddress = auth.From
+	}
+
+	_, pk, err = etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DASignSequencePrivateKey.Path, cfg.SequenceSender.DASignSequencePrivateKey.Password)
+	if err != nil {
+		log.Warnf("Failed to load da sign sequence's private key:%v", err.Error())
+	} else {
 		seqPrivKey = pk
 	}
 
 	if seqPrivKey == nil {
 		log.Fatal("Sequencer private key not found")
 	}
-
-	cfg.SequenceSender.SenderAddress = auth.From
 
 	cfg.SequenceSender.ForkUpgradeBatchNumber = cfg.ForkUpgradeBatchNumber
 

@@ -2369,6 +2369,7 @@ Must be one of:
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                                                                                                                               |
 | - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which address is going to receive the fees                                                                                                                                                                                                                                                                                                                                                                 |
 | - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
+| - [DASignSequencePrivateKey](#SequenceSender_DASignSequencePrivateKey )                                 | No      | object           | No         | -          | DASignSequencePrivateKey defines all the key store files that are going<br />to sign batches for DA service                                                                                                                                                                                                                                                                                                                   |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                                                                                                                                   |
 | - [GasOffset](#SequenceSender_GasOffset )                                                               | No      | integer          | No         | -          | GasOffset is the amount of gas to be added to the gas estimation in order<br />to provide an amount that is higher than the estimated one. This is used<br />to avoid the TX getting reverted in case something has changed in the network<br />state after the estimation which can cause the TX to require more gas to be<br />executed.<br /><br />ex:<br />gas estimation: 1000<br />gas offset: 100<br />final gas: 1100 |
@@ -2516,7 +2517,46 @@ Path="/pk/sequencer.keystore"
 Password="testonly"
 ```
 
-### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.8. `SequenceSender.ForkUpgradeBatchNumber`
+### <a name="SequenceSender_DASignSequencePrivateKey"></a>11.8. `[SequenceSender.DASignSequencePrivateKey]`
+
+**Type:** : `object`
+**Description:** DASignSequencePrivateKey defines all the key store files that are going
+to sign batches for DA service
+
+| Property                                                         | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
+| ---------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
+| - [Path](#SequenceSender_DASignSequencePrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
+| - [Password](#SequenceSender_DASignSequencePrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
+
+#### <a name="SequenceSender_DASignSequencePrivateKey_Path"></a>11.8.1. `SequenceSender.DASignSequencePrivateKey.Path`
+
+**Type:** : `string`
+
+**Default:** `"/pk/sequencer.keystore"`
+
+**Description:** Path is the file path for the key store file
+
+**Example setting the default value** ("/pk/sequencer.keystore"):
+```
+[SequenceSender.DASignSequencePrivateKey]
+Path="/pk/sequencer.keystore"
+```
+
+#### <a name="SequenceSender_DASignSequencePrivateKey_Password"></a>11.8.2. `SequenceSender.DASignSequencePrivateKey.Password`
+
+**Type:** : `string`
+
+**Default:** `"testonly"`
+
+**Description:** Password is the password to decrypt the key store file
+
+**Example setting the default value** ("testonly"):
+```
+[SequenceSender.DASignSequencePrivateKey]
+Password="testonly"
+```
+
+### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.9. `SequenceSender.ForkUpgradeBatchNumber`
 
 **Type:** : `integer`
 
@@ -2530,7 +2570,7 @@ Password="testonly"
 ForkUpgradeBatchNumber=0
 ```
 
-### <a name="SequenceSender_UseValidium"></a>11.9. `SequenceSender.UseValidium`
+### <a name="SequenceSender_UseValidium"></a>11.10. `SequenceSender.UseValidium`
 
 **Type:** : `boolean`
 
@@ -2544,7 +2584,7 @@ ForkUpgradeBatchNumber=0
 UseValidium=true
 ```
 
-### <a name="SequenceSender_GasOffset"></a>11.10. `SequenceSender.GasOffset`
+### <a name="SequenceSender_GasOffset"></a>11.11. `SequenceSender.GasOffset`
 
 **Type:** : `integer`
 
