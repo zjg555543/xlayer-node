@@ -408,7 +408,6 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 			metrics.GetLogStatistics().UpdateTimestamp(metrics.NewRound, time.Now())
 			metrics.BatchExecuteTime(metrics.BatchFinalizeTypeLabelFullBatch, metrics.GetLogStatistics().GetStatistics(metrics.ProcessingTxCommit))
 			metrics.TrustBatchNum(f.batch.batchNumber - 1)
-
 		}
 
 		if err := ctx.Err(); err != nil {
