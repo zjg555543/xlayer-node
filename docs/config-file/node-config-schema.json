@@ -981,12 +981,12 @@
 						"Path": {
 							"type": "string",
 							"description": "Path is the file path for the key store file",
-							"default": "/pk/sequencer.keystore"
+							"default": ""
 						},
 						"Password": {
 							"type": "string",
 							"description": "Password is the password to decrypt the key store file",
-							"default": "testonly"
+							"default": ""
 						}
 					},
 					"additionalProperties": false,

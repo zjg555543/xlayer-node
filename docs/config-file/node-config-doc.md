@@ -2532,28 +2532,28 @@ to sign batches for DA service
 
 **Type:** : `string`
 
-**Default:** `"/pk/sequencer.keystore"`
+**Default:** `""`
 
 **Description:** Path is the file path for the key store file
 
-**Example setting the default value** ("/pk/sequencer.keystore"):
+**Example setting the default value** (""):
 ```
 [SequenceSender.DASignSequencePrivateKey]
-Path="/pk/sequencer.keystore"
+Path=""
 ```
 
 #### <a name="SequenceSender_DASignSequencePrivateKey_Password"></a>11.8.2. `SequenceSender.DASignSequencePrivateKey.Password`
 
 **Type:** : `string`
 
-**Default:** `"testonly"`
+**Default:** `""`
 
 **Description:** Password is the password to decrypt the key store file
 
-**Example setting the default value** ("testonly"):
+**Example setting the default value** (""):
 ```
 [SequenceSender.DASignSequencePrivateKey]
-Password="testonly"
+Password=""
 ```
 
 ### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.9. `SequenceSender.ForkUpgradeBatchNumber`
