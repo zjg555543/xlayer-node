@@ -420,7 +420,7 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal(err)
 	}
 
-	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DASignSequencePrivateKey.Path, cfg.SequenceSender.DASignSequencePrivateKey.Password)
+	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DAPermitApiPrivateKey.Path, cfg.SequenceSender.DAPermitApiPrivateKey.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -429,7 +429,7 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal("SenderAddress is not config")
 	}
 	if privKey == nil {
-		log.Fatal("DASignSequencePrivateKey is not found")
+		log.Fatal("DAPermitApiPrivateKey is not found")
 	}
 
 	cfg.SequenceSender.ForkUpgradeBatchNumber = cfg.ForkUpgradeBatchNumber
