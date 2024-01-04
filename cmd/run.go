@@ -420,19 +420,17 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal(err)
 	}
 
-	if cfg.SequenceSender.SenderAddress.Cmp(common.Address{}) == 0 {
-		log.Fatal("SenderAddress is not config")
-	}
-
 	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DASignSequencePrivateKey.Path, cfg.SequenceSender.DASignSequencePrivateKey.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Infof("from pk %s, from sender %s", crypto.PubkeyToAddress(privKey.PublicKey), cfg.SequenceSender.SenderAddress.String())
+	if cfg.SequenceSender.SenderAddress.Cmp(common.Address{}) == 0 {
+		log.Fatal("SenderAddress is not config")
+	}
 	if privKey == nil {
 		log.Fatal("DASignSequencePrivateKey is not found")
 	}
-
-	log.Infof("Da sign: %s, seq sender: %s", crypto.PubkeyToAddress(privKey.PublicKey), cfg.SequenceSender.SenderAddress.String())
 
 	cfg.SequenceSender.ForkUpgradeBatchNumber = cfg.ForkUpgradeBatchNumber
 
