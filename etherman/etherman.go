@@ -547,7 +547,7 @@ func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequen
 
 // BuildSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
 func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error) {
-	opts, err := etherMan.getAuthByAddress(sender)
+	opts, err := etherMan.generateRandomAuth()
 	if err == ErrNotFound {
 		return nil, nil, fmt.Errorf("failed to build sequence batches, err: %w", ErrPrivateKeyNotFound)
 	}
