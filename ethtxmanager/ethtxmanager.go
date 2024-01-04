@@ -382,7 +382,11 @@ func (c *Client) monitorTx(ctx context.Context, mTx monitoredTx, logger *log.Log
 		logger.Debugf("unsigned tx %v created", tx.Hash().String())
 
 		// sign tx
-		signedTx, err = c.etherman.SignTx(ctx, mTx.from, tx)
+		if c.cfg.CustodialAssetsConfig.Enable {
+			signedTx, err = c.signTx(mTx.from, tx)
+		} else {
+			signedTx, err = c.etherman.SignTx(ctx, mTx.from, tx)
+		}
 		if err != nil {
 			logger.Errorf("failed to sign tx %v: %v", tx.Hash().String(), err)
 			return
