@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"net"
@@ -421,25 +420,17 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal(err)
 	}
 
-	var seqPrivKey *ecdsa.PrivateKey
-	auth, pk, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
+	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
 	if err != nil {
-		log.Warnf("Failed to load sequence sender's private key:%v", err.Error())
+		log.Fatal(err)
 	}
-	log.Infof("from pk %s, from sender %s", crypto.PubkeyToAddress(pk.PublicKey), cfg.SequenceSender.SenderAddress.String())
-	if crypto.PubkeyToAddress(pk.PublicKey) == cfg.SequenceSender.SenderAddress {
-		seqPrivKey = pk
-		cfg.SequenceSender.SenderAddress = auth.From
+	if privKey == nil {
+		log.Fatal("Sequencer private key not found")
 	}
 
-	_, pk, err = etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DASignSequencePrivateKey.Path, cfg.SequenceSender.DASignSequencePrivateKey.Password)
-	if err != nil {
-		log.Warnf("Failed to load da sign sequence's private key:%v", err.Error())
-	} else {
-		seqPrivKey = pk
-	}
+	log.Infof("from pk %s, from sender %s", crypto.PubkeyToAddress(privKey.PublicKey), cfg.SequenceSender.SenderAddress.String())
 
-	if seqPrivKey == nil {
+	if cfg.SequenceSender.SenderAddress.Cmp(common.Address{}) == 0 {
 		log.Fatal("Sequencer private key not found")
 	}
 
@@ -447,7 +438,7 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 
 	ethTxManager := ethtxmanager.New(cfg.EthTxManager, etherman, etmStorage, st)
 
-	seqSender, err := sequencesender.New(cfg.SequenceSender, st, etherman, ethTxManager, eventLog, seqPrivKey)
+	seqSender, err := sequencesender.New(cfg.SequenceSender, st, etherman, ethTxManager, eventLog, privKey)
 	if err != nil {
 		log.Fatal(err)
 	}
