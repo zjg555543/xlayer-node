@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/0xPolygonHermez/zkevm-data-streamer/log"
 	"github.com/0xPolygonHermez/zkevm-node/tools/sign/config"
 	"github.com/0xPolygonHermez/zkevm-node/tools/sign/service"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -26,6 +27,7 @@ var (
 	}
 )
 
+// main is the entry point for the tool
 func main() {
 	app := cli.NewApp()
 	app.Name = appName
@@ -50,6 +52,7 @@ func main() {
 	}
 }
 
+// HttpService is the entry point for the http service
 func HttpService(cliCtx *cli.Context) error {
 	c, err := config.Load(cliCtx)
 	if err != nil {
@@ -67,8 +70,12 @@ func HttpService(cliCtx *cli.Context) error {
 
 	// 启动 HTTP 服务器
 	port := c.Port
-	fmt.Printf("Server is running on :%d\n", port)
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%d", port),
+		ReadHeaderTimeout: 3 * time.Second, // nolint:gomnd
+	}
+
+	err = server.ListenAndServe() //nolint:gomnd
 	if err != nil {
 		fmt.Println("Error:", err)
 	}

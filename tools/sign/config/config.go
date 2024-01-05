@@ -18,6 +18,7 @@ const (
 	FlagCfg = "cfg"
 )
 
+// L1 is the default configuration values
 type L1 struct {
 	ChainId       uint64                   `mapstructure:"ChainId"`
 	RPC           string                   `mapstructure:"RPC"`

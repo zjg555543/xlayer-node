@@ -35,6 +35,7 @@ type Server struct {
 	result map[string]string
 }
 
+// NewServer creates a new server
 func NewServer(cfg *config.Config, ctx context.Context) *Server {
 	srv := &Server{
 		ctx: ctx,
@@ -42,7 +43,7 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 
 	srv.ethCfg = etherman.Config{
 		URL:              cfg.L1.RPC,
-		ForkIDChunkSize:  20000,
+		ForkIDChunkSize:  20000, //nolint:gomnd
 		MultiGasProvider: false,
 	}
 
@@ -81,15 +82,17 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 	return srv
 }
 
+// Response is the response struct
 func sendJSONResponse(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(data)
+	json.NewEncoder(w).Encode(data) //nolint:errcheck
 }
 
+// PostSignDataByOrderNo is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 	log.Infof("PostSignDataByOrderNo start")
-	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false}
+	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false} //nolint:gomnd
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
@@ -109,8 +112,8 @@ func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 
 	log.Infof("Request: %v,%v,%v,%v,%v,%v,%v,%v", requestData.OperateType, requestData.OperateAddress, requestData.Symbol, requestData.ProjectSymbol, requestData.RefOrderId, requestData.OperateSymbol, requestData.OperateAmount, requestData.SysFrom)
 	if value, ok := s.result[requestData.RefOrderId]; ok {
-		fmt.Printf(value)
 		response.DetailMsg = "already exist"
+		log.Infof("already exist, key:%v, value:%v", requestData.RefOrderId, value)
 		sendJSONResponse(w, response)
 		return
 	}
@@ -142,6 +145,7 @@ func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 	sendJSONResponse(w, response)
 }
 
+// signSeq is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) signSeq(requestData Request) (error, string) {
 	var seqData SeqData
 	err := json.Unmarshal([]byte(requestData.OtherInfo), &seqData)
@@ -228,6 +232,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 	return nil, hex.EncodeToString(txBin)
 }
 
+// signAgg is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) signAgg(requestData Request) (error, string) {
 	var aggData AggData
 	err := json.Unmarshal([]byte(requestData.OtherInfo), &aggData)
@@ -308,14 +313,14 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 	return nil, hex.EncodeToString(txBin)
 }
 
+// GetSignDataByOrderNo is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) GetSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
-	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false}
+	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false} //nolint:gomnd
 
 	orderID := r.URL.Query().Get("orderId")
 	projectSymbol := r.URL.Query().Get("projectSymbol")
 	log.Infof("GetSignDataByOrderNo: %v,%v", orderID, projectSymbol)
 	if value, ok := s.result[orderID]; ok {
-		fmt.Printf(value)
 		response.Code = CodeSuccess
 		response.Success = true
 		response.Data = value
