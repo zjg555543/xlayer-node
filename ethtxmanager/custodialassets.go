@@ -1,15 +1,18 @@
 package ethtxmanager
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
+	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/google/uuid"
 )
 
 const (
@@ -17,6 +20,7 @@ const (
 	sigLen   = 4
 	hashLen  = 32
 	proofLen = 24
+	traceID  = "traceID"
 )
 
 type sequenceBatchesArgs struct {
@@ -46,35 +50,45 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
+	ctx := context.WithValue(context.Background(), traceID, uuid.New().String())
+	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog.Infof("begin sign tx %x", tx.Hash())
 
 	switch sender {
 	case c.cfg.CustodialAssetsConfig.SequencerAddr:
 		args, err := c.unpackSequenceBatchesTx(tx)
 		if err != nil {
+			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
 		infos, err := json.Marshal(args)
 		if err != nil {
+			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		err = c.postCustodialAssets(c.newSignRequest(operateTypeSeq, sender, string(infos)))
+		err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
 		if err != nil {
+			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
 		}
 	case c.cfg.CustodialAssetsConfig.AggregatorAddr:
 		args, err := c.unpackVerifyBatchesTrustedAggregatorTx(tx)
 		if err != nil {
+			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
 		infos, err := json.Marshal(args)
 		if err != nil {
+			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		err = c.postCustodialAssets(c.newSignRequest(operateTypeAgg, sender, string(infos)))
+		err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
 		if err != nil {
+			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
 		}
 	default:
+		mLog.Errorf("unknown sender %s", sender.String())
 		return nil, fmt.Errorf("unknown sender %s", sender.String())
 	}
 
