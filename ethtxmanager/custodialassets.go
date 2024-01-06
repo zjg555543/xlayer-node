@@ -2,6 +2,7 @@ package ethtxmanager
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -61,12 +62,12 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := json.Marshal(args)
+		infos, err := args.marshal()
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
+		_, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
@@ -77,12 +78,12 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := json.Marshal(args)
+		infos, err := args.marshal()
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
+		_, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
@@ -163,4 +164,73 @@ func unpack(data []byte) (map[string]interface{}, error) {
 	}
 
 	return result, nil
+}
+
+type batchData struct {
+	Transactions       string `json:"transactions"`
+	TransactionHash    string `json:"transactionHash"`
+	GlobalExitRoot     string `json:"globalExitRoot"`
+	Timestamp          uint64 `json:"timestamp"`
+	MinForcedTimestamp uint64 `json:"minForcedTimestamp"`
+}
+
+func (s *sequenceBatchesArgs) marshal() (string, error) {
+	if s == nil {
+		return "", fmt.Errorf("sequenceBatchesArgs is nil")
+	}
+	httpArgs := struct {
+		Batches            []batchData    `json:"batches"`
+		L2Coinbase         common.Address `json:"l2Coinbase"`
+		SignaturesAndAddrs string         `json:"signaturesAndAddrs"`
+	}{
+		L2Coinbase:         s.L2Coinbase,
+		SignaturesAndAddrs: hex.EncodeToString(s.SignaturesAndAddrs),
+	}
+
+	httpArgs.Batches = make([]batchData, 0, len(s.Batches))
+	for _, batch := range s.Batches {
+		httpArgs.Batches = append(httpArgs.Batches, batchData{
+			Transactions:       hex.EncodeToString(batch.Transactions),
+			TransactionHash:    hex.EncodeToString(batch.TransactionsHash[:]),
+			GlobalExitRoot:     hex.EncodeToString(batch.GlobalExitRoot[:]),
+			Timestamp:          batch.Timestamp,
+			MinForcedTimestamp: batch.MinForcedTimestamp,
+		})
+	}
+	ret, err := json.Marshal(httpArgs)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal sequenceBatchesArgs: %v", err)
+	}
+
+	return string(ret), nil
+}
+
+func (v *verifyBatchesTrustedAggregatorArgs) marshal() (string, error) {
+	if v == nil {
+		return "", fmt.Errorf("verifyBatchesTrustedAggregatorArgs is nil")
+	}
+	httpArgs := struct {
+		PendingStateNum  uint64           `json:"pendingStateNum"`
+		InitNumBatch     uint64           `json:"initNumBatch"`
+		FinalNewBatch    uint64           `json:"finalNewBatch"`
+		NewLocalExitRoot string           `json:"newLocalExitRoot"`
+		NewStateRoot     string           `json:"newStateRoot"`
+		Proof            [proofLen]string `json:"proof"`
+	}{
+		PendingStateNum:  v.PendingStateNum,
+		InitNumBatch:     v.InitNumBatch,
+		FinalNewBatch:    v.FinalNewBatch,
+		NewLocalExitRoot: hex.EncodeToString(v.NewLocalExitRoot[:]),
+		NewStateRoot:     hex.EncodeToString(v.NewStateRoot[:]),
+	}
+	for i, v := range v.Proof {
+		httpArgs.Proof[i] = hex.EncodeToString(v[:])
+	}
+
+	ret, err := json.Marshal(httpArgs)
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal verifyBatchesTrustedAggregatorArgs: %v", err)
+	}
+
+	return string(ret), nil
 }

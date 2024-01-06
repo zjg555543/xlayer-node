@@ -1,6 +1,10 @@
 package ethtxmanager
 
-import "github.com/ethereum/go-ethereum/common"
+import (
+	"time"
+
+	"github.com/ethereum/go-ethereum/common"
+)
 
 type CustodialAssetsConfig struct {
 	// Enable is the flag to enable the custodial assets
@@ -17,4 +21,7 @@ type CustodialAssetsConfig struct {
 
 	// AggregatorAddr is the address of the aggregator
 	AggregatorAddr common.Address
+
+	// WaitResultTimeout is the timeout to wait for the result of the custodial assets
+	WaitResultTimeout time.Duration
 }

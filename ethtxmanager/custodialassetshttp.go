@@ -8,9 +8,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"time"
 
+	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/google/uuid"
 )
 
@@ -131,7 +134,12 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	if err != nil {
 		return nil, fmt.Errorf("error join url: %w", err)
 	}
-	response, err := http.Get(querySignURL)
+	params := url.Values{}
+	params.Add("orderId", request.OrderID)
+	params.Add("projectSymbol", fmt.Sprintf("%d", request.ProjectSymbol))
+	fullQuerySignURL := fmt.Sprintf("%s?%s", querySignURL, params.Encode())
+
+	response, err := http.Get(fullQuerySignURL)
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
@@ -155,23 +163,55 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	return &signResp, nil
 }
 
-func (c *Client) waitResult(ctx context.Context, request *signResultRequest) error {
-	return nil
+func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
+	queryTicker := time.NewTicker(time.Second)
+	defer queryTicker.Stop()
+	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssetsConfig.WaitResultTimeout)
+
+	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	for {
+		result, err := c.querySignResult(ctx, request)
+		if err == nil {
+			mLog.Infof("query sign result success: %v", result)
+			return result, nil
+		}
+		mLog.Infof("query sign result failed: %v", err)
+
+		// Wait for the next round.
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case <-queryTicker.C:
+		}
+	}
 }
 
-func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *signRequest) error {
+func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *signRequest) (*types.Transaction, error) {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
-		return errCustodialAssetsNotEnabled
+		return nil, errCustodialAssetsNotEnabled
 	}
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	mLog.Infof("post custodial assets request: %v", request)
 	if err := c.postCustodialAssets(ctx, request); err != nil {
-		return fmt.Errorf("error post custodial assets: %w", err)
+		return nil, fmt.Errorf("error post custodial assets: %w", err)
 	}
 	mLog.Infof("post custodial assets success")
-	if err := c.waitResult(ctx, c.newSignResultRequest(request.RefOrderID)); err != nil {
-		return fmt.Errorf("error wait result: %w", err)
+	result, err := c.waitResult(ctx, c.newSignResultRequest(request.RefOrderID))
+	if err != nil {
+		//TODO handle error
+		return nil, fmt.Errorf("error wait result: %w", err)
 	}
+	mLog.Infof("wait result success: %v", result)
+	data, err := hex.DecodeHex(result.Data)
+	if err != nil {
+		return nil, fmt.Errorf("error decode hex: %w", err)
+	}
+	transaction := &types.Transaction{}
+	err = transaction.UnmarshalBinary(data)
+	if err != nil {
+		return nil, fmt.Errorf("error unmarshal binary: %w", err)
+	}
+	mLog.Infof("unmarshal transaction success: %v", transaction.Hash())
 
-	return nil
+	return transaction, nil
 }
