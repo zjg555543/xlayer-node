@@ -213,5 +213,48 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *sign
 	}
 	mLog.Infof("unmarshal transaction success: %v", transaction.Hash())
 
+	err = c.checkSignedTransaction(ctx, transaction, request)
+	if err != nil {
+		return nil, fmt.Errorf("error check signed transaction: %w", err)
+	}
+
 	return transaction, nil
+}
+
+func (c *Client) checkSignedTransaction(ctx context.Context, transaction *types.Transaction, request *signRequest) error {
+	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+		return errCustodialAssetsNotEnabled
+	}
+	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog.Infof("check signed transaction: %v", transaction.Hash())
+
+	var signedRequest string
+	switch request.OperateType {
+	case operateTypeSeq:
+		args, err := c.unpackSequenceBatchesTx(transaction)
+		if err != nil {
+			return fmt.Errorf("error unpack sequence batches tx: %w", err)
+		}
+		signedRequest, err = args.marshal()
+		if err != nil {
+			return fmt.Errorf("error marshal sequence batches tx: %w", err)
+		}
+	case operateTypeAgg:
+		args, err := c.unpackVerifyBatchesTrustedAggregatorTx(transaction)
+		if err != nil {
+			return fmt.Errorf("error unpack sequence batches tx: %w", err)
+		}
+		signedRequest, err = args.marshal()
+		if err != nil {
+			return fmt.Errorf("error marshal sequence batches tx: %w", err)
+		}
+	default:
+		return fmt.Errorf("error operate type: %v", request.OperateType)
+
+	}
+	if signedRequest != request.OtherInfo {
+		return fmt.Errorf("signed sequence batches not equal with other info: %v, %v", signedRequest, request.OtherInfo)
+	}
+
+	return nil
 }
