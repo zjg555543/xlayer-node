@@ -55,6 +55,8 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	mLog.Infof("begin sign tx %x", tx.Hash())
 
+	var ret *types.Transaction
+
 	switch sender {
 	case c.cfg.CustodialAssetsConfig.SequencerAddr:
 		args, err := c.unpackSequenceBatchesTx(tx)
@@ -67,7 +69,7 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		_, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
+		ret, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
@@ -83,7 +85,7 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		_, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
+		ret, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
@@ -93,7 +95,7 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 		return nil, fmt.Errorf("unknown sender %s", sender.String())
 	}
 
-	return nil, nil
+	return ret, nil
 }
 
 func (c *Client) unpackSequenceBatchesTx(tx *types.Transaction) (*sequenceBatchesArgs, error) {
