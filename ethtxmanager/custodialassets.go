@@ -171,7 +171,7 @@ func unpack(data []byte) (map[string]interface{}, error) {
 
 type batchData struct {
 	Transactions       string `json:"transactions"`
-	TransactionHash    string `json:"transactionHash"`
+	TransactionsHash   string `json:"transactionsHash"`
 	GlobalExitRoot     string `json:"globalExitRoot"`
 	Timestamp          uint64 `json:"timestamp"`
 	MinForcedTimestamp uint64 `json:"minForcedTimestamp"`
@@ -194,7 +194,7 @@ func (s *sequenceBatchesArgs) marshal() (string, error) {
 	for _, batch := range s.Batches {
 		httpArgs.Batches = append(httpArgs.Batches, batchData{
 			Transactions:       hex.EncodeToString(batch.Transactions),
-			TransactionHash:    hex.EncodeToString(batch.TransactionsHash[:]),
+			TransactionsHash:   hex.EncodeToString(batch.TransactionsHash[:]),
 			GlobalExitRoot:     hex.EncodeToString(batch.GlobalExitRoot[:]),
 			Timestamp:          batch.Timestamp,
 			MinForcedTimestamp: batch.MinForcedTimestamp,

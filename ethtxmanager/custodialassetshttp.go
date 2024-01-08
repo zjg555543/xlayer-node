@@ -24,11 +24,13 @@ const (
 	operateSymbol  = 2
 	operatorAmount = 0
 	sysFrom        = 3
+	userID         = 0
 	requestSignURI = "/priapi/v1/assetonchain/ecology/ecologyOperate"
 	querySignURI   = "/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"
 )
 
 type signRequest struct {
+	UserID         int            `json:"userId"`
 	OperateType    int            `json:"operateType"` // 1 seq 2 agg
 	OperateAddress common.Address `json:"operateAddress"`
 	Symbol         int            `json:"symbol"`        // devnet 2882 mainnet 2
@@ -42,14 +44,24 @@ type signRequest struct {
 
 type signResponse struct {
 	Code           int    `json:"code"`
+	Data           int    `json:"data"`
+	DetailMessages string `json:"detailMsg"`
+	Msg            string `json:"msg"`
+	Status         int    `json:"status"`
+	Success        bool   `json:"success"`
+}
+
+type signResultResponse struct {
+	Code           int    `json:"code"`
 	Data           string `json:"data"`
-	DetailMessages string `json:"detailMessages"`
+	DetailMessages string `json:"detailMsg"`
 	Msg            string `json:"msg"`
 	Status         int    `json:"status"`
 	Success        bool   `json:"success"`
 }
 
 type signResultRequest struct {
+	UserID        int    `json:"userId"`
 	OrderID       string `json:"orderId"`
 	ProjectSymbol int    `json:"projectSymbol"`
 }
@@ -57,6 +69,7 @@ type signResultRequest struct {
 func (c *Client) newSignRequest(operateType int, operateAddress common.Address, otherInfo string) *signRequest {
 	refOrderID := uuid.New().String()
 	return &signRequest{
+		UserID:         userID,
 		OperateType:    operateType,
 		OperateAddress: operateAddress,
 		Symbol:         c.cfg.CustodialAssetsConfig.Symbol,
@@ -71,6 +84,7 @@ func (c *Client) newSignRequest(operateType int, operateAddress common.Address, 
 
 func (c *Client) newSignResultRequest(orderID string) *signResultRequest {
 	return &signResultRequest{
+		UserID:        userID,
 		OrderID:       orderID,
 		ProjectSymbol: projectSymbol,
 	}
@@ -116,14 +130,14 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 	if err != nil {
 		return fmt.Errorf("error unmarshal %v response body: %w", resp, err)
 	}
-	if signResp.Status != 200 {
+	if signResp.Status != 200 || signResp.Success != true {
 		return fmt.Errorf("error response %v status: %v", signResp, signResp.Status)
 	}
 
 	return nil
 }
 
-func (c *Client) querySignResult(ctx context.Context, request *signResultRequest) (*signResponse, error) {
+func (c *Client) querySignResult(ctx context.Context, request *signResultRequest) (*signResultResponse, error) {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
@@ -150,7 +164,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
-	var signResp signResponse
+	var signResp signResultResponse
 	err = json.Unmarshal(body, &signResp)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshal %v response body: %w", response, err)
@@ -163,7 +177,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	return &signResp, nil
 }
 
-func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
+func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResultResponse, error) {
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
 	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssetsConfig.WaitResultTimeout)
