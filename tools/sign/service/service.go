@@ -187,7 +187,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		return err, ""
 	}
 	log.Infof("CurrentNonce: %v", nonce)
-	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+	tx := ethTypes.NewTx(&ethTypes.DynamicFeeTx{
 		To:   to,
 		Data: data,
 	})
@@ -210,12 +210,13 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		log.Error(err.Error())
 		return err, ""
 	}
-	tx = ethTypes.NewTx(&ethTypes.LegacyTx{
-		Nonce:    nonce,
-		Gas:      gas + uint64(1),
-		GasPrice: gasPrice,
-		To:       to,
-		Data:     data,
+	tx = ethTypes.NewTx(&ethTypes.DynamicFeeTx{
+		Nonce:     nonce,
+		GasTipCap: gasPrice,
+		GasFeeCap: gasPrice,
+		Gas:       gas + uint64(1),
+		To:        to,
+		Data:      data,
 	})
 	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
 	if err != nil {
@@ -271,7 +272,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+	tx := ethTypes.NewTx(&ethTypes.DynamicFeeTx{
 		To:   to,
 		Data: data,
 	})
@@ -294,12 +295,14 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		log.Error(err.Error())
 		return err, ""
 	}
-	tx = ethTypes.NewTx(&ethTypes.LegacyTx{
-		Nonce:    nonce,
-		Gas:      gas + uint64(1),
-		GasPrice: gasPrice,
-		To:       to,
-		Data:     data,
+
+	tx = ethTypes.NewTx(&ethTypes.DynamicFeeTx{
+		Nonce:     nonce,
+		GasTipCap: gasPrice,
+		GasFeeCap: gasPrice,
+		Gas:       gas + uint64(1),
+		To:        to,
+		Data:      data,
 	})
 	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
 	if err != nil {
