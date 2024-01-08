@@ -177,26 +177,26 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 
 	to, data, err := s.ethClient.BuildSequenceBatchesTxData(s.seqAddress, sequences, common.HexToAddress(seqData.L2Coinbase), signData)
 	if err != nil {
+		log.Errorf("error BuildSequenceBatchesTxData: %v", err)
 		return err, ""
 	}
 
 	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.seqAddress)
 	if err != nil {
+		log.Errorf("error CurrentNonce: %v", err)
 		return err, ""
 	}
-
+	log.Infof("CurrentNonce: %v", nonce)
 	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
 		To:   to,
 		Data: data,
 	})
-	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
+	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx) //nolint:staticcheck
 	if err != nil {
+		log.Errorf("error SignTx: %v", err)
 		return err, ""
 	}
-	err = s.ethClient.SendTx(s.ctx, signedTx)
-	if err != nil {
-		return err, ""
-	}
+
 	gas, err := s.ethClient.EstimateGas(s.ctx, s.seqAddress, to, nil, data)
 	if err != nil {
 		err := fmt.Errorf("failed to estimate gas: %w", err)
@@ -219,12 +219,13 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 	})
 	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("error SignTx: %v", err)
 		return err, ""
 	}
 
 	txBin, err := signedTx.MarshalBinary()
 	if err != nil {
+		log.Errorf("error MarshalBinary: %v", err)
 		return err, ""
 	}
 
@@ -243,11 +244,13 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 
 	newLocal, err := hex.DecodeHex(aggData.NewLocalExitRoot)
 	if err != nil {
+		log.Errorf("error DecodeHex: %v", err)
 		return err, ""
 	}
 
 	newStateRoot, err := hex.DecodeHex(aggData.NewStateRoot)
 	if err != nil {
+		log.Errorf("error DecodeHex: %v", err)
 		return err, ""
 	}
 
@@ -258,11 +261,13 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 
 	to, data, err := s.ethClient.BuildTrustedVerifyBatchesTxData(aggData.InitNumBatch, aggData.FinalNewBatch, inputs)
 	if err != nil {
+		log.Errorf("error BuildTrustedVerifyBatchesTxData: %v", err)
 		return err, ""
 	}
 
 	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.seqAddress)
 	if err != nil {
+		log.Errorf("error CurrentNonce: %v", err)
 		return err, ""
 	}
 
@@ -270,14 +275,12 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		To:   to,
 		Data: data,
 	})
-	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
+	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx) //nolint:staticcheck
 	if err != nil {
+		log.Errorf("error SignTx: %v", err)
 		return err, ""
 	}
-	err = s.ethClient.SendTx(s.ctx, signedTx)
-	if err != nil {
-		return err, ""
-	}
+
 	gas, err := s.ethClient.EstimateGas(s.ctx, s.seqAddress, to, nil, data)
 	if err != nil {
 		err := fmt.Errorf("failed to estimate gas: %w", err)
@@ -300,12 +303,13 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 	})
 	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
 	if err != nil {
-		log.Error(err.Error())
+		log.Errorf("error SignTx: %v", err)
 		return err, ""
 	}
 
 	txBin, err := signedTx.MarshalBinary()
 	if err != nil {
+		log.Errorf("error MarshalBinary: %v", err)
 		return err, ""
 	}
 
