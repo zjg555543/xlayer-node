@@ -197,7 +197,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	gas := uint64(2000000) //noilint:gomnd
+	gas := uint64(2000000) //nolint:gomnd
 
 	// get gas price
 	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
@@ -278,7 +278,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	gas := uint64(2000000) //noilint:gomnd
+	gas := uint64(2000000) //nolint:gomnd
 
 	// get gas price
 	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
