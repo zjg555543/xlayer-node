@@ -8,20 +8,20 @@ import (
 
 type CustodialAssetsConfig struct {
 	// Enable is the flag to enable the custodial assets
-	Enable bool
+	Enable bool `mapstructure:"Enable"`
 
 	// URL is the url to sign the custodial assets
-	URL string
+	URL string `mapstructure:"URL"`
 
 	// Symbol is the symbol of the network, 2 prd, 2882 devnet
-	Symbol int
+	Symbol int `mapstructure:"Symbol"`
 
 	// SequencerAddr is the address of the sequencer
-	SequencerAddr common.Address
+	SequencerAddr common.Address `mapstructure:"SequencerAddr"`
 
 	// AggregatorAddr is the address of the aggregator
-	AggregatorAddr common.Address
+	AggregatorAddr common.Address `mapstructure:"AggregatorAddr"`
 
 	// WaitResultTimeout is the timeout to wait for the result of the custodial assets
-	WaitResultTimeout time.Duration
+	WaitResultTimeout time.Duration `mapstructure:"WaitResultTimeout"`
 }
