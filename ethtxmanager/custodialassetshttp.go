@@ -263,7 +263,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	if transaction.Nonce() != mTx.nonce {
 		return fmt.Errorf("signed transaction nonce not equal with mTx: %v, %v", transaction.Nonce(), mTx.nonce)
 	}
-	if transaction.To() != mTx.to {
+	if transaction.To().String() != mTx.to.String() {
 		return fmt.Errorf("signed transaction to not equal with mTx: %v, %v", transaction.To(), mTx.to)
 	}
 

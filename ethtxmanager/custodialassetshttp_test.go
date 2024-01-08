@@ -35,8 +35,10 @@ func TestClient_postSignRequestAndWaitResult(t *testing.T) {
 
 	req := client.newSignRequest(2, client.cfg.CustodialAssetsConfig.AggregatorAddr, ret)
 
+	to := common.HexToAddress("8288042CDcFf6C1F158D3bc357fF2ffF4e959E28")
 	mTx := monitoredTx{
 		from: common.HexToAddress("d6dda5aa7749142b7fda3fe4662c9f346101b8a6"),
+		to:   &to,
 	}
 	_, err := client.postSignRequestAndWaitResult(ctx, mTx, req)
 	if err != nil {
