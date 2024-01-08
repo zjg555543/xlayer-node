@@ -33,5 +33,8 @@ func TestClient_postSignRequestAndWaitResult(t *testing.T) {
 	ret, _ := seqReq.marshal()
 
 	req := client.newSignRequest(1, client.cfg.CustodialAssetsConfig.SequencerAddr, string(ret))
-	client.postSignRequestAndWaitResult(ctx, req)
+	mTx := monitoredTx{
+		from: common.HexToAddress("d6dda5aa7749142b7fda3fe4662c9f346101b8a6"),
+	}
+	client.postSignRequestAndWaitResult(ctx, mTx, req)
 }

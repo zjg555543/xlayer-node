@@ -47,10 +47,11 @@ var (
 	errUnpack                    = errors.New("failed to unpack data")
 )
 
-func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Transaction, error) {
+func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transaction, error) {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
+	sender := mTx.from
 	ctx := context.WithValue(context.Background(), traceID, uuid.New().String())
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	mLog.Infof("begin sign tx %x", tx.Hash())
@@ -69,7 +70,7 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		ret, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeSeq, sender, string(infos)))
+		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(operateTypeSeq, sender, infos))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
@@ -85,7 +86,7 @@ func (c *Client) signTx(sender common.Address, tx *types.Transaction) (*types.Tr
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		ret, err = c.postSignRequestAndWaitResult(ctx, c.newSignRequest(operateTypeAgg, sender, string(infos)))
+		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(operateTypeAgg, sender, infos))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)

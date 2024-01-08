@@ -186,7 +186,7 @@ func (c *Client) waitResult(parentCtx context.Context, request *signResultReques
 	}
 }
 
-func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *signRequest) (*types.Transaction, error) {
+func (c *Client) postSignRequestAndWaitResult(ctx context.Context, mTx monitoredTx, request *signRequest) (*types.Transaction, error) {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
@@ -213,7 +213,7 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *sign
 	}
 	mLog.Infof("unmarshal transaction success: %v", transaction.Hash())
 
-	err = c.checkSignedTransaction(ctx, transaction, request)
+	err = c.checkSignedTransaction(ctx, mTx, transaction, request)
 	if err != nil {
 		return nil, fmt.Errorf("error check signed transaction: %w", err)
 	}
@@ -221,7 +221,7 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, request *sign
 	return transaction, nil
 }
 
-func (c *Client) checkSignedTransaction(ctx context.Context, transaction *types.Transaction, request *signRequest) error {
+func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, transaction *types.Transaction, request *signRequest) error {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return errCustodialAssetsNotEnabled
 	}
@@ -253,7 +253,13 @@ func (c *Client) checkSignedTransaction(ctx context.Context, transaction *types.
 
 	}
 	if signedRequest != request.OtherInfo {
-		return fmt.Errorf("signed sequence batches not equal with other info: %v, %v", signedRequest, request.OtherInfo)
+		return fmt.Errorf("signed transaction not equal with other info: %v, %v", signedRequest, request.OtherInfo)
+	}
+	if transaction.Nonce() != mTx.nonce {
+		return fmt.Errorf("signed transaction nonce not equal with mTx: %v, %v", transaction.Nonce(), mTx.nonce)
+	}
+	if transaction.To() != mTx.to {
+		return fmt.Errorf("signed transaction to not equal with mTx: %v, %v", transaction.To(), mTx.to)
 	}
 
 	return nil

@@ -383,7 +383,7 @@ func (c *Client) monitorTx(ctx context.Context, mTx monitoredTx, logger *log.Log
 
 		// sign tx
 		if c.cfg.CustodialAssetsConfig.Enable {
-			signedTx, err = c.signTx(mTx.from, tx)
+			signedTx, err = c.signTx(mTx, tx)
 		} else {
 			signedTx, err = c.etherman.SignTx(ctx, mTx.from, tx)
 		}
