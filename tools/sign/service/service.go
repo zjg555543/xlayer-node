@@ -197,12 +197,8 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	gas, err := s.ethClient.EstimateGas(s.ctx, s.seqAddress, to, nil, data)
-	if err != nil {
-		err := fmt.Errorf("failed to estimate gas: %w", err)
-		log.Error(err.Error())
-		return err, ""
-	}
+	gas := uint64(2000000) //nolint:gomnd
+
 	// get gas price
 	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
 	if err != nil {
@@ -214,7 +210,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		Nonce:     nonce,
 		GasTipCap: gasPrice,
 		GasFeeCap: gasPrice,
-		Gas:       gas + uint64(1),
+		Gas:       gas,
 		To:        to,
 		Data:      data,
 	})
@@ -282,12 +278,8 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	gas, err := s.ethClient.EstimateGas(s.ctx, s.seqAddress, to, nil, data)
-	if err != nil {
-		err := fmt.Errorf("failed to estimate gas: %w", err)
-		log.Error(err.Error())
-		return err, ""
-	}
+	gas := uint64(2000000) //nolint:gomnd
+
 	// get gas price
 	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
 	if err != nil {
@@ -300,7 +292,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		Nonce:     nonce,
 		GasTipCap: gasPrice,
 		GasFeeCap: gasPrice,
-		Gas:       gas + uint64(1),
+		Gas:       gas,
 		To:        to,
 		Data:      data,
 	})
