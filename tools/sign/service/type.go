@@ -1,7 +1,5 @@
 package service
 
-import "encoding/json"
-
 // OperateTypeSeq is the type of operation
 const OperateTypeSeq = 1
 
@@ -16,15 +14,15 @@ const CodeFail = 1
 
 // Request is the request body
 type Request struct {
-	OperateType    int             `json:"operateType"`
-	OperateAddress string          `json:"operateAddress"`
-	Symbol         int             `json:"symbol"`
-	ProjectSymbol  int             `json:"projectSymbol"`
-	RefOrderId     string          `json:"refOrderId"`
-	OperateSymbol  int             `json:"operateSymbol"`
-	OperateAmount  int             `json:"operateAmount"`
-	SysFrom        int             `json:"sysFrom"`
-	OtherInfo      json.RawMessage `json:"otherInfo"`
+	OperateType    int    `json:"operateType"`
+	OperateAddress string `json:"operateAddress"`
+	Symbol         int    `json:"symbol"`
+	ProjectSymbol  int    `json:"projectSymbol"`
+	RefOrderId     string `json:"refOrderId"`
+	OperateSymbol  int    `json:"operateSymbol"`
+	OperateAmount  int    `json:"operateAmount"`
+	SysFrom        int    `json:"sysFrom"`
+	OtherInfo      string `json:"otherInfo"`
 }
 
 // SeqData is the data for sequence operation
