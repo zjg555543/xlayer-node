@@ -44,15 +44,6 @@ type signRequest struct {
 
 type signResponse struct {
 	Code           int    `json:"code"`
-	Data           int    `json:"data"`
-	DetailMessages string `json:"detailMsg"`
-	Msg            string `json:"msg"`
-	Status         int    `json:"status"`
-	Success        bool   `json:"success"`
-}
-
-type signResultResponse struct {
-	Code           int    `json:"code"`
 	Data           string `json:"data"`
 	DetailMessages string `json:"detailMsg"`
 	Msg            string `json:"msg"`
@@ -137,7 +128,7 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 	return nil
 }
 
-func (c *Client) querySignResult(ctx context.Context, request *signResultRequest) (*signResultResponse, error) {
+func (c *Client) querySignResult(ctx context.Context, request *signResultRequest) (*signResponse, error) {
 	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
@@ -164,7 +155,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
 
-	var signResp signResultResponse
+	var signResp signResponse
 	err = json.Unmarshal(body, &signResp)
 	if err != nil {
 		return nil, fmt.Errorf("error unmarshal %v response body: %w", response, err)
@@ -177,7 +168,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	return &signResp, nil
 }
 
-func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResultResponse, error) {
+func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
 	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssetsConfig.WaitResultTimeout)
