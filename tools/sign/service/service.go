@@ -111,6 +111,8 @@ func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Infof("Request:%v", requestData.String())
+
 	log.Infof("Request: %v,%v,%v,%v,%v,%v,%v,%v", requestData.OperateType, requestData.OperateAddress, requestData.Symbol, requestData.ProjectSymbol, requestData.RefOrderId, requestData.OperateSymbol, requestData.OperateAmount, requestData.SysFrom)
 	if value, ok := s.result[requestData.RefOrderId]; ok {
 		response.DetailMsg = "already exist"
@@ -156,6 +158,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 	}
 
 	var sequences []types.Sequence
+	var txHashs [][32]byte
 	for _, batch := range seqData.Batches {
 		var txsBytes []byte
 		txsBytes, err := hex.DecodeHex(batch.Transactions)
@@ -168,6 +171,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 			Timestamp:            batch.Timestamp,
 			ForcedBatchTimestamp: batch.MinForcedTimestamp,
 		})
+		txHashs = append(txHashs, common.HexToHash(batch.TransactionsHash))
 	}
 
 	var signData []byte
@@ -176,7 +180,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		signData = nil
 	}
 
-	to, data, err := s.ethClient.BuildSequenceBatchesTxData(s.seqAddress, sequences, common.HexToAddress(seqData.L2Coinbase), signData)
+	to, data, err := s.ethClient.BuildMockSequenceBatchesTxData(s.seqAddress, sequences, common.HexToAddress(seqData.L2Coinbase), signData, txHashs)
 	if err != nil {
 		log.Errorf("error BuildSequenceBatchesTxData: %v", err)
 		return err, ""
