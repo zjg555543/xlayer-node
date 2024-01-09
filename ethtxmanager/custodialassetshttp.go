@@ -5,7 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"time"
@@ -73,7 +73,7 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return errCustodialAssetsNotEnabled
 	}
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 
 	payload, err := json.Marshal(request)
 	if err != nil {
@@ -100,7 +100,7 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("error reading response body: %w", err)
 	}
@@ -109,7 +109,7 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 	if err != nil {
 		return fmt.Errorf("error unmarshal %v response body: %w", resp, err)
 	}
-	if signResp.Status != 200 || signResp.Success != true {
+	if signResp.Status != 200 || !signResp.Success {
 		return fmt.Errorf("error response %v status: %v", signResp, signResp.Status)
 	}
 
@@ -120,7 +120,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 	mLog.Infof("get sign result request: %v", request)
 
 	querySignURL, err := url.JoinPath(c.cfg.CustodialAssets.URL, c.cfg.CustodialAssets.QuerySignURI)
@@ -132,13 +132,19 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 	params.Add("projectSymbol", fmt.Sprintf("%d", request.ProjectSymbol))
 	fullQuerySignURL := fmt.Sprintf("%s?%s", querySignURL, params.Encode())
 
-	response, err := http.Get(fullQuerySignURL)
+	req, err := http.NewRequest("GET", fullQuerySignURL, nil)
+	// response, err := http.Get(fullQuerySignURL)
+	if err != nil {
+		return nil, fmt.Errorf("error sending request: %w", err)
+	}
+	client := &http.Client{}
+	response, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("error sending request: %w", err)
 	}
 	defer response.Body.Close()
 
-	body, err := ioutil.ReadAll(response.Body)
+	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("error reading response body: %w", err)
 	}
@@ -159,9 +165,10 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
-	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssets.WaitResultTimeout.Duration)
+	ctx, cancel := context.WithTimeout(parentCtx, c.cfg.CustodialAssets.WaitResultTimeout.Duration)
+	defer cancel()
 
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 	for {
 		result, err := c.querySignResult(ctx, request)
 		if err == nil {
@@ -183,7 +190,7 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, mTx monitored
 	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 	mLog.Infof("post custodial assets request: %v", request)
 	if err := c.postCustodialAssets(ctx, request); err != nil {
 		return nil, fmt.Errorf("error post custodial assets: %w", err)
@@ -218,7 +225,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return errCustodialAssetsNotEnabled
 	}
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 	mLog.Infof("check signed transaction: %v", transaction.Hash())
 
 	var signedRequest string
@@ -243,7 +250,6 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		}
 	default:
 		return fmt.Errorf("error operate type: %v", request.OperateType)
-
 	}
 	if signedRequest != request.OtherInfo {
 		return fmt.Errorf("signed transaction not equal with other info: %v, %v", signedRequest, request.OtherInfo)

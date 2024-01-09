@@ -16,12 +16,25 @@ import (
 	"github.com/google/uuid"
 )
 
+type trace string
+
 const (
-	sigLen   = 4
-	hashLen  = 32
-	proofLen = 24
-	traceID  = "traceID"
+	sigLen         = 4
+	hashLen        = 32
+	proofLen       = 24
+	traceID  trace = "traceID"
 )
+
+func getTraceID(ctx context.Context) (string, string) {
+	if ctx == nil {
+		return "", ""
+	}
+	return string(traceID), ctx.Value(traceID).(string)
+}
+
+func (t trace) String() string {
+	return string(t)
+}
 
 type sequenceBatchesArgs struct {
 	Batches            []polygonzkevm.PolygonZkEVMBatchData `json:"batches"`
@@ -52,7 +65,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 	}
 	sender := mTx.from
 	ctx := context.WithValue(context.Background(), traceID, uuid.New().String())
-	mLog := log.WithFields(traceID, ctx.Value(traceID))
+	mLog := log.WithFields(getTraceID(ctx))
 	mLog.Infof("begin sign tx %x", tx.Hash())
 
 	var ret *types.Transaction
