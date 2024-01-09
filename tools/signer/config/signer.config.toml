@@ -2,7 +2,7 @@ Port = 7001
 
 [L1]
 ChainId = 11155111
-RPC = "https://sepolia.infura.io/v3/0d081e04621c4c69b12649fbb63ef18a"
+RPC = "https://sepolia.infura.io/v3/xxxxxxxxxxxxxxxxxxxxxxxx"
 PolygonZkEVMAddress = "0x812cB73e48841a6736bB94c65c56341817cE6304"
 GlobalExitRootManagerAddr = "0x0e9Bb928351a50227ebFEC9782Db005Ba9b6C052"
 DataCommitteeAddr = "0x246EcFCae4423631c9eE3A86DE37F77BCF27FAaE"
