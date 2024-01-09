@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/0xPolygonHermez/zkevm-node/aggregator/prover"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
@@ -75,7 +76,7 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 	}
 
 	srv.aggAddress = crypto.PubkeyToAddress(srv.aggPrivateKey.PublicKey)
-	log.Infof("Sequencer address: %s", srv.seqAddress.String())
+	log.Infof("Agg address: %s", srv.aggAddress.String())
 
 	srv.result = make(map[string]string)
 
@@ -251,9 +252,25 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
+	if len(aggData.Proof) != 24 { // nolint:gomnd
+		log.Errorf("agg data len is not 24")
+		return fmt.Errorf("agg proof len is not 24"), ""
+	}
+	proofStr := "0x"
+	for _, v := range aggData.Proof {
+		proofStr += v
+	}
+
+	log.Infof("proofStr: %v", proofStr)
+
+	proof := &prover.FinalProof{
+		Proof: proofStr,
+	}
+
 	var inputs = &ethmanTypes.FinalProofInputs{
 		NewLocalExitRoot: newLocal,
 		NewStateRoot:     newStateRoot,
+		FinalProof:       proof,
 	}
 
 	to, data, err := s.ethClient.BuildTrustedVerifyBatchesTxData(aggData.InitNumBatch, aggData.FinalNewBatch, inputs)
