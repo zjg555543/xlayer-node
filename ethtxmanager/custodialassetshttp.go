@@ -17,18 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const (
-	operateTypeSeq = 1
-	operateTypeAgg = 2
-	projectSymbol  = 3011
-	operateSymbol  = 2
-	operatorAmount = 0
-	sysFrom        = 3
-	userID         = 0
-	requestSignURI = "/priapi/v1/assetonchain/ecology/ecologyOperate"
-	querySignURI   = "/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"
-)
-
 type signRequest struct {
 	UserID         int            `json:"userId"`
 	OperateType    int            `json:"operateType"` // 1 seq 2 agg
@@ -60,29 +48,29 @@ type signResultRequest struct {
 func (c *Client) newSignRequest(operateType int, operateAddress common.Address, otherInfo string) *signRequest {
 	refOrderID := uuid.New().String()
 	return &signRequest{
-		UserID:         userID,
+		UserID:         c.cfg.CustodialAssets.UserID,
 		OperateType:    operateType,
 		OperateAddress: operateAddress,
-		Symbol:         c.cfg.CustodialAssetsConfig.Symbol,
-		ProjectSymbol:  projectSymbol,
+		Symbol:         c.cfg.CustodialAssets.Symbol,
+		ProjectSymbol:  c.cfg.CustodialAssets.ProjectSymbol,
 		RefOrderID:     refOrderID,
-		OperateSymbol:  operateSymbol,
-		OperateAmount:  operatorAmount,
-		SysFrom:        sysFrom,
+		OperateSymbol:  c.cfg.CustodialAssets.OperateSymbol,
+		OperateAmount:  c.cfg.CustodialAssets.OperateAmount,
+		SysFrom:        c.cfg.CustodialAssets.SysFrom,
 		OtherInfo:      otherInfo,
 	}
 }
 
 func (c *Client) newSignResultRequest(orderID string) *signResultRequest {
 	return &signResultRequest{
-		UserID:        userID,
+		UserID:        c.cfg.CustodialAssets.UserID,
 		OrderID:       orderID,
-		ProjectSymbol: projectSymbol,
+		ProjectSymbol: c.cfg.CustodialAssets.ProjectSymbol,
 	}
 }
 
 func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) error {
-	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return errCustodialAssetsNotEnabled
 	}
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
@@ -92,7 +80,7 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 		return fmt.Errorf("error marshal request: %w", err)
 	}
 
-	reqSignURL, err := url.JoinPath(c.cfg.CustodialAssetsConfig.URL, requestSignURI)
+	reqSignURL, err := url.JoinPath(c.cfg.CustodialAssets.URL, c.cfg.CustodialAssets.RequestSignURI)
 	if err != nil {
 		return fmt.Errorf("error join url: %w", err)
 	}
@@ -129,13 +117,13 @@ func (c *Client) postCustodialAssets(ctx context.Context, request *signRequest) 
 }
 
 func (c *Client) querySignResult(ctx context.Context, request *signResultRequest) (*signResponse, error) {
-	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	mLog.Infof("get sign result request: %v", request)
 
-	querySignURL, err := url.JoinPath(c.cfg.CustodialAssetsConfig.URL, querySignURI)
+	querySignURL, err := url.JoinPath(c.cfg.CustodialAssets.URL, c.cfg.CustodialAssets.QuerySignURI)
 	if err != nil {
 		return nil, fmt.Errorf("error join url: %w", err)
 	}
@@ -171,7 +159,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
-	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssetsConfig.WaitResultTimeout)
+	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssets.WaitResultTimeout)
 
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	for {
@@ -192,7 +180,7 @@ func (c *Client) waitResult(parentCtx context.Context, request *signResultReques
 }
 
 func (c *Client) postSignRequestAndWaitResult(ctx context.Context, mTx monitoredTx, request *signRequest) (*types.Transaction, error) {
-	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
@@ -227,7 +215,7 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, mTx monitored
 }
 
 func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, transaction *types.Transaction, request *signRequest) error {
-	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return errCustodialAssetsNotEnabled
 	}
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
@@ -235,7 +223,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 
 	var signedRequest string
 	switch request.OperateType {
-	case operateTypeSeq:
+	case c.cfg.CustodialAssets.OperateTypeSeq:
 		args, err := c.unpackSequenceBatchesTx(transaction)
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)
@@ -244,7 +232,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		if err != nil {
 			return fmt.Errorf("error marshal sequence batches tx: %w", err)
 		}
-	case operateTypeAgg:
+	case c.cfg.CustodialAssets.OperateTypeAgg:
 		args, err := c.unpackVerifyBatchesTrustedAggregatorTx(transaction)
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)

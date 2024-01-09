@@ -47,7 +47,7 @@ var (
 )
 
 func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transaction, error) {
-	if c == nil || !c.cfg.CustodialAssetsConfig.Enable {
+	if c == nil || !c.cfg.CustodialAssets.Enable {
 		return nil, errCustodialAssetsNotEnabled
 	}
 	sender := mTx.from
@@ -58,7 +58,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 	var ret *types.Transaction
 
 	switch sender {
-	case c.cfg.CustodialAssetsConfig.SequencerAddr:
+	case c.cfg.CustodialAssets.SequencerAddr:
 		args, err := c.unpackSequenceBatchesTx(tx)
 		if err != nil {
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
@@ -69,12 +69,12 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(operateTypeSeq, sender, infos))
+		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(c.cfg.CustodialAssets.OperateTypeSeq, sender, infos))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
 		}
-	case c.cfg.CustodialAssetsConfig.AggregatorAddr:
+	case c.cfg.CustodialAssets.AggregatorAddr:
 		args, err := c.unpackVerifyBatchesTrustedAggregatorTx(tx)
 		if err != nil {
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
@@ -85,7 +85,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 		}
-		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(operateTypeAgg, sender, infos))
+		ret, err = c.postSignRequestAndWaitResult(ctx, mTx, c.newSignRequest(c.cfg.CustodialAssets.OperateTypeAgg, sender, infos))
 		if err != nil {
 			mLog.Errorf("failed to post custodial assets: %v", err)
 			return nil, fmt.Errorf("failed to post custodial assets: %v", err)
