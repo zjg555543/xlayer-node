@@ -2,13 +2,14 @@ package etherman
 
 import (
 	"fmt"
+	"math/big"
+
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"math/big"
 )
 
 // BuildMockSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
