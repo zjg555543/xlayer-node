@@ -17,10 +17,10 @@ func CtxWithLogger(parentCtx context.Context, logger *Logger) context.Context {
 func LoggerFromCtx(ctx context.Context) *Logger {
 	res := ctx.Value(ctxKeyLogger)
 	if res == nil {
-		return nil
+		return getDefaultLog()
 	}
 	if logger, ok := res.(*Logger); ok {
 		return logger
 	}
-	return nil
+	return getDefaultLog()
 }
