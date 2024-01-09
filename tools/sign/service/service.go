@@ -279,7 +279,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.seqAddress)
+	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.aggAddress)
 	if err != nil {
 		log.Errorf("error CurrentNonce: %v", err)
 		return err, ""
@@ -289,7 +289,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		To:   to,
 		Data: data,
 	})
-	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx) //nolint:staticcheck
+	signedTx, err := s.ethClient.SignTx(s.ctx, s.aggAddress, tx) //nolint:staticcheck
 	if err != nil {
 		log.Errorf("error SignTx: %v", err)
 		return err, ""
@@ -313,7 +313,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		To:        to,
 		Data:      data,
 	})
-	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
+	signedTx, err = s.ethClient.SignTx(s.ctx, s.aggAddress, tx)
 	if err != nil {
 		log.Errorf("error SignTx: %v", err)
 		return err, ""
