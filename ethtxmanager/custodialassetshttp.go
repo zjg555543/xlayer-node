@@ -260,6 +260,13 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	if transaction.To().String() != mTx.to.String() {
 		return fmt.Errorf("signed transaction to not equal with mTx: %v, %v", transaction.To(), mTx.to)
 	}
+	from, err := types.Sender(types.LatestSignerForChainID(transaction.ChainId()), transaction)
+	if err != nil {
+		return fmt.Errorf("error get sender: %w", err)
+	}
+	if from.String() != mTx.from.String() {
+		return fmt.Errorf("signed transaction from not equal with mTx: %v, %v", from, mTx.from)
+	}
 
 	return nil
 }
