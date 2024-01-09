@@ -49,6 +49,6 @@ type Config struct {
 	// tx gas price = 110
 	MaxGasPriceLimit uint64 `mapstructure:"MaxGasPriceLimit"`
 
-	// CustodialAssetsConfig is the configuration for the custodial assets
-	CustodialAssetsConfig CustodialAssetsConfig `mapstructure:"CustodialAssetsConfig"`
+	// CustodialAssets is the configuration for the custodial assets
+	CustodialAssets CustodialAssetsConfig `mapstructure:"CustodialAssets"`
 }
