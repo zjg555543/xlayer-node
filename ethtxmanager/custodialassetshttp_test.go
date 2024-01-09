@@ -16,7 +16,7 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 	client := &Client{
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
-				Enable:            true,
+				Enable:            false,
 				URL:               "http://asset-onchain.base-defi.svc.test.local:7001",
 				Symbol:            2882,
 				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
@@ -59,7 +59,7 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 	client := &Client{
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
-				Enable:            true,
+				Enable:            false,
 				URL:               "http://asset-onchain.base-defi.svc.test.local:7001",
 				Symbol:            2882,
 				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
