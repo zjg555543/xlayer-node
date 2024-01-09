@@ -159,7 +159,7 @@ func (c *Client) querySignResult(ctx context.Context, request *signResultRequest
 func (c *Client) waitResult(parentCtx context.Context, request *signResultRequest) (*signResponse, error) {
 	queryTicker := time.NewTicker(time.Second)
 	defer queryTicker.Stop()
-	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssets.WaitResultTimeout)
+	ctx, _ := context.WithTimeout(parentCtx, c.cfg.CustodialAssets.WaitResultTimeout.Duration)
 
 	mLog := log.WithFields(traceID, ctx.Value(traceID))
 	for {
