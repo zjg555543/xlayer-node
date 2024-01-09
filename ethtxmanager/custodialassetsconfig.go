@@ -1,8 +1,7 @@
 package ethtxmanager
 
 import (
-	"time"
-
+	"github.com/0xPolygonHermez/zkevm-node/config/types"
 	"github.com/ethereum/go-ethereum/common"
 )
 
@@ -23,7 +22,7 @@ type CustodialAssetsConfig struct {
 	AggregatorAddr common.Address `mapstructure:"AggregatorAddr"`
 
 	// WaitResultTimeout is the timeout to wait for the result of the custodial assets
-	WaitResultTimeout time.Duration `mapstructure:"WaitResultTimeout"`
+	WaitResultTimeout types.Duration `mapstructure:"WaitResultTimeout"`
 
 	// OperateTypeSeq is the operate type of the custodial assets for the sequencer
 	OperateTypeSeq int `mapstructure:"OperateTypeSeq"`
