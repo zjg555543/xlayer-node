@@ -14,7 +14,7 @@ import (
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
-	"github.com/0xPolygonHermez/zkevm-node/tools/sign/config"
+	"github.com/0xPolygonHermez/zkevm-node/tools/signer/config"
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
