@@ -48,6 +48,10 @@ func getDefaultLog() *Logger {
 	return log.Load()
 }
 
+func GetDefaultLog() *Logger {
+	return getDefaultLog()
+}
+
 // Init the logger with defined level. outputs defines the outputs where the
 // logs will be sent. By default outputs contains "stdout", which prints the
 // logs at the output of the process. To add a log file as output, the path
