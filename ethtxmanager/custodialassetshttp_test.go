@@ -13,15 +13,26 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	doMain       = "http://asset-onchain.base-defi.svc.test.local:7001"
+	seqAddr      = "1a13bddcc02d363366e04d4aa588d3c125b0ff6f"
+	aggAddr      = "66e39a1e507af777e8c385e2d91559e20e306303"
+	contractAddr = "8288042CDcFf6C1F158D3bc357fF2ffF4e959E28"
+	// 	doMain       = "http://127.0.0.1:8080"
+	// 	seqAddr      = "f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	// 	aggAddr      = "70997970C51812dc3A010C7d01b50e0d17dc79C8"
+	// 	contractAddr = "812cB73e48841a6736bB94c65c56341817cE6304"
+)
+
 func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 	client := &Client{
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
 				Enable:            false,
-				URL:               "http://asset-onchain.base-defi.svc.test.local:7001",
+				URL:               doMain,
 				Symbol:            2882,
-				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
-				AggregatorAddr:    common.HexToAddress("66e39a1e507af777e8c385e2d91559e20e306303"),
+				SequencerAddr:     common.HexToAddress(seqAddr),
+				AggregatorAddr:    common.HexToAddress(aggAddr),
 				WaitResultTimeout: zktypes.NewDuration(2 * time.Minute),
 				OperateTypeSeq:    1,
 				OperateTypeAgg:    2,
@@ -45,10 +56,11 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 
 	req := client.newSignRequest(2, client.cfg.CustodialAssets.AggregatorAddr, ret)
 
-	to := common.HexToAddress("8288042CDcFf6C1F158D3bc357fF2ffF4e959E28")
+	to := common.HexToAddress(contractAddr)
 	mTx := monitoredTx{
-		from: common.HexToAddress("d6dda5aa7749142b7fda3fe4662c9f346101b8a6"),
-		to:   &to,
+		from:  common.HexToAddress(aggAddr),
+		to:    &to,
+		nonce: 0,
 	}
 	_, err := client.postSignRequestAndWaitResult(ctx, mTx, req)
 	if err != nil {
@@ -61,10 +73,10 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
 				Enable:            false,
-				URL:               "http://asset-onchain.base-defi.svc.test.local:7001",
+				URL:               doMain,
 				Symbol:            2882,
-				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
-				AggregatorAddr:    common.HexToAddress("66e39a1e507af777e8c385e2d91559e20e306303"),
+				SequencerAddr:     common.HexToAddress(seqAddr),
+				AggregatorAddr:    common.HexToAddress(aggAddr),
 				WaitResultTimeout: zktypes.NewDuration(2 * time.Minute),
 				OperateTypeSeq:    1,
 				OperateTypeAgg:    2,
@@ -88,9 +100,9 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 
 	req := client.newSignRequest(client.cfg.CustodialAssets.OperateTypeSeq, client.cfg.CustodialAssets.SequencerAddr, ret)
 
-	to := common.HexToAddress("8288042CDcFf6C1F158D3bc357fF2ffF4e959E28")
+	to := common.HexToAddress(contractAddr)
 	mTx := monitoredTx{
-		from: common.HexToAddress("d6dda5aa7749142b7fda3fe4662c9f346101b8a6"),
+		from: common.HexToAddress(seqAddr),
 		to:   &to,
 	}
 	_, err := client.postSignRequestAndWaitResult(ctx, mTx, req)

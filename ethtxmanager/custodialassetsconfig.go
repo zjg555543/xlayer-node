@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// CustodialAssetsConfig is the config of the custodial assets
 type CustodialAssetsConfig struct {
 	// Enable is the flag to enable the custodial assets
 	Enable bool `mapstructure:"Enable"`
