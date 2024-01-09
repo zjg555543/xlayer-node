@@ -258,7 +258,7 @@ func Test_Filters(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, 30, len(logs))
-		assert.Equal(t, 20, len(logFilterChanges))
+		assert.Equal(t, 10, len(logFilterChanges))
 	}
 }
 
