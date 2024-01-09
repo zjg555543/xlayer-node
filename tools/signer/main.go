@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-data-streamer/log"
-	"github.com/0xPolygonHermez/zkevm-node/tools/sign/config"
-	"github.com/0xPolygonHermez/zkevm-node/tools/sign/service"
+	"github.com/0xPolygonHermez/zkevm-node/tools/signer/config"
+	"github.com/0xPolygonHermez/zkevm-node/tools/signer/service"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,7 +22,7 @@ var (
 		Name:        config.FlagCfg,
 		Aliases:     []string{"c"},
 		Usage:       "Configuration `FILE`",
-		DefaultText: "./config/tool.config.toml",
+		DefaultText: "./config/signer.config.toml",
 		Required:    true,
 	}
 )
