@@ -90,7 +90,7 @@ MaxGasPriceLimit = 0
 		SysFrom = 3
 		UserID = 0
 		OperateAmount = 0
-		RequestSignURI = "/priapi/v1/assetonchain/ecology/ecologyOperat"
+		RequestSignURI = "/priapi/v1/assetonchain/ecology/ecologyOperate"
 		QuerySignURI = "/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"
 
 [RPC]

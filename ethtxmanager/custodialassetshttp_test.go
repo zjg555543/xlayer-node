@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	zktypes "github.com/0xPolygonHermez/zkevm-node/config/types"
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -21,7 +22,7 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 				Symbol:            2882,
 				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
 				AggregatorAddr:    common.HexToAddress("66e39a1e507af777e8c385e2d91559e20e306303"),
-				WaitResultTimeout: 2 * time.Minute,
+				WaitResultTimeout: zktypes.NewDuration(2 * time.Minute),
 				OperateTypeSeq:    1,
 				OperateTypeAgg:    2,
 				ProjectSymbol:     3011,
@@ -64,7 +65,7 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 				Symbol:            2882,
 				SequencerAddr:     common.HexToAddress("1a13bddcc02d363366e04d4aa588d3c125b0ff6f"),
 				AggregatorAddr:    common.HexToAddress("66e39a1e507af777e8c385e2d91559e20e306303"),
-				WaitResultTimeout: 2 * time.Minute,
+				WaitResultTimeout: zktypes.NewDuration(2 * time.Minute),
 				OperateTypeSeq:    1,
 				OperateTypeAgg:    2,
 				ProjectSymbol:     3011,
