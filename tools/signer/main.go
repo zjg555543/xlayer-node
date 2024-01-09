@@ -68,7 +68,6 @@ func HttpService(cliCtx *cli.Context) error {
 	log.Infof("%v,%v,%v,%v,%v,", c.L1.PolygonZkEVMAddress, c.L1.RPC, c.L1.ChainId, c.L1.SeqPrivateKey, c.L1.AggPrivateKey)
 	log.Infof("%v", c.Port)
 
-	// 启动 HTTP 服务器
 	port := c.Port
 	server := &http.Server{
 		Addr:              fmt.Sprintf(":%d", port),
