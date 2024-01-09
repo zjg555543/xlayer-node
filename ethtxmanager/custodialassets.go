@@ -99,7 +99,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 }
 
 func (c *Client) unpackSequenceBatchesTx(tx *types.Transaction) (*sequenceBatchesArgs, error) {
-	if tx == nil || len(tx.Data()) == 0 {
+	if tx == nil || len(tx.Data()) < sigLen {
 		return nil, errEmptyTx
 	}
 	retArgs, err := unpack(tx.Data())
@@ -120,7 +120,7 @@ func (c *Client) unpackSequenceBatchesTx(tx *types.Transaction) (*sequenceBatche
 }
 
 func (c *Client) unpackVerifyBatchesTrustedAggregatorTx(tx *types.Transaction) (*verifyBatchesTrustedAggregatorArgs, error) {
-	if tx == nil || len(tx.Data()) == 0 {
+	if tx == nil || len(tx.Data()) < sigLen {
 		return nil, errEmptyTx
 	}
 	retArgs, err := unpack(tx.Data())
