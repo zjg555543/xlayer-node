@@ -48,6 +48,7 @@ func getDefaultLog() *Logger {
 	return log.Load()
 }
 
+// GetDefaultLog returns the default logger
 func GetDefaultLog() *Logger {
 	return getDefaultLog()
 }
