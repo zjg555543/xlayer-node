@@ -71,6 +71,11 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 
 	var ret *types.Transaction
 
+	contractAddress, err := c.etherman.GetZkEVMAddress()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get zkEVM address: %v", err)
+	}
+
 	switch sender {
 	case c.cfg.CustodialAssets.SequencerAddr:
 		args, err := c.unpackSequenceBatchesTx(tx)
@@ -78,7 +83,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := args.marshal()
+		infos, err := args.marshal(contractAddress)
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
@@ -94,7 +99,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := args.marshal()
+		infos, err := args.marshal(contractAddress)
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
@@ -190,7 +195,7 @@ type batchData struct {
 	MinForcedTimestamp uint64 `json:"minForcedTimestamp"`
 }
 
-func (s *sequenceBatchesArgs) marshal() (string, error) {
+func (s *sequenceBatchesArgs) marshal(contractAddress common.Address) (string, error) {
 	if s == nil {
 		return "", fmt.Errorf("sequenceBatchesArgs is nil")
 	}
@@ -198,9 +203,11 @@ func (s *sequenceBatchesArgs) marshal() (string, error) {
 		Batches            []batchData    `json:"batches"`
 		L2Coinbase         common.Address `json:"l2Coinbase"`
 		SignaturesAndAddrs string         `json:"signaturesAndAddrs"`
+		ContractAddress    common.Address `json:"contractAddress"`
 	}{
 		L2Coinbase:         s.L2Coinbase,
 		SignaturesAndAddrs: hex.EncodeToString(s.SignaturesAndAddrs),
+		ContractAddress:    contractAddress,
 	}
 
 	httpArgs.Batches = make([]batchData, 0, len(s.Batches))
@@ -221,7 +228,7 @@ func (s *sequenceBatchesArgs) marshal() (string, error) {
 	return string(ret), nil
 }
 
-func (v *verifyBatchesTrustedAggregatorArgs) marshal() (string, error) {
+func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Address) (string, error) {
 	if v == nil {
 		return "", fmt.Errorf("verifyBatchesTrustedAggregatorArgs is nil")
 	}
@@ -232,12 +239,14 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal() (string, error) {
 		NewLocalExitRoot string           `json:"newLocalExitRoot"`
 		NewStateRoot     string           `json:"newStateRoot"`
 		Proof            [proofLen]string `json:"proof"`
+		ContractAddress  common.Address   `json:"contractAddress"`
 	}{
 		PendingStateNum:  v.PendingStateNum,
 		InitNumBatch:     v.InitNumBatch,
 		FinalNewBatch:    v.FinalNewBatch,
 		NewLocalExitRoot: hex.EncodeToString(v.NewLocalExitRoot[:]),
 		NewStateRoot:     hex.EncodeToString(v.NewStateRoot[:]),
+		ContractAddress:  contractAddress,
 	}
 	for i, v := range v.Proof {
 		httpArgs.Proof[i] = hex.EncodeToString(v[:])

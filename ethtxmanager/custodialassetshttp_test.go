@@ -26,6 +26,7 @@ const (
 
 func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 	client := &Client{
+		etherman: mockEtherman{},
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
 				Enable:            false,
@@ -52,7 +53,7 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 	tx := types.NewTransaction(0, common.HexToAddress("095e7baea6a6c7c4c2dfeb977efac326af552d87"), big.NewInt(10), 50000, big.NewInt(10), txInput)
 
 	seqReq, _ := client.unpackVerifyBatchesTrustedAggregatorTx(tx)
-	ret, _ := seqReq.marshal()
+	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr))
 
 	req := client.newSignRequest(2, client.cfg.CustodialAssets.AggregatorAddr, ret)
 
@@ -70,6 +71,7 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 
 func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 	client := &Client{
+		etherman: mockEtherman{},
 		cfg: Config{
 			CustodialAssets: CustodialAssetsConfig{
 				Enable:            false,
@@ -96,7 +98,7 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 	tx := types.NewTransaction(0, common.HexToAddress("095e7baea6a6c7c4c2dfeb977efac326af552d87"), big.NewInt(10), 50000, big.NewInt(10), txInput)
 
 	seqReq, _ := client.unpackSequenceBatchesTx(tx)
-	ret, _ := seqReq.marshal()
+	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr))
 
 	req := client.newSignRequest(client.cfg.CustodialAssets.OperateTypeSeq, client.cfg.CustodialAssets.SequencerAddr, ret)
 
@@ -109,4 +111,60 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 	if err != nil {
 		t.Log(err)
 	}
+}
+
+type mockEtherman struct{}
+
+func (m mockEtherman) GetTx(ctx context.Context, txHash common.Hash) (*types.Transaction, bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) GetTxReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) WaitTxToBeMined(ctx context.Context, tx *types.Transaction, timeout time.Duration) (bool, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) SendTx(ctx context.Context, tx *types.Transaction) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) CurrentNonce(ctx context.Context, account common.Address) (uint64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) SuggestedGasPrice(ctx context.Context) (*big.Int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) EstimateGas(ctx context.Context, from common.Address, to *common.Address, value *big.Int, data []byte) (uint64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) CheckTxWasMined(ctx context.Context, txHash common.Hash) (bool, *types.Receipt, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) SignTx(ctx context.Context, sender common.Address, tx *types.Transaction) (*types.Transaction, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) GetRevertMessage(ctx context.Context, tx *types.Transaction) (string, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m mockEtherman) GetZkEVMAddress() (common.Address, error) {
+	return common.HexToAddress(contractAddr), nil
 }

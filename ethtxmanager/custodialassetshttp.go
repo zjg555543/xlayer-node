@@ -198,7 +198,6 @@ func (c *Client) postSignRequestAndWaitResult(ctx context.Context, mTx monitored
 	mLog.Infof("post custodial assets success")
 	result, err := c.waitResult(ctx, c.newSignResultRequest(request.RefOrderID))
 	if err != nil {
-		//TODO handle error
 		return nil, fmt.Errorf("error wait result: %w", err)
 	}
 	mLog.Infof("wait result success: %v", result)
@@ -228,6 +227,10 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	mLog := log.WithFields(getTraceID(ctx))
 	mLog.Infof("check signed transaction: %v", transaction.Hash())
 
+	contractAddress, err := c.etherman.GetZkEVMAddress()
+	if err != nil {
+		return fmt.Errorf("failed to get zkEVM address: %v", err)
+	}
 	var signedRequest string
 	switch request.OperateType {
 	case c.cfg.CustodialAssets.OperateTypeSeq:
@@ -235,7 +238,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)
 		}
-		signedRequest, err = args.marshal()
+		signedRequest, err = args.marshal(contractAddress)
 		if err != nil {
 			return fmt.Errorf("error marshal sequence batches tx: %w", err)
 		}
@@ -244,7 +247,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)
 		}
-		signedRequest, err = args.marshal()
+		signedRequest, err = args.marshal(contractAddress)
 		if err != nil {
 			return fmt.Errorf("error marshal sequence batches tx: %w", err)
 		}
