@@ -13,8 +13,11 @@ import (
 )
 
 const (
-	appName  = "zkevm-data-streamer-tool" //nolint:gosec
-	appUsage = "zkevm datastream tool"
+	appName      = "x1-signer" //nolint:gosec
+	appUsage     = "x1 signer tool"
+	timeout      = 5 * time.Second
+	httpGetPath  = "/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"
+	httpPostPath = "/priapi/v1/assetonchain/ecology/ecologyOperate"
 )
 
 var (
@@ -47,7 +50,7 @@ func main() {
 
 	err := app.Run(os.Args)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		log.Errorf("Error: %v", err)
 		os.Exit(1)
 	}
 }
@@ -56,28 +59,25 @@ func main() {
 func HttpService(cliCtx *cli.Context) error {
 	c, err := config.Load(cliCtx)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		log.Errorf("Error: %v", err)
 		os.Exit(1)
 	}
 
 	log.Init(c.Log)
 	srv := service.NewServer(c, cliCtx.Context)
-	http.HandleFunc("/priapi/v1/assetonchain/ecology/querySignDataByOrderNo", srv.GetSignDataByOrderNo)
-	http.HandleFunc("/priapi/v1/assetonchain/ecology/ecologyOperate", srv.PostSignDataByOrderNo)
+	http.HandleFunc(httpGetPath, srv.GetSignDataByOrderNo)
+	http.HandleFunc(httpPostPath, srv.PostSignDataByOrderNo)
 
-	log.Infof("%v,%v,%v,%v,%v,", c.L1.PolygonZkEVMAddress, c.L1.RPC, c.L1.ChainId, c.L1.SeqPrivateKey, c.L1.AggPrivateKey)
-	log.Infof("%v", c.Port)
+	log.Infof("Listen port:%v", c.Port)
 
-	// 启动 HTTP 服务器
-	port := c.Port
 	server := &http.Server{
-		Addr:              fmt.Sprintf(":%d", port),
-		ReadHeaderTimeout: 3 * time.Second, // nolint:gomnd
+		Addr:              fmt.Sprintf(":%d", c.Port),
+		ReadHeaderTimeout: timeout,
 	}
 
-	err = server.ListenAndServe() //nolint:gomnd
+	err = server.ListenAndServe()
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Errorf("Error:%v", err)
 	}
 
 	return nil

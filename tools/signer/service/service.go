@@ -20,6 +20,17 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+const (
+	maxGasPrice     = 2000000
+	proofLen        = 24
+	forkIDChunkSize = 20000
+	statusSuccess   = 200
+	operateTypeSeq  = 1
+	operateTypeAgg  = 2
+	codeSuccess     = 0
+	codeFail        = 1
+)
+
 // Server is an API backend to handle RPC requests
 type Server struct {
 	ethCfg etherman.Config
@@ -44,7 +55,7 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 
 	srv.ethCfg = etherman.Config{
 		URL:              cfg.L1.RPC,
-		ForkIDChunkSize:  20000, //nolint:gomnd
+		ForkIDChunkSize:  forkIDChunkSize,
 		MultiGasProvider: false,
 	}
 
@@ -93,7 +104,7 @@ func sendJSONResponse(w http.ResponseWriter, data interface{}) {
 // PostSignDataByOrderNo is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 	log.Infof("PostSignDataByOrderNo start")
-	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false} //nolint:gomnd
+	response := Response{Code: codeFail, Data: "", DetailMsg: "", Msg: "", Status: statusSuccess, Success: false}
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "Error reading request body", http.StatusBadRequest)
@@ -113,7 +124,6 @@ func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 
 	log.Infof("Request:%v", requestData.String())
 
-	log.Infof("Request: %v,%v,%v,%v,%v,%v,%v,%v", requestData.OperateType, requestData.OperateAddress, requestData.Symbol, requestData.ProjectSymbol, requestData.RefOrderId, requestData.OperateSymbol, requestData.OperateAmount, requestData.SysFrom)
 	if value, ok := s.result[requestData.RefOrderId]; ok {
 		response.DetailMsg = "already exist"
 		log.Infof("already exist, key:%v, value:%v", requestData.RefOrderId, value)
@@ -121,23 +131,23 @@ func (s *Server) PostSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if requestData.OperateType == OperateTypeSeq {
+	if requestData.OperateType == operateTypeSeq {
 		err, data := s.signSeq(requestData)
 		if err != nil {
 			response.DetailMsg = err.Error()
 			log.Errorf("error signSeq: %v", err)
 		} else {
-			response.Code = CodeSuccess
+			response.Code = codeSuccess
 			response.Success = true
 			s.result[requestData.RefOrderId] = data
 		}
-	} else if requestData.OperateType == OperateTypeAgg {
+	} else if requestData.OperateType == operateTypeAgg {
 		err, data := s.signAgg(requestData)
 		if err != nil {
 			response.DetailMsg = err.Error()
 			log.Errorf("error signAgg: %v", err)
 		} else {
-			response.Code = CodeSuccess
+			response.Code = codeSuccess
 			response.Success = true
 			s.result[requestData.RefOrderId] = data
 		}
@@ -186,53 +196,7 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.seqAddress)
-	if err != nil {
-		log.Errorf("error CurrentNonce: %v", err)
-		return err, ""
-	}
-	log.Infof("CurrentNonce: %v", nonce)
-	tx := ethTypes.NewTx(&ethTypes.DynamicFeeTx{
-		To:   to,
-		Data: data,
-	})
-	signedTx, err := s.ethClient.SignTx(s.ctx, s.seqAddress, tx) //nolint:staticcheck
-	if err != nil {
-		log.Errorf("error SignTx: %v", err)
-		return err, ""
-	}
-
-	gas := uint64(2000000) //nolint:gomnd
-
-	// get gas price
-	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
-	if err != nil {
-		err := fmt.Errorf("failed to get suggested gas price: %w", err)
-		log.Error(err.Error())
-		return err, ""
-	}
-	tx = ethTypes.NewTx(&ethTypes.DynamicFeeTx{
-		Nonce:     nonce,
-		GasTipCap: gasPrice,
-		GasFeeCap: gasPrice,
-		Gas:       gas,
-		To:        to,
-		Data:      data,
-	})
-	signedTx, err = s.ethClient.SignTx(s.ctx, s.seqAddress, tx)
-	if err != nil {
-		log.Errorf("error SignTx: %v", err)
-		return err, ""
-	}
-
-	txBin, err := signedTx.MarshalBinary()
-	if err != nil {
-		log.Errorf("error MarshalBinary: %v", err)
-		return err, ""
-	}
-
-	log.Infof("TxHash: %v", signedTx.Hash().String())
-	return nil, hex.EncodeToString(txBin)
+	return s.getTxData(s.seqAddress, to, data)
 }
 
 // signAgg is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
@@ -256,7 +220,7 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	if len(aggData.Proof) != 24 { // nolint:gomnd
+	if len(aggData.Proof) != proofLen {
 		log.Errorf("agg data len is not 24")
 		return fmt.Errorf("agg proof len is not 24"), ""
 	}
@@ -283,7 +247,11 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	nonce, err := s.ethClient.CurrentNonce(s.ctx, s.aggAddress)
+	return s.getTxData(s.aggAddress, to, data)
+}
+
+func (s *Server) getTxData(from common.Address, to *common.Address, data []byte) (error, string) {
+	nonce, err := s.ethClient.CurrentNonce(s.ctx, from)
 	if err != nil {
 		log.Errorf("error CurrentNonce: %v", err)
 		return err, ""
@@ -293,13 +261,11 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		To:   to,
 		Data: data,
 	})
-	signedTx, err := s.ethClient.SignTx(s.ctx, s.aggAddress, tx) //nolint:staticcheck
+	signedTx, err := s.ethClient.SignTx(s.ctx, from, tx) //nolint:staticcheck
 	if err != nil {
 		log.Errorf("error SignTx: %v", err)
 		return err, ""
 	}
-
-	gas := uint64(2000000) //nolint:gomnd
 
 	// get gas price
 	gasPrice, err := s.ethClient.SuggestedGasPrice(s.ctx)
@@ -313,11 +279,11 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		Nonce:     nonce,
 		GasTipCap: gasPrice,
 		GasFeeCap: gasPrice,
-		Gas:       gas,
+		Gas:       maxGasPrice,
 		To:        to,
 		Data:      data,
 	})
-	signedTx, err = s.ethClient.SignTx(s.ctx, s.aggAddress, tx)
+	signedTx, err = s.ethClient.SignTx(s.ctx, from, tx)
 	if err != nil {
 		log.Errorf("error SignTx: %v", err)
 		return err, ""
@@ -335,13 +301,13 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 
 // GetSignDataByOrderNo is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
 func (s *Server) GetSignDataByOrderNo(w http.ResponseWriter, r *http.Request) {
-	response := Response{Code: CodeFail, Data: "", DetailMsg: "", Msg: "", Status: 200, Success: false} //nolint:gomnd
+	response := Response{Code: codeFail, Data: "", DetailMsg: "", Msg: "", Status: statusSuccess, Success: false}
 
 	orderID := r.URL.Query().Get("orderId")
 	projectSymbol := r.URL.Query().Get("projectSymbol")
 	log.Infof("GetSignDataByOrderNo: %v,%v", orderID, projectSymbol)
 	if value, ok := s.result[orderID]; ok {
-		response.Code = CodeSuccess
+		response.Code = codeSuccess
 		response.Success = true
 		response.Data = value
 	} else {

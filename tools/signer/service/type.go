@@ -6,18 +6,6 @@ import (
 	"fmt"
 )
 
-// OperateTypeSeq is the type of operation
-const OperateTypeSeq = 1
-
-// OperateTypeAgg is the type of operation
-const OperateTypeAgg = 2
-
-// CodeSuccess is the type of result
-const CodeSuccess = 0
-
-// CodeFail is the type of result
-const CodeFail = 1
-
 // Request is the request body
 type Request struct {
 	OperateType    int    `json:"operateType"`
