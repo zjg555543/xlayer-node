@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	maxGasPrice     = 2000000
+	maxGas          = 5000000
 	proofLen        = 24
 	forkIDChunkSize = 20000
 	statusSuccess   = 200
@@ -279,7 +279,7 @@ func (s *Server) getTxData(from common.Address, to *common.Address, data []byte)
 		Nonce:     nonce,
 		GasTipCap: gasPrice,
 		GasFeeCap: gasPrice,
-		Gas:       maxGasPrice,
+		Gas:       maxGas,
 		To:        to,
 		Data:      data,
 	})
