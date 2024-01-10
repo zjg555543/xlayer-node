@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -248,4 +249,12 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal() (string, error) {
 	}
 
 	return string(ret), nil
+}
+
+func (c *Client) halt(err error) {
+	for {
+		log.Errorf("fatal error: %s", err)
+		log.Error("halting the eth tx manager")
+		time.Sleep(5 * time.Second) //nolint:gomnd
+	}
 }
