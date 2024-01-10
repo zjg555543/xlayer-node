@@ -201,8 +201,10 @@ func Test_Filters(t *testing.T) {
 		err = operations.WaitTxToBeMined(ctx, ethereumClient, scTx, operations.DefaultTimeoutTxToBeMined)
 		require.NoError(t, err)
 
+		bn := types.BlockNumber(0)
 		response, err = client.JSONRPCCall(network.URL, "eth_newFilter", map[string]interface{}{
 			"Addresses": []common.Address{scAddr},
+			"FromBlock": bn.StringOrHex(),
 		})
 		require.NoError(t, err)
 		require.Nil(t, response.Error)
@@ -258,7 +260,7 @@ func Test_Filters(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, 30, len(logs))
-		assert.Equal(t, 10, len(logFilterChanges))
+		assert.Equal(t, 20, len(logFilterChanges))
 	}
 }
 
