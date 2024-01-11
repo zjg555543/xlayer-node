@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/big"
 	"strings"
 	"time"
 
@@ -14,16 +15,18 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/google/uuid"
 )
 
 type trace string
 
 const (
-	sigLen         = 4
-	hashLen        = 32
-	proofLen       = 24
-	traceID  trace = "traceID"
+	sigLen               = 4
+	hashLen              = 32
+	proofLen             = 24
+	traceID        trace = "traceID"
+	gasPriceBuffer       = 0.001 // GWei
 )
 
 func getTraceID(ctx context.Context) (string, string) {
@@ -83,7 +86,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := args.marshal(contractAddress)
+		infos, err := args.marshal(contractAddress, mTx)
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
@@ -99,7 +102,7 @@ func (c *Client) signTx(mTx monitoredTx, tx *types.Transaction) (*types.Transact
 			mLog.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to unpack tx %x data: %v", tx.Hash(), err)
 		}
-		infos, err := args.marshal(contractAddress)
+		infos, err := args.marshal(contractAddress, mTx)
 		if err != nil {
 			mLog.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
 			return nil, fmt.Errorf("failed to marshal tx %x data: %v", tx.Hash(), err)
@@ -195,19 +198,40 @@ type batchData struct {
 	MinForcedTimestamp uint64 `json:"minForcedTimestamp"`
 }
 
-func (s *sequenceBatchesArgs) marshal(contractAddress common.Address) (string, error) {
+func weiToGWei(wei *big.Int) *big.Float {
+	return new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(params.GWei))
+}
+
+func getGasPriceGWei(gasPriceWei *big.Int) float64 {
+	gwei := weiToGWei(gasPriceWei)
+	ret, acc := gwei.Float64()
+	if acc == big.Below {
+		ret += gasPriceBuffer
+	}
+
+	return ret
+}
+
+func (s *sequenceBatchesArgs) marshal(contractAddress common.Address, mTx monitoredTx) (string, error) {
 	if s == nil {
 		return "", fmt.Errorf("sequenceBatchesArgs is nil")
 	}
+	gp := getGasPriceGWei(mTx.gasPrice)
 	httpArgs := struct {
 		Batches            []batchData    `json:"batches"`
 		L2Coinbase         common.Address `json:"l2Coinbase"`
 		SignaturesAndAddrs string         `json:"signaturesAndAddrs"`
 		ContractAddress    common.Address `json:"contractAddress"`
+		GasLimit           uint64         `json:"gasLimit"`
+		GasPrice           float64        `json:"gasPrice"`
+		Nonce              uint64         `json:"nonce"`
 	}{
 		L2Coinbase:         s.L2Coinbase,
 		SignaturesAndAddrs: hex.EncodeToString(s.SignaturesAndAddrs),
 		ContractAddress:    contractAddress,
+		GasLimit:           mTx.gas + mTx.gasOffset,
+		GasPrice:           gp,
+		Nonce:              mTx.nonce,
 	}
 
 	httpArgs.Batches = make([]batchData, 0, len(s.Batches))
@@ -228,10 +252,12 @@ func (s *sequenceBatchesArgs) marshal(contractAddress common.Address) (string, e
 	return string(ret), nil
 }
 
-func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Address) (string, error) {
+func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Address, mTx monitoredTx) (string, error) {
 	if v == nil {
 		return "", fmt.Errorf("verifyBatchesTrustedAggregatorArgs is nil")
 	}
+
+	gp := getGasPriceGWei(mTx.gasPrice)
 	httpArgs := struct {
 		PendingStateNum  uint64           `json:"pendingStateNum"`
 		InitNumBatch     uint64           `json:"initNumBatch"`
@@ -240,6 +266,9 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Addr
 		NewStateRoot     string           `json:"newStateRoot"`
 		Proof            [proofLen]string `json:"proof"`
 		ContractAddress  common.Address   `json:"contractAddress"`
+		GasLimit         uint64           `json:"gasLimit"`
+		GasPrice         float64          `json:"gasPrice"` // Gwei
+		Nonce            uint64           `json:"nonce"`
 	}{
 		PendingStateNum:  v.PendingStateNum,
 		InitNumBatch:     v.InitNumBatch,
@@ -247,6 +276,9 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Addr
 		NewLocalExitRoot: hex.EncodeToString(v.NewLocalExitRoot[:]),
 		NewStateRoot:     hex.EncodeToString(v.NewStateRoot[:]),
 		ContractAddress:  contractAddress,
+		GasLimit:         mTx.gas + mTx.gasOffset,
+		GasPrice:         gp,
+		Nonce:            mTx.nonce,
 	}
 	for i, v := range v.Proof {
 		httpArgs.Proof[i] = hex.EncodeToString(v[:])

@@ -238,7 +238,7 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)
 		}
-		signedRequest, err = args.marshal(contractAddress)
+		signedRequest, err = args.marshal(contractAddress, mTx)
 		if err != nil {
 			return fmt.Errorf("error marshal sequence batches tx: %w", err)
 		}
@@ -247,13 +247,15 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		if err != nil {
 			return fmt.Errorf("error unpack sequence batches tx: %w", err)
 		}
-		signedRequest, err = args.marshal(contractAddress)
+		signedRequest, err = args.marshal(contractAddress, mTx)
 		if err != nil {
 			return fmt.Errorf("error marshal sequence batches tx: %w", err)
 		}
 	default:
 		return fmt.Errorf("error operate type: %v", request.OperateType)
 	}
+	mLog.Infof("signed transaction nonce: %v to: %v gas: %v gas price: %v\n", transaction.Nonce(), transaction.To(), transaction.Gas(), transaction.GasPrice())
+	mLog.Infof("mTx    transaction nonce: %v to: %v gas: %v gas price: %v\n", mTx.nonce, mTx.to.String(), mTx.gas, mTx.gasPrice.String())
 	if signedRequest != request.OtherInfo {
 		return fmt.Errorf("signed transaction not equal with other info: %v, %v", signedRequest, request.OtherInfo)
 	}
@@ -269,6 +271,12 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	}
 	if from.String() != mTx.from.String() {
 		return fmt.Errorf("signed transaction from not equal with mTx: %v, %v", from, mTx.from)
+	}
+	if transaction.Gas() != mTx.gas {
+		return fmt.Errorf("signed transaction gas not equal with mTx: %v, %v", transaction.Gas(), mTx.gas)
+	}
+	if transaction.GasPrice().Cmp(mTx.gasPrice) >= 0 {
+		return fmt.Errorf("signed transaction gas price less than mTx: %v, %v", transaction.GasPrice().String(), mTx.gasPrice.String())
 	}
 
 	return nil
