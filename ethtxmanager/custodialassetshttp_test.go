@@ -53,16 +53,20 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 	tx := types.NewTransaction(0, common.HexToAddress("095e7baea6a6c7c4c2dfeb977efac326af552d87"), big.NewInt(10), 50000, big.NewInt(10), txInput)
 
 	seqReq, _ := client.unpackVerifyBatchesTrustedAggregatorTx(tx)
-	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr))
-
-	req := client.newSignRequest(2, client.cfg.CustodialAssets.AggregatorAddr, ret)
 
 	to := common.HexToAddress(contractAddr)
 	mTx := monitoredTx{
-		from:  common.HexToAddress(aggAddr),
-		to:    &to,
-		nonce: 0,
+		from:      common.HexToAddress(aggAddr),
+		to:        &to,
+		nonce:     0,
+		gas:       2000000,
+		gasOffset: 100,
+		gasPrice:  big.NewInt(12345678912),
 	}
+	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr), mTx)
+
+	req := client.newSignRequest(2, client.cfg.CustodialAssets.AggregatorAddr, ret)
+
 	_, err := client.postSignRequestAndWaitResult(ctx, mTx, req)
 	if err != nil {
 		t.Log(err)
@@ -98,15 +102,18 @@ func TestClientPostSignRequestAndWaitResultSeq(t *testing.T) {
 	tx := types.NewTransaction(0, common.HexToAddress("095e7baea6a6c7c4c2dfeb977efac326af552d87"), big.NewInt(10), 50000, big.NewInt(10), txInput)
 
 	seqReq, _ := client.unpackSequenceBatchesTx(tx)
-	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr))
+	to := common.HexToAddress(contractAddr)
+	mTx := monitoredTx{
+		from:      common.HexToAddress(seqAddr),
+		to:        &to,
+		gasPrice:  big.NewInt(12345678912),
+		gas:       2000000,
+		gasOffset: 100,
+	}
+	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr), mTx)
 
 	req := client.newSignRequest(client.cfg.CustodialAssets.OperateTypeSeq, client.cfg.CustodialAssets.SequencerAddr, ret)
 
-	to := common.HexToAddress(contractAddr)
-	mTx := monitoredTx{
-		from: common.HexToAddress(seqAddr),
-		to:   &to,
-	}
 	_, err := client.postSignRequestAndWaitResult(ctx, mTx, req)
 	if err != nil {
 		t.Log(err)
