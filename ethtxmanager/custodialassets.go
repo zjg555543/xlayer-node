@@ -22,11 +22,10 @@ import (
 type trace string
 
 const (
-	sigLen               = 4
-	hashLen              = 32
-	proofLen             = 24
-	traceID        trace = "traceID"
-	gasPriceBuffer       = 0.001 // GWei
+	sigLen         = 4
+	hashLen        = 32
+	proofLen       = 24
+	traceID  trace = "traceID"
 )
 
 func getTraceID(ctx context.Context) (string, string) {
