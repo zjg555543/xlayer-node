@@ -60,8 +60,8 @@ func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
 		to:        &to,
 		nonce:     0,
 		gas:       2000000,
-		gasOffset: 100,
-		gasPrice:  big.NewInt(12345678912),
+		gasOffset: 200,
+		gasPrice:  big.NewInt(12),
 	}
 	ret, _ := seqReq.marshal(common.HexToAddress(contractAddr), mTx)
 

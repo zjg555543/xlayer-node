@@ -198,18 +198,13 @@ type batchData struct {
 	MinForcedTimestamp uint64 `json:"minForcedTimestamp"`
 }
 
-func weiToGWei(wei *big.Int) *big.Float {
-	return new(big.Float).Quo(new(big.Float).SetInt(wei), big.NewFloat(params.GWei))
-}
+func getGasPriceGWei(gasPriceWei *big.Int) string {
+	compactAmount := big.NewInt(0)
+	reminder := big.NewInt(0)
+	divisor := big.NewInt(params.Ether)
+	compactAmount.QuoRem(gasPriceWei, divisor, reminder)
 
-func getGasPriceGWei(gasPriceWei *big.Int) float64 {
-	gwei := weiToGWei(gasPriceWei)
-	ret, acc := gwei.Float64()
-	if acc == big.Below {
-		ret += gasPriceBuffer
-	}
-
-	return ret
+	return fmt.Sprintf("%v.%018s", compactAmount.String(), reminder.String())
 }
 
 func (s *sequenceBatchesArgs) marshal(contractAddress common.Address, mTx monitoredTx) (string, error) {
@@ -223,7 +218,7 @@ func (s *sequenceBatchesArgs) marshal(contractAddress common.Address, mTx monito
 		SignaturesAndAddrs string         `json:"signaturesAndAddrs"`
 		ContractAddress    common.Address `json:"contractAddress"`
 		GasLimit           uint64         `json:"gasLimit"`
-		GasPrice           float64        `json:"gasPrice"`
+		GasPrice           string         `json:"gasPrice"`
 		Nonce              uint64         `json:"nonce"`
 	}{
 		L2Coinbase:         s.L2Coinbase,
@@ -267,7 +262,7 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Addr
 		Proof            [proofLen]string `json:"proof"`
 		ContractAddress  common.Address   `json:"contractAddress"`
 		GasLimit         uint64           `json:"gasLimit"`
-		GasPrice         float64          `json:"gasPrice"` // Gwei
+		GasPrice         string           `json:"gasPrice"`
 		Nonce            uint64           `json:"nonce"`
 	}{
 		PendingStateNum:  v.PendingStateNum,
