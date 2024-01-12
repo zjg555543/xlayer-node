@@ -14,14 +14,14 @@ import (
 )
 
 const (
-	doMain       = "http://asset-onchain.base-defi.svc.test.local:7001"
-	seqAddr      = "1a13bddcc02d363366e04d4aa588d3c125b0ff6f"
-	aggAddr      = "66e39a1e507af777e8c385e2d91559e20e306303"
-	contractAddr = "8288042CDcFf6C1F158D3bc357fF2ffF4e959E28"
-	// 	doMain       = "http://127.0.0.1:8080"
-	// 	seqAddr      = "f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-	// 	aggAddr      = "70997970C51812dc3A010C7d01b50e0d17dc79C8"
-	// 	contractAddr = "812cB73e48841a6736bB94c65c56341817cE6304"
+	// 	doMain       = "http://asset-onchain.base-defi.svc.test.local:7001"
+	// 	seqAddr      = "1a13bddcc02d363366e04d4aa588d3c125b0ff6f"
+	// 	aggAddr      = "66e39a1e507af777e8c385e2d91559e20e306303"
+	// 	contractAddr = "8288042CDcFf6C1F158D3bc357fF2ffF4e959E28"
+	doMain       = "http://127.0.0.1:7001"
+	seqAddr      = "f39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	aggAddr      = "70997970C51812dc3A010C7d01b50e0d17dc79C8"
+	contractAddr = "812cB73e48841a6736bB94c65c56341817cE6304"
 )
 
 func TestClientPostSignRequestAndWaitResultAgg(t *testing.T) {
