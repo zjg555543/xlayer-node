@@ -501,6 +501,11 @@ func (e *EthEndpoints) internalGetLogs(ctx context.Context, dbTx pgx.Tx, filter 
 		return RPCErrorResponse(types.DefaultErrorCode, "not supported yet", nil, true)
 	}
 
+	if filter.FromBlock == nil {
+		bn := types.LatestBlockNumber
+		filter.FromBlock = &bn
+	}
+
 	fromBlockNumber, toBlockNumber, rpcErr := filter.GetNumericBlockNumbers(ctx, e.cfg, e.state, e.etherman, dbTx)
 	if rpcErr != nil {
 		return nil, rpcErr
