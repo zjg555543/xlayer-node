@@ -492,6 +492,11 @@ func (e *EthEndpoints) GetFilterLogs(filterID string) (interface{}, types.Error)
 // GetLogs returns a list of logs accordingly to the provided filter
 func (e *EthEndpoints) GetLogs(filter LogFilter) (interface{}, types.Error) {
 	return e.txMan.NewDbTxScope(e.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
+		if filter.FromBlock == nil {
+			bn := types.LatestBlockNumber
+			filter.FromBlock = &bn
+		}
+
 		return e.internalGetLogs(ctx, dbTx, filter)
 	})
 }
@@ -499,11 +504,6 @@ func (e *EthEndpoints) GetLogs(filter LogFilter) (interface{}, types.Error) {
 func (e *EthEndpoints) internalGetLogs(ctx context.Context, dbTx pgx.Tx, filter LogFilter) (interface{}, types.Error) {
 	if e.isDisabled("eth_getLogs") {
 		return RPCErrorResponse(types.DefaultErrorCode, "not supported yet", nil, true)
-	}
-
-	if filter.FromBlock == nil {
-		bn := types.LatestBlockNumber
-		filter.FromBlock = &bn
 	}
 
 	fromBlockNumber, toBlockNumber, rpcErr := filter.GetNumericBlockNumbers(ctx, e.cfg, e.state, e.etherman, dbTx)
