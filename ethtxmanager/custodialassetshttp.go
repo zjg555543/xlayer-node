@@ -254,8 +254,8 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 	default:
 		return fmt.Errorf("error operate type: %v", request.OperateType)
 	}
-	mLog.Infof("signed transaction nonce: %v to: %v gas: %v gas price: %v", transaction.Nonce(), transaction.To(), transaction.Gas(), transaction.GasPrice())
-	mLog.Infof("mTx    transaction nonce: %v to: %v gas: %v gas price: %v", mTx.nonce, mTx.to.String(), mTx.gas+mTx.gasOffset, mTx.gasPrice.String())
+	mLog.Infof("signed transaction nonce: %v to: %v gas limit: %v gas price: %v", transaction.Nonce(), transaction.To(), transaction.Gas(), transaction.GasPrice())
+	mLog.Infof("mTx    transaction nonce: %v to: %v gas limit: %v gas price: %v", mTx.nonce, mTx.to.String(), mTx.gas+mTx.gasOffset, mTx.gasPrice.String())
 	if signedRequest != request.OtherInfo {
 		return fmt.Errorf("signed transaction not equal with other info: %v, %v", signedRequest, request.OtherInfo)
 	}
@@ -273,10 +273,10 @@ func (c *Client) checkSignedTransaction(ctx context.Context, mTx monitoredTx, tr
 		return fmt.Errorf("signed transaction from not equal with mTx: %v, %v", from, mTx.from)
 	}
 	if transaction.Gas() != mTx.gas+mTx.gasOffset {
-		return fmt.Errorf("signed transaction gas not equal with mTx: %v, %v", transaction.Gas(), mTx.gas)
+		return fmt.Errorf("signed transaction gas limit not equal with mTx: %v, %v", transaction.Gas(), mTx.gas)
 	}
 	if transaction.GasPrice().Cmp(mTx.gasPrice) != 0 {
-		return fmt.Errorf("signed transaction gas not equal with mTx: %v, %v", transaction.GasPrice().String(), mTx.gasPrice.String())
+		return fmt.Errorf("signed transaction gas price not equal with mTx: %v, %v", transaction.GasPrice().String(), mTx.gasPrice.String())
 	}
 
 	return nil
