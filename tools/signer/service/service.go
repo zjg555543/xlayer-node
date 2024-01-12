@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 
 	"github.com/0xPolygonHermez/zkevm-node/aggregator/prover"
@@ -18,6 +19,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/params"
 )
 
 const (
@@ -195,8 +197,10 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		log.Errorf("error BuildSequenceBatchesTxData: %v", err)
 		return err, ""
 	}
+	to = &seqData.ContractAddress
 
-	return s.getTxData(s.seqAddress, to, data)
+	// return s.getTxData(s.seqAddress, to, data)
+	return s.getLegacyTxData(s.seqAddress, to, data, seqData.Nonce, seqData.GasLimit, seqData.GasPrice)
 }
 
 // signAgg is the handler for the /priapi/v1/assetonchain/ecology/ecologyOperate endpoint
@@ -247,7 +251,40 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		return err, ""
 	}
 
-	return s.getTxData(s.aggAddress, to, data)
+	to = &aggData.ContractAddress
+	// return s.getTxData(s.aggAddress, to, data)
+	return s.getLegacyTxData(s.aggAddress, to, data, aggData.Nonce, aggData.GasLimit, aggData.GasPrice)
+}
+
+func (s *Server) getLegacyTxData(from common.Address, to *common.Address, data []byte, nonce, gasLimit uint64, gasPrice string) (error, string) {
+	bigFloatGasPrice := new(big.Float)
+	bigFloatGasPrice, _ = bigFloatGasPrice.SetString(gasPrice)
+	result := new(big.Float).Mul(bigFloatGasPrice, new(big.Float).SetInt(big.NewInt(params.Ether)))
+	gp := new(big.Int)
+	result.Int(gp)
+
+	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+		Nonce:    nonce,
+		GasPrice: gp,
+		Gas:      gasLimit,
+		To:       to,
+		Data:     data,
+	})
+
+	signedTx, err := s.ethClient.SignTx(s.ctx, from, tx)
+	if err != nil {
+		log.Errorf("error SignTx: %v", err)
+		return err, ""
+	}
+
+	txBin, err := signedTx.MarshalBinary()
+	if err != nil {
+		log.Errorf("error MarshalBinary: %v", err)
+		return err, ""
+	}
+
+	log.Infof("TxHash: %v", signedTx.Hash().String())
+	return nil, hex.EncodeToString(txBin)
 }
 
 func (s *Server) getTxData(from common.Address, to *common.Address, data []byte) (error, string) {

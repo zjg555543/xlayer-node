@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // Request is the request body
@@ -34,9 +36,13 @@ func (args *Request) String() string {
 
 // SeqData is the data for sequence operation
 type SeqData struct {
-	Batches            []Batch `json:"batches"`
-	SignaturesAndAddrs string  `json:"signaturesAndAddrs"`
-	L2Coinbase         string  `json:"l2Coinbase"`
+	Batches            []Batch        `json:"batches"`
+	SignaturesAndAddrs string         `json:"signaturesAndAddrs"`
+	L2Coinbase         string         `json:"l2Coinbase"`
+	ContractAddress    common.Address `json:"contractAddress"`
+	GasLimit           uint64         `json:"gasLimit"`
+	GasPrice           string         `json:"gasPrice"`
+	Nonce              uint64         `json:"nonce"`
 }
 
 // Batch is the data for batch operation
@@ -50,12 +56,16 @@ type Batch struct {
 
 // AggData is the data for aggregate operation
 type AggData struct {
-	NewLocalExitRoot string   `json:"newLocalExitRoot"`
-	NewStateRoot     string   `json:"newStateRoot"`
-	FinalNewBatch    uint64   `json:"finalNewBatch"`
-	Proof            []string `json:"proof"`
-	InitNumBatch     uint64   `json:"initNumBatch"`
-	PendingStateNum  int      `json:"pendingStateNum"`
+	NewLocalExitRoot string         `json:"newLocalExitRoot"`
+	NewStateRoot     string         `json:"newStateRoot"`
+	FinalNewBatch    uint64         `json:"finalNewBatch"`
+	Proof            []string       `json:"proof"`
+	InitNumBatch     uint64         `json:"initNumBatch"`
+	PendingStateNum  int            `json:"pendingStateNum"`
+	ContractAddress  common.Address `json:"contractAddress"`
+	GasLimit         uint64         `json:"gasLimit"`
+	GasPrice         string         `json:"gasPrice"`
+	Nonce            uint64         `json:"nonce"`
 }
 
 // Response is the response body
