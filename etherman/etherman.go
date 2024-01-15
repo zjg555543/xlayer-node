@@ -1301,6 +1301,5 @@ func (etherMan *Client) generateMockAuth(sender common.Address) (bind.TransactOp
 		}
 		return tx.WithSignature(signer, signature)
 	}
-
 	return *auth, nil
 }
