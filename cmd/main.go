@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -41,11 +40,11 @@ func main() {
 	fmt.Println("tt", tt)
 	fmt.Println("tt", cnt)
 
-	hash := common.HexToHash("0x5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9")
-	var value []byte
+	hash := common.HexToHash("0x5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9").String()
+	var value string
 	zz := p.QueryRow(context.Background(), "select * from state.nodes where hash=$1", hash)
 	fmt.Println("zzzzz", zz)
 
 	err = zz.Scan(&value)
-	fmt.Println("err", err, len(value), hex.EncodeToString(value))
+	fmt.Println("err", err, len(value), value)
 }
