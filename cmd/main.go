@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"reflect"
@@ -38,4 +39,9 @@ func main() {
 	fmt.Println("type()", err, reflect.TypeOf(tt))
 	fmt.Println("tt", tt)
 	fmt.Println("tt", cnt)
+
+	var value []byte
+	err = p.QueryRow(context.Background(), "select * from state.nodes where hash=$1", "5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9").Scan(&value)
+
+	fmt.Println("err", err, len(value), hex.EncodeToString(value))
 }
