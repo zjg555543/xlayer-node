@@ -33,8 +33,8 @@ func NewSQLDB() (*pgxpool.Pool, error) {
 func main() {
 	p, _ := NewSQLDB()
 	tt := p.QueryRow(context.Background(), "select count(*) from state.program;")
-	cnt := 0
-	err := tt.Scan(cnt)
+	var cnt int
+	err := tt.Scan(&cnt)
 	fmt.Println("type()", err, reflect.TypeOf(tt))
 	fmt.Println("tt", tt)
 	fmt.Println("tt", cnt)
