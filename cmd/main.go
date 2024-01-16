@@ -40,9 +40,10 @@ func main() {
 	fmt.Println("tt", cnt)
 
 	var value string
+	var value1 string
 	zz := p.QueryRow(context.Background(), "select * from state.nodes where hash=$1", "\\x5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9")
 	fmt.Println("zzzzz", zz)
 
-	err = zz.Scan(&value)
+	err = zz.Scan(&value, &value1)
 	fmt.Println("err", err, len(value), value)
 }
