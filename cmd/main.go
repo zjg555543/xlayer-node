@@ -40,7 +40,7 @@ func main() {
 	fmt.Println("tt", cnt)
 
 	var value []byte
-	zz := p.QueryRow(context.Background(), "select * from state.nodes where hash=$1", "\\x5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9")
+	zz := p.QueryRow(context.Background(), "select data::text from state.nodes where hash=$1", "\\x5ed958a0dccba94103d2b55a6afb986332fabb685c610f1749c3ea17d322e9f9")
 	fmt.Println("zzzzz", zz)
 
 	err = zz.Scan(&value)
