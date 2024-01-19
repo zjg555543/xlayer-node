@@ -253,6 +253,7 @@ func (e *EthEndpoints) GetBalance(address types.ArgAddress, blockArg *types.Bloc
 		}
 
 		balance, err := e.state.GetBalance(ctx, address.Address(), block.Root())
+		fmt.Println("balance", balance)
 		if errors.Is(err, state.ErrNotFound) {
 			return hex.EncodeUint64(0), nil
 		} else if err != nil {
