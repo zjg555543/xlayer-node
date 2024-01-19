@@ -244,8 +244,10 @@ func (e *EthEndpoints) getPriceFromSequencerNode() (interface{}, types.Error) {
 
 // GetBalance returns the account's balance at the referenced block
 func (e *EthEndpoints) GetBalance(address types.ArgAddress, blockArg *types.BlockNumberOrHash) (interface{}, types.Error) {
+	fmt.Println("GetBalance", address.Address().String(), blockArg)
 	return e.txMan.NewDbTxScope(e.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
 		block, rpcErr := e.getBlockByArg(ctx, blockArg, dbTx)
+		fmt.Println("GetBalance getBlockByArg", block.Number(), block.Hash().String(), block.Root().String())
 		if rpcErr != nil {
 			return nil, rpcErr
 		}
