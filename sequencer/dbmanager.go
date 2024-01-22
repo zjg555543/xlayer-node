@@ -377,7 +377,7 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 			Txs:       []state.DSL2Transaction{l2Transaction},
 		}
 
-		log.Infof("Send data to stream: successfully stored tx: %v for batch: %v", tx.response.TxHash.String(), tx.batchNumber)
+		log.Infof("Send data to stream successfully tx: %v for batch: %v, block: %v", tx.response.TxHash.String(), tx.batchNumber, l2Block.L2BlockNumber)
 	}
 
 	return nil
