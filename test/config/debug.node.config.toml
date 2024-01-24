@@ -106,7 +106,7 @@ MaxTxLifetime = "3h"
 	[Sequencer.StreamServer]
 		Port = 6900
 		Filename = "/datastreamer/datastream.bin"
-		Enabled = true
+		Enabled = false
 
 [SequenceSender]
 WaitPeriodSendSequence = "15s"
@@ -163,3 +163,8 @@ ProfilingEnabled = false
 	Port = "5435"
 	EnableLog = false
 	MaxConns = 200
+
+[DataStreamer]
+Port = 6900
+Filename = "/datastreamer/datastream.bin"
+
