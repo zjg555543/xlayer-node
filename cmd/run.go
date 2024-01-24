@@ -87,6 +87,8 @@ func start(cliCtx *cli.Context) error {
 		case SEQUENCER, RPC, SYNCHRONIZER:
 			needsExecutor = true
 			needsStateTree = true
+		case DATA_STREAMER:
+			needsStateTree = true
 		}
 	}
 
