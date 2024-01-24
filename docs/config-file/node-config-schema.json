@@ -1788,45 +1788,11 @@
 					"description": "Filename of the binary data file",
 					"default": "/datastreamer/datastream.bin"
 				},
-				"Log": {
-					"properties": {
-						"Environment": {
-							"type": "string",
-							"enum": [
-								"production",
-								"development"
-							],
-							"default": ""
-						},
-						"Level": {
-							"type": "string",
-							"enum": [
-								"debug",
-								"info",
-								"warn",
-								"error",
-								"dpanic",
-								"panic",
-								"fatal"
-							],
-							"default": ""
-						},
-						"Outputs": {
-							"items": {
-								"type": "string"
-							},
-							"type": "array"
-						}
-					},
-					"additionalProperties": false,
-					"type": "object",
-					"description": "Log is the log configuration"
-				},
 				"WaitPeriodReadDB": {
 					"type": "string",
 					"title": "Duration",
 					"description": "WaitPeriodReadDB is the time the data streamer waits until",
-					"default": "0s",
+					"default": "1s",
 					"examples": [
 						"1m",
 						"300ms"
@@ -1835,7 +1801,7 @@
 				"MaxBlockLimit": {
 					"type": "integer",
 					"description": "MaxBlockLimit is the maximum number of blocks to be read from the DB",
-					"default": 0
+					"default": 1000
 				}
 			},
 			"additionalProperties": false,

@@ -208,4 +208,6 @@ MaxConns = 200
 [DataStreamer]
 Port = 6900
 Filename = "/datastreamer/datastream.bin"
+WaitPeriodReadDB = "1000ms"
+MaxBlockLimit = 1000
 `

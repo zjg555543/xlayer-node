@@ -4441,7 +4441,6 @@ NamespaceName=""
 | ----------------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------- |
 | - [Port](#DataStreamer_Port )                         | No      | integer | No         | -          | Port to listen on                                                    |
 | - [Filename](#DataStreamer_Filename )                 | No      | string  | No         | -          | Filename of the binary data file                                     |
-| - [Log](#DataStreamer_Log )                           | No      | object  | No         | -          | Log is the log configuration                                         |
 | - [WaitPeriodReadDB](#DataStreamer_WaitPeriodReadDB ) | No      | string  | No         | -          | Duration                                                             |
 | - [MaxBlockLimit](#DataStreamer_MaxBlockLimit )       | No      | integer | No         | -          | MaxBlockLimit is the maximum number of blocks to be read from the DB |
 
@@ -4473,65 +4472,13 @@ Port=6900
 Filename="/datastreamer/datastream.bin"
 ```
 
-### <a name="DataStreamer_Log"></a>22.3. `[DataStreamer.Log]`
-
-**Type:** : `object`
-**Description:** Log is the log configuration
-
-| Property                                        | Pattern | Type             | Deprecated | Definition | Title/Description |
-| ----------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------- |
-| - [Environment](#DataStreamer_Log_Environment ) | No      | enum (of string) | No         | -          | -                 |
-| - [Level](#DataStreamer_Log_Level )             | No      | enum (of string) | No         | -          | -                 |
-| - [Outputs](#DataStreamer_Log_Outputs )         | No      | array of string  | No         | -          | -                 |
-
-#### <a name="DataStreamer_Log_Environment"></a>22.3.1. `DataStreamer.Log.Environment`
-
-**Type:** : `enum (of string)`
-
-**Default:** `""`
-
-**Example setting the default value** (""):
-```
-[DataStreamer.Log]
-Environment=""
-```
-
-Must be one of:
-* "production"
-* "development"
-
-#### <a name="DataStreamer_Log_Level"></a>22.3.2. `DataStreamer.Log.Level`
-
-**Type:** : `enum (of string)`
-
-**Default:** `""`
-
-**Example setting the default value** (""):
-```
-[DataStreamer.Log]
-Level=""
-```
-
-Must be one of:
-* "debug"
-* "info"
-* "warn"
-* "error"
-* "dpanic"
-* "panic"
-* "fatal"
-
-#### <a name="DataStreamer_Log_Outputs"></a>22.3.3. `DataStreamer.Log.Outputs`
-
-**Type:** : `array of string`
-
-### <a name="DataStreamer_WaitPeriodReadDB"></a>22.4. `DataStreamer.WaitPeriodReadDB`
+### <a name="DataStreamer_WaitPeriodReadDB"></a>22.3. `DataStreamer.WaitPeriodReadDB`
 
 **Title:** Duration
 
 **Type:** : `string`
 
-**Default:** `"0s"`
+**Default:** `"1s"`
 
 **Description:** WaitPeriodReadDB is the time the data streamer waits until
 
@@ -4545,24 +4492,24 @@ Must be one of:
 "300ms"
 ```
 
-**Example setting the default value** ("0s"):
+**Example setting the default value** ("1s"):
 ```
 [DataStreamer]
-WaitPeriodReadDB="0s"
+WaitPeriodReadDB="1s"
 ```
 
-### <a name="DataStreamer_MaxBlockLimit"></a>22.5. `DataStreamer.MaxBlockLimit`
+### <a name="DataStreamer_MaxBlockLimit"></a>22.4. `DataStreamer.MaxBlockLimit`
 
 **Type:** : `integer`
 
-**Default:** `0`
+**Default:** `1000`
 
 **Description:** MaxBlockLimit is the maximum number of blocks to be read from the DB
 
-**Example setting the default value** (0):
+**Example setting the default value** (1000):
 ```
 [DataStreamer]
-MaxBlockLimit=0
+MaxBlockLimit=1000
 ```
 
 ----------------------------------------------------------------------------------------------------------------------------

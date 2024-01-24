@@ -549,6 +549,7 @@ run: ## Runs a full node
 	$(RUNL2GASPRICER)
 	$(RUNAGGREGATOR)
 	$(RUNJSONRPC)
+	$(RUNDATASTREAMER)
 
 .PHONY: stop
 stop: ## Stops all services

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-data-streamer/datastreamer"
+	dslog "github.com/0xPolygonHermez/zkevm-data-streamer/log"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -16,15 +17,17 @@ import (
 // DataStreamer represents a data streamer
 type DataStreamer struct {
 	cfg          Config
+	dsLog        dslog.Config
 	state        stateInterface
 	eventLog     *event.EventLog
 	streamServer *datastreamer.StreamServer
 }
 
 // New inits data streamer
-func New(cfg Config, state stateInterface, eventLog *event.EventLog) (*DataStreamer, error) {
+func New(cfg Config, logCfg log.Config, state stateInterface, eventLog *event.EventLog) (*DataStreamer, error) {
 	return &DataStreamer{
 		cfg:      cfg,
+		dsLog:    dslog.Config{Environment: dslog.LogEnvironment(logCfg.Environment), Level: logCfg.Level, Outputs: logCfg.Outputs},
 		state:    state,
 		eventLog: eventLog,
 	}, nil
@@ -33,7 +36,7 @@ func New(cfg Config, state stateInterface, eventLog *event.EventLog) (*DataStrea
 // Start starts the data streamer
 func (s *DataStreamer) Start(ctx context.Context) {
 	var err error
-	s.streamServer, err = datastreamer.NewServer(s.cfg.Port, state.StreamTypeSequencer, s.cfg.Filename, &s.cfg.Log)
+	s.streamServer, err = datastreamer.NewServer(s.cfg.Port, state.StreamTypeSequencer, s.cfg.Filename, &s.dsLog)
 	if err != nil {
 		log.Fatalf("failed to create stream server, err: %v", err)
 	}

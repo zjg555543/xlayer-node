@@ -550,7 +550,7 @@ func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStor
 }
 
 func createDataStreamer(cfg config.Config, st *state.State, eventLog *event.EventLog) *datastreamer.DataStreamer {
-	ds, err := datastreamer.New(cfg.DataStreamer, st, eventLog)
+	ds, err := datastreamer.New(cfg.DataStreamer, cfg.Log, st, eventLog)
 	if err != nil {
 		log.Fatal(err)
 	}
