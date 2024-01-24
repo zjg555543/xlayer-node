@@ -170,6 +170,24 @@ services:
       - "-c"
       - "/app/x1-node run --network custom --custom-network-file /app/genesis.json --cfg /app/config.toml --components l2gaspricer"
 
+  x1-data-streamer:
+    container_name: x1-data-streamer
+    image: x1-node
+    ports:
+      - 6900:6900 # Data stream server
+    environment:
+      - ZKEVM_NODE_STATE_DB_HOST=x1-state-db
+      - ZKEVM_NODE_MTCLIENT_URI=${ZKEVM_NODE_MTCLIENT_URI}
+      - ZKEVM_NODE_EXECUTOR_URI=${ZKEVM_NODE_EXECUTOR_URI}
+    volumes:
+      - ./config/test.node.config.toml:/app/config.toml
+      - ./config/test.genesis.config.json:/app/genesis.json
+      - ./:/datastreamer
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/x1-node run --network custom --custom-network-file /app/genesis.json --cfg /app/config.toml --components data-streamer"
+
   x1-state-db:
     container_name: x1-state-db
     image: postgres:15

@@ -28,6 +28,7 @@
 | - [HashDB](#HashDB )                                 | No      | object  | No         | -          | Configuration of the hash database connection                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | - [State](#State )                                   | No      | object  | No         | -          | State service configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | - [Apollo](#Apollo )                                 | No      | object  | No         | -          | Apollo configuration                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| - [DataStreamer](#DataStreamer )                     | No      | object  | No         | -          | Configuration of the data streamer service                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ## <a name="IsTrustedSequencer"></a>1. `IsTrustedSequencer`
 
@@ -4429,6 +4430,139 @@ AppID=""
 ```
 [Apollo]
 NamespaceName=""
+```
+
+## <a name="DataStreamer"></a>22. `[DataStreamer]`
+
+**Type:** : `object`
+**Description:** Configuration of the data streamer service
+
+| Property                                              | Pattern | Type    | Deprecated | Definition | Title/Description                                                    |
+| ----------------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------- |
+| - [Port](#DataStreamer_Port )                         | No      | integer | No         | -          | Port to listen on                                                    |
+| - [Filename](#DataStreamer_Filename )                 | No      | string  | No         | -          | Filename of the binary data file                                     |
+| - [Log](#DataStreamer_Log )                           | No      | object  | No         | -          | Log is the log configuration                                         |
+| - [WaitPeriodReadDB](#DataStreamer_WaitPeriodReadDB ) | No      | string  | No         | -          | Duration                                                             |
+| - [MaxBlockLimit](#DataStreamer_MaxBlockLimit )       | No      | integer | No         | -          | MaxBlockLimit is the maximum number of blocks to be read from the DB |
+
+### <a name="DataStreamer_Port"></a>22.1. `DataStreamer.Port`
+
+**Type:** : `integer`
+
+**Default:** `6900`
+
+**Description:** Port to listen on
+
+**Example setting the default value** (6900):
+```
+[DataStreamer]
+Port=6900
+```
+
+### <a name="DataStreamer_Filename"></a>22.2. `DataStreamer.Filename`
+
+**Type:** : `string`
+
+**Default:** `"/datastreamer/datastream.bin"`
+
+**Description:** Filename of the binary data file
+
+**Example setting the default value** ("/datastreamer/datastream.bin"):
+```
+[DataStreamer]
+Filename="/datastreamer/datastream.bin"
+```
+
+### <a name="DataStreamer_Log"></a>22.3. `[DataStreamer.Log]`
+
+**Type:** : `object`
+**Description:** Log is the log configuration
+
+| Property                                        | Pattern | Type             | Deprecated | Definition | Title/Description |
+| ----------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------- |
+| - [Environment](#DataStreamer_Log_Environment ) | No      | enum (of string) | No         | -          | -                 |
+| - [Level](#DataStreamer_Log_Level )             | No      | enum (of string) | No         | -          | -                 |
+| - [Outputs](#DataStreamer_Log_Outputs )         | No      | array of string  | No         | -          | -                 |
+
+#### <a name="DataStreamer_Log_Environment"></a>22.3.1. `DataStreamer.Log.Environment`
+
+**Type:** : `enum (of string)`
+
+**Default:** `""`
+
+**Example setting the default value** (""):
+```
+[DataStreamer.Log]
+Environment=""
+```
+
+Must be one of:
+* "production"
+* "development"
+
+#### <a name="DataStreamer_Log_Level"></a>22.3.2. `DataStreamer.Log.Level`
+
+**Type:** : `enum (of string)`
+
+**Default:** `""`
+
+**Example setting the default value** (""):
+```
+[DataStreamer.Log]
+Level=""
+```
+
+Must be one of:
+* "debug"
+* "info"
+* "warn"
+* "error"
+* "dpanic"
+* "panic"
+* "fatal"
+
+#### <a name="DataStreamer_Log_Outputs"></a>22.3.3. `DataStreamer.Log.Outputs`
+
+**Type:** : `array of string`
+
+### <a name="DataStreamer_WaitPeriodReadDB"></a>22.4. `DataStreamer.WaitPeriodReadDB`
+
+**Title:** Duration
+
+**Type:** : `string`
+
+**Default:** `"0s"`
+
+**Description:** WaitPeriodReadDB is the time the data streamer waits until
+
+**Examples:** 
+
+```json
+"1m"
+```
+
+```json
+"300ms"
+```
+
+**Example setting the default value** ("0s"):
+```
+[DataStreamer]
+WaitPeriodReadDB="0s"
+```
+
+### <a name="DataStreamer_MaxBlockLimit"></a>22.5. `DataStreamer.MaxBlockLimit`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** MaxBlockLimit is the maximum number of blocks to be read from the DB
+
+**Example setting the default value** (0):
+```
+[DataStreamer]
+MaxBlockLimit=0
 ```
 
 ----------------------------------------------------------------------------------------------------------------------------

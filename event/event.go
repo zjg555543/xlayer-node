@@ -63,6 +63,8 @@ const (
 	Component_Broadcast Component = "broadcast"
 	// Component_Sequence_Sender is the component that triggered the event
 	Component_Sequence_Sender = "seqsender"
+	// Component_Data_Streamer is the component that triggered the event
+	Component_Data_Streamer = "datastreamer"
 
 	// Level_Emergency is the most severe level
 	Level_Emergency Level = "emerg"

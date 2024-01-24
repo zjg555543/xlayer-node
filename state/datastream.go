@@ -356,7 +356,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 		}
 
 		// Gererate full batches
-		fullBatches := computeFullBatches(batches, l2Blocks, l2Txs)
+		fullBatches := ComputeFullBatches(batches, l2Blocks, l2Txs)
 		currentBatchNumber += limit
 
 		for _, batch := range fullBatches {
@@ -485,8 +485,8 @@ func GetSystemSCPosition(blockNumber uint64) []byte {
 	return keccak256.Hash(v1, v2)
 }
 
-// computeFullBatches computes the full batches
-func computeFullBatches(batches []*DSBatch, l2Blocks []*DSL2Block, l2Txs []*DSL2Transaction) []*DSFullBatch {
+// ComputeFullBatches computes the full batches
+func ComputeFullBatches(batches []*DSBatch, l2Blocks []*DSL2Block, l2Txs []*DSL2Transaction) []*DSFullBatch {
 	currentL2Block := 0
 	currentL2Tx := 0
 

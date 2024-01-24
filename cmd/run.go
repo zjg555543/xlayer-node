@@ -18,6 +18,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/aggregator"
 	"github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/config/apollo"
+	"github.com/0xPolygonHermez/zkevm-node/datastreamer"
 	"github.com/0xPolygonHermez/zkevm-node/db"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
@@ -249,6 +250,16 @@ func start(cliCtx *cli.Context) error {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
 			}
 			go runL2GasPriceSuggester(c.L2GasPriceSuggester, st, poolInstance, etherman, apolloClient)
+
+		case DATA_STREAMER:
+			ev.Component = event.Component_Data_Streamer
+			ev.Description = "Running data streamer"
+			err := eventLog.LogEvent(cliCtx.Context, ev)
+			if err != nil {
+				log.Fatal(err)
+			}
+			seqSender := createDataStreamer(*c, st, eventLog)
+			go seqSender.Start(cliCtx.Context)
 		}
 	}
 
@@ -536,6 +547,14 @@ func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStor
 	}
 	etm := ethtxmanager.New(cfg.EthTxManager, etherman, etmStorage, st)
 	return etm
+}
+
+func createDataStreamer(cfg config.Config, st *state.State, eventLog *event.EventLog) *datastreamer.DataStreamer {
+	ds, err := datastreamer.New(cfg.DataStreamer, st, eventLog)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ds
 }
 
 func startProfilingHttpServer(c metrics.Config) {

@@ -28,6 +28,8 @@ const (
 	L2GASPRICER = "l2gaspricer"
 	// SEQUENCE_SENDER is the sequence sender component identifier
 	SEQUENCE_SENDER = "sequence-sender"
+	// DATA_STREAMER is the data streamer component identifier
+	DATA_STREAMER = "data-streamer"
 )
 
 const (

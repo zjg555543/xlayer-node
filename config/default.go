@@ -204,4 +204,8 @@ Host = "x1-state-db"
 Port = "5432"
 EnableLog = false
 MaxConns = 200
+
+[DataStreamer]
+Port = 6900
+Filename = "/datastreamer/datastream.bin"
 `
