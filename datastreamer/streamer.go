@@ -52,26 +52,26 @@ func (s *DataStreamer) Start(ctx context.Context) {
 		log.Fatalf("failed to generate data streamer file, err: %v", err)
 	}
 
-	s.loopSendDataStreamer(ctx)
+	s.loopDataStreamer(ctx)
 }
 
-func (s *DataStreamer) loopSendDataStreamer(ctx context.Context) {
+func (s *DataStreamer) loopDataStreamer(ctx context.Context) {
 	log.Infof("Starting data streamer loop")
 	for {
 		select {
 		case <-ctx.Done():
-			log.Infof("Loop send data streamer is exiting")
+			log.Infof("Loop data streamer is exiting")
 			return
 		default:
 			time.Sleep(s.cfg.WaitInterval.Duration)
 
-			batch, block, err := s.getCurBatchAndBlock(s.streamServer)
+			latestBatchNum, latestBlockNum, err := s.getLatestBatchAndBlock(s.streamServer)
 			if err != nil {
 				log.Fatalf("Error getting current batch and block: %s", err.Error())
 				break
 			}
 
-			err = s.trySendDataStreamer(ctx, s.streamServer, s.state, batch, block)
+			err = s.handleDataStreamer(ctx, s.streamServer, s.state, latestBatchNum, latestBlockNum)
 			if err != nil {
 				log.Fatalf("Error sending data to streamer: %s", err.Error())
 				break
@@ -80,15 +80,15 @@ func (s *DataStreamer) loopSendDataStreamer(ctx context.Context) {
 	}
 }
 
-// trySendDataStreamer generates or resumes a data stream file
-func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB state.DSState, batch uint64, block uint64) error {
-	batches, err := stateDB.GetDSBatches(ctx, batch, batch+s.cfg.MaxBatchLimit, true, nil)
+// handleDataStreamer generates or resumes a data stream file
+func (s *DataStreamer) handleDataStreamer(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB state.DSState, latestBatchNum uint64, latestBlockNum uint64) error {
+	batches, err := stateDB.GetDSBatches(ctx, latestBatchNum, latestBatchNum+s.cfg.MaxBatchLimit, true, nil)
 	if err != nil {
 		if err == state.ErrStateNotSynchronized {
 			log.Errorf("State not synchronized, retrying in %s", s.cfg.WaitInterval.Duration.String())
 			return nil
 		}
-		log.Errorf("Error getting batch %d: %s", batch, err.Error())
+		log.Errorf("Error getting batch %d: %s", latestBatchNum, err.Error())
 		return err
 	}
 
@@ -97,7 +97,7 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 	}
 
 	var currentGER = batches[0].GlobalExitRoot
-	log.Infof("Processing batches %d to %d", batches[0].BatchNumber, batches[len(batches)-1].BatchNumber)
+	log.Infof("Processing batches [%d, %d]", batches[0].BatchNumber, batches[len(batches)-1].BatchNumber)
 	l2BlocksTemp, err := stateDB.GetDSL2Blocks(ctx, batches[0].BatchNumber, batches[len(batches)-1].BatchNumber, nil)
 	if err != nil {
 		log.Errorf("Error getting L2 blocks for batches starting at %d: %s", batches[0].BatchNumber, err.Error())
@@ -105,13 +105,15 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 	}
 
 	l2Blocks := make([]*state.DSL2Block, 0)
-	if block > 0 {
+	if latestBlockNum > 0 {
 		for _, l2block := range l2BlocksTemp {
-			if l2block.L2BlockNumber <= block {
+			if l2block.L2BlockNumber <= latestBlockNum {
 				continue
 			}
 			l2Blocks = append(l2Blocks, l2block)
 		}
+	} else {
+		l2Blocks = l2BlocksTemp
 	}
 
 	l2Txs := make([]*state.DSL2Transaction, 0)
@@ -124,104 +126,20 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 		}
 	}
 
-	// Gererate full batches
 	fullBatches := state.ComputeFullBatches(batches, l2Blocks, l2Txs)
-	for _, batch := range fullBatches {
-		if len(batch.L2Blocks) == 0 {
-			if batch.StateRoot == (common.Hash{}) {
-				continue
+	for _, fullBatch := range fullBatches {
+		if len(fullBatch.L2Blocks) == 0 {
+			ger, err := s.handleGER(streamServer, fullBatch, currentGER)
+			if err != nil {
+				return err
 			}
-			// Check if there is a GER update
-			if batch.GlobalExitRoot != currentGER && batch.GlobalExitRoot != (common.Hash{}) {
-				updateGer := state.DSUpdateGER{
-					BatchNumber:    batch.BatchNumber,
-					Timestamp:      batch.Timestamp.Unix(),
-					GlobalExitRoot: batch.GlobalExitRoot,
-					Coinbase:       batch.Coinbase,
-					ForkID:         batch.ForkID,
-					StateRoot:      batch.StateRoot,
-				}
-
-				err = streamServer.StartAtomicOp()
-				if err != nil {
-					return err
-				}
-
-				log.Infof("AddStreamEntry GER update for batch %d", batch.BatchNumber)
-				_, err = streamServer.AddStreamEntry(state.EntryTypeUpdateGER, updateGer.Encode())
-				if err != nil {
-					return err
-				}
-
-				err = streamServer.CommitAtomicOp()
-				if err != nil {
-					return err
-				}
-
-				currentGER = batch.GlobalExitRoot
+			if ger != (common.Hash{}) {
+				currentGER = ger
 			}
 			continue
 		}
 
-		err = streamServer.StartAtomicOp()
-		if err != nil {
-			return err
-		}
-
-		for _, l2block := range batch.L2Blocks {
-			blockStart := state.DSL2BlockStart{
-				BatchNumber:    l2block.BatchNumber,
-				L2BlockNumber:  l2block.L2BlockNumber,
-				Timestamp:      l2block.Timestamp,
-				GlobalExitRoot: l2block.GlobalExitRoot,
-				Coinbase:       l2block.Coinbase,
-				ForkID:         l2block.ForkID,
-			}
-
-			bookMark := state.DSBookMark{
-				Type:          state.BookMarkTypeL2Block,
-				L2BlockNumber: blockStart.L2BlockNumber,
-			}
-
-			_, err = streamServer.AddStreamBookmark(bookMark.Encode())
-			if err != nil {
-				return err
-			}
-
-			_, err = streamServer.AddStreamEntry(state.EntryTypeL2BlockStart, blockStart.Encode())
-			if err != nil {
-				return err
-			}
-
-			for _, tx := range l2block.Txs {
-				// Populate intermediate state root
-				position := state.GetSystemSCPosition(l2block.L2BlockNumber)
-				imStateRoot, err := stateDB.GetStorageAt(ctx, common.HexToAddress(state.SystemSC), big.NewInt(0).SetBytes(position), l2block.StateRoot)
-				if err != nil {
-					return err
-				}
-				tx.StateRoot = common.BigToHash(imStateRoot)
-				log.Infof("AddStreamEntry tx block:%v", tx.L2BlockNumber)
-				_, err = streamServer.AddStreamEntry(state.EntryTypeL2Tx, tx.Encode())
-				if err != nil {
-					return err
-				}
-			}
-
-			blockEnd := state.DSL2BlockEnd{
-				L2BlockNumber: l2block.L2BlockNumber,
-				BlockHash:     l2block.BlockHash,
-				StateRoot:     l2block.StateRoot,
-			}
-
-			_, err = streamServer.AddStreamEntry(state.EntryTypeL2BlockEnd, blockEnd.Encode())
-			if err != nil {
-				return err
-			}
-			currentGER = l2block.GlobalExitRoot
-		}
-		// Commit at the end of each batch group
-		err = streamServer.CommitAtomicOp()
+		currentGER, err = s.handleBlocks(ctx, streamServer, stateDB, fullBatch)
 		if err != nil {
 			return err
 		}
@@ -230,7 +148,7 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 	return err
 }
 
-func (s *DataStreamer) getCurBatchAndBlock(streamServer *datastreamer.StreamServer) (uint64, uint64, error) {
+func (s *DataStreamer) getLatestBatchAndBlock(streamServer *datastreamer.StreamServer) (uint64, uint64, error) {
 	header := streamServer.GetHeader()
 	if header.TotalEntries == 0 {
 		return 0, 0, errors.New("no entries in data streamer file")
@@ -263,6 +181,111 @@ func (s *DataStreamer) getCurBatchAndBlock(streamServer *datastreamer.StreamServ
 		return 0, 0, errors.New("latest entry type is not UpdateGER or L2BlockEnd")
 	}
 
-	log.Infof("Latest entry type:%v, Batch number: %v, L2 block number: %v, ", latestEntry.Type, currentBatchNumber, currentL2Block)
+	log.Infof("Get latest batch number: %v, L2 block number: %v, entry type:%v", currentBatchNumber, currentL2Block, latestEntry.Type)
 	return currentBatchNumber, currentL2Block, nil
+}
+
+func (s *DataStreamer) handleBlocks(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB state.DSState, batch *state.DSFullBatch) (common.Hash, error) {
+	err := streamServer.StartAtomicOp()
+	if err != nil {
+		return common.Hash{}, err
+	}
+	var currentGER common.Hash
+
+	for _, l2block := range batch.L2Blocks {
+		blockStart := state.DSL2BlockStart{
+			BatchNumber:    l2block.BatchNumber,
+			L2BlockNumber:  l2block.L2BlockNumber,
+			Timestamp:      l2block.Timestamp,
+			GlobalExitRoot: l2block.GlobalExitRoot,
+			Coinbase:       l2block.Coinbase,
+			ForkID:         l2block.ForkID,
+		}
+
+		bookMark := state.DSBookMark{
+			Type:          state.BookMarkTypeL2Block,
+			L2BlockNumber: blockStart.L2BlockNumber,
+		}
+
+		_, err = streamServer.AddStreamBookmark(bookMark.Encode())
+		if err != nil {
+			return common.Hash{}, err
+		}
+
+		_, err = streamServer.AddStreamEntry(state.EntryTypeL2BlockStart, blockStart.Encode())
+		if err != nil {
+			return common.Hash{}, err
+		}
+
+		for _, tx := range l2block.Txs {
+			// Populate intermediate state root
+			position := state.GetSystemSCPosition(l2block.L2BlockNumber)
+			imStateRoot, err := stateDB.GetStorageAt(ctx, common.HexToAddress(state.SystemSC), big.NewInt(0).SetBytes(position), l2block.StateRoot)
+			if err != nil {
+				return common.Hash{}, err
+			}
+			tx.StateRoot = common.BigToHash(imStateRoot)
+			log.Infof("Processing add stream entry, block:%v", tx.L2BlockNumber)
+			_, err = streamServer.AddStreamEntry(state.EntryTypeL2Tx, tx.Encode())
+			if err != nil {
+				return common.Hash{}, err
+			}
+		}
+
+		blockEnd := state.DSL2BlockEnd{
+			L2BlockNumber: l2block.L2BlockNumber,
+			BlockHash:     l2block.BlockHash,
+			StateRoot:     l2block.StateRoot,
+		}
+
+		_, err = streamServer.AddStreamEntry(state.EntryTypeL2BlockEnd, blockEnd.Encode())
+		if err != nil {
+			return common.Hash{}, err
+		}
+		currentGER = l2block.GlobalExitRoot
+	}
+	// Commit at the end of each batch group
+	err = streamServer.CommitAtomicOp()
+	if err != nil {
+		return common.Hash{}, err
+	}
+
+	return currentGER, nil
+}
+
+func (s *DataStreamer) handleGER(streamServer *datastreamer.StreamServer, batch *state.DSFullBatch, ger common.Hash) (common.Hash, error) {
+	if batch.StateRoot == (common.Hash{}) {
+		return common.Hash{}, nil
+	}
+	// Check if there is a GER update
+	if batch.GlobalExitRoot != ger && batch.GlobalExitRoot != (common.Hash{}) {
+		updateGer := state.DSUpdateGER{
+			BatchNumber:    batch.BatchNumber,
+			Timestamp:      batch.Timestamp.Unix(),
+			GlobalExitRoot: batch.GlobalExitRoot,
+			Coinbase:       batch.Coinbase,
+			ForkID:         batch.ForkID,
+			StateRoot:      batch.StateRoot,
+		}
+
+		err := streamServer.StartAtomicOp()
+		if err != nil {
+			return common.Hash{}, err
+		}
+
+		log.Infof("Processing add stream entry, GER batch %d", batch.BatchNumber)
+		_, err = streamServer.AddStreamEntry(state.EntryTypeUpdateGER, updateGer.Encode())
+		if err != nil {
+			return common.Hash{}, err
+		}
+
+		err = streamServer.CommitAtomicOp()
+		if err != nil {
+			return common.Hash{}, err
+		}
+
+		ger = batch.GlobalExitRoot
+		return ger, nil
+	}
+	return common.Hash{}, nil
 }
