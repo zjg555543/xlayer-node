@@ -342,7 +342,8 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 		}
 	}
 
-	log.Infof("StoreProcessedTxAndDeleteFromPool: successfully stored tx: %v for batch: %v", tx.response.TxHash.String(), tx.batchNumber)
+	log.Infof("StoreProcessedTxAndDeleteFromPool: successfully stored tx: %v for batch: %v, block: %v",
+		tx.response.TxHash.String(), tx.batchNumber, l2BlockHeader.Number.Uint64())
 
 	// Send data to streamer
 	if d.streamServer != nil {
