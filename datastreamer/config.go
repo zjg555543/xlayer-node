@@ -10,8 +10,8 @@ type Config struct {
 	Port uint16 `mapstructure:"Port"`
 	// Filename of the binary data file
 	Filename string `mapstructure:"Filename"`
-	// WaitPeriodReadDB is the time the data streamer waits until
-	WaitPeriodReadDB types.Duration `mapstructure:"WaitPeriodReadDB"`
-	// MaxBlockLimit is the maximum number of blocks to be read from the DB
-	MaxBlockLimit uint64 `mapstructure:"MaxBlockLimit"`
+	// WaitInterval is the time the data streamer waits until
+	WaitInterval types.Duration `mapstructure:"WaitInterval"`
+	// MaxBatchLimit is the maximum number of blocks to be read from the DB
+	MaxBatchLimit uint64 `mapstructure:"MaxBatchLimit"`
 }

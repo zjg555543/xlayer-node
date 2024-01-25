@@ -4437,12 +4437,12 @@ NamespaceName=""
 **Type:** : `object`
 **Description:** Configuration of the data streamer service
 
-| Property                                              | Pattern | Type    | Deprecated | Definition | Title/Description                                                    |
-| ----------------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------- |
-| - [Port](#DataStreamer_Port )                         | No      | integer | No         | -          | Port to listen on                                                    |
-| - [Filename](#DataStreamer_Filename )                 | No      | string  | No         | -          | Filename of the binary data file                                     |
-| - [WaitPeriodReadDB](#DataStreamer_WaitPeriodReadDB ) | No      | string  | No         | -          | Duration                                                             |
-| - [MaxBlockLimit](#DataStreamer_MaxBlockLimit )       | No      | integer | No         | -          | MaxBlockLimit is the maximum number of blocks to be read from the DB |
+| Property                                        | Pattern | Type    | Deprecated | Definition | Title/Description                                                    |
+| ----------------------------------------------- | ------- | ------- | ---------- | ---------- | -------------------------------------------------------------------- |
+| - [Port](#DataStreamer_Port )                   | No      | integer | No         | -          | Port to listen on                                                    |
+| - [Filename](#DataStreamer_Filename )           | No      | string  | No         | -          | Filename of the binary data file                                     |
+| - [WaitInterval](#DataStreamer_WaitInterval )   | No      | string  | No         | -          | Duration                                                             |
+| - [MaxBatchLimit](#DataStreamer_MaxBatchLimit ) | No      | integer | No         | -          | MaxBatchLimit is the maximum number of blocks to be read from the DB |
 
 ### <a name="DataStreamer_Port"></a>22.1. `DataStreamer.Port`
 
@@ -4472,7 +4472,7 @@ Port=6900
 Filename="/datastreamer/datastream.bin"
 ```
 
-### <a name="DataStreamer_WaitPeriodReadDB"></a>22.3. `DataStreamer.WaitPeriodReadDB`
+### <a name="DataStreamer_WaitInterval"></a>22.3. `DataStreamer.WaitInterval`
 
 **Title:** Duration
 
@@ -4480,7 +4480,7 @@ Filename="/datastreamer/datastream.bin"
 
 **Default:** `"1s"`
 
-**Description:** WaitPeriodReadDB is the time the data streamer waits until
+**Description:** WaitInterval is the time the data streamer waits until
 
 **Examples:** 
 
@@ -4495,21 +4495,21 @@ Filename="/datastreamer/datastream.bin"
 **Example setting the default value** ("1s"):
 ```
 [DataStreamer]
-WaitPeriodReadDB="1s"
+WaitInterval="1s"
 ```
 
-### <a name="DataStreamer_MaxBlockLimit"></a>22.4. `DataStreamer.MaxBlockLimit`
+### <a name="DataStreamer_MaxBatchLimit"></a>22.4. `DataStreamer.MaxBatchLimit`
 
 **Type:** : `integer`
 
 **Default:** `1000`
 
-**Description:** MaxBlockLimit is the maximum number of blocks to be read from the DB
+**Description:** MaxBatchLimit is the maximum number of blocks to be read from the DB
 
 **Example setting the default value** (1000):
 ```
 [DataStreamer]
-MaxBlockLimit=1000
+MaxBatchLimit=1000
 ```
 
 ----------------------------------------------------------------------------------------------------------------------------

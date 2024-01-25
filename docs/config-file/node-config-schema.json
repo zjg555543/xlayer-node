@@ -1788,19 +1788,19 @@
 					"description": "Filename of the binary data file",
 					"default": "/datastreamer/datastream.bin"
 				},
-				"WaitPeriodReadDB": {
+				"WaitInterval": {
 					"type": "string",
 					"title": "Duration",
-					"description": "WaitPeriodReadDB is the time the data streamer waits until",
+					"description": "WaitInterval is the time the data streamer waits until",
 					"default": "1s",
 					"examples": [
 						"1m",
 						"300ms"
 					]
 				},
-				"MaxBlockLimit": {
+				"MaxBatchLimit": {
 					"type": "integer",
-					"description": "MaxBlockLimit is the maximum number of blocks to be read from the DB",
+					"description": "MaxBatchLimit is the maximum number of blocks to be read from the DB",
 					"default": 1000
 				}
 			},

@@ -63,7 +63,7 @@ func (s *DataStreamer) loopSendDataStreamer(ctx context.Context) {
 			log.Infof("Loop send data streamer is exiting")
 			return
 		default:
-			time.Sleep(s.cfg.WaitPeriodReadDB.Duration)
+			time.Sleep(s.cfg.WaitInterval.Duration)
 
 			batch, block, err := s.getCurBatchAndBlock(s.streamServer)
 			if err != nil {
@@ -82,17 +82,10 @@ func (s *DataStreamer) loopSendDataStreamer(ctx context.Context) {
 
 // trySendDataStreamer generates or resumes a data stream file
 func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB state.DSState, batch uint64, block uint64) error {
-	var currentGER = common.Hash{}
-	// Start on the current batch number + 1
-	batch++
-	maxBatch := batch + s.cfg.MaxBlockLimit
-
-	var err error
-	// Get Next Batch
-	batches, err := stateDB.GetDSBatches(ctx, batch, maxBatch, false, nil)
+	batches, err := stateDB.GetDSBatches(ctx, batch, batch+s.cfg.MaxBatchLimit, true, nil)
 	if err != nil {
 		if err == state.ErrStateNotSynchronized {
-			log.Errorf("State not synchronized, retrying in %s", s.cfg.WaitPeriodReadDB.Duration.String())
+			log.Errorf("State not synchronized, retrying in %s", s.cfg.WaitInterval.Duration.String())
 			return nil
 		}
 		log.Errorf("Error getting batch %d: %s", batch, err.Error())
@@ -102,15 +95,28 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 	if len(batches) == 0 {
 		return nil
 	}
+
+	var currentGER = batches[0].GlobalExitRoot
 	log.Infof("Processing batches %d to %d", batches[0].BatchNumber, batches[len(batches)-1].BatchNumber)
-	l2Blocks, err := stateDB.GetDSL2Blocks(ctx, batches[0].BatchNumber, batches[len(batches)-1].BatchNumber, nil)
+	l2BlocksTemp, err := stateDB.GetDSL2Blocks(ctx, batches[0].BatchNumber, batches[len(batches)-1].BatchNumber, nil)
 	if err != nil {
 		log.Errorf("Error getting L2 blocks for batches starting at %d: %s", batches[0].BatchNumber, err.Error())
 		return err
 	}
 
+	l2Blocks := make([]*state.DSL2Block, 0)
+	if block > 0 {
+		for _, l2block := range l2BlocksTemp {
+			if l2block.L2BlockNumber <= block {
+				continue
+			}
+			l2Blocks = append(l2Blocks, l2block)
+		}
+	}
+
 	l2Txs := make([]*state.DSL2Transaction, 0)
 	if len(l2Blocks) > 0 {
+		log.Infof("Processing old blocks [%d,%d], new blocks [%d,%d]", l2BlocksTemp[0].L2BlockNumber, l2BlocksTemp[len(l2BlocksTemp)-1].L2BlockNumber, l2Blocks[0].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber)
 		l2Txs, err = stateDB.GetDSL2Transactions(ctx, l2Blocks[0].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber, nil)
 		if err != nil {
 			log.Errorf("Error getting L2 transactions for blocks starting at %d: %s", l2Blocks[0].L2BlockNumber, err.Error())
@@ -122,8 +128,6 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 	fullBatches := state.ComputeFullBatches(batches, l2Blocks, l2Txs)
 	for _, batch := range fullBatches {
 		if len(batch.L2Blocks) == 0 {
-			// Empty batch
-			// Is WIP Batch?
 			if batch.StateRoot == (common.Hash{}) {
 				continue
 			}
@@ -143,6 +147,7 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 					return err
 				}
 
+				log.Infof("AddStreamEntry GER update for batch %d", batch.BatchNumber)
 				_, err = streamServer.AddStreamEntry(state.EntryTypeUpdateGER, updateGer.Encode())
 				if err != nil {
 					return err
@@ -189,7 +194,6 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 			}
 
 			for _, tx := range l2block.Txs {
-				log.Infof("Processing tx block:%v", tx.L2BlockNumber)
 				// Populate intermediate state root
 				position := state.GetSystemSCPosition(l2block.L2BlockNumber)
 				imStateRoot, err := stateDB.GetStorageAt(ctx, common.HexToAddress(state.SystemSC), big.NewInt(0).SetBytes(position), l2block.StateRoot)
@@ -197,7 +201,7 @@ func (s *DataStreamer) trySendDataStreamer(ctx context.Context, streamServer *da
 					return err
 				}
 				tx.StateRoot = common.BigToHash(imStateRoot)
-
+				log.Infof("AddStreamEntry tx block:%v", tx.L2BlockNumber)
 				_, err = streamServer.AddStreamEntry(state.EntryTypeL2Tx, tx.Encode())
 				if err != nil {
 					return err
