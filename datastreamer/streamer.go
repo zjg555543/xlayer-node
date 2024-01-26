@@ -117,11 +117,12 @@ func (s *DataStreamer) handleDataStreamer(ctx context.Context, streamServer *dat
 	}
 
 	l2Txs := make([]*state.DSL2Transaction, 0)
-	if len(l2Blocks) > 0 {
-		log.Infof("Processing old blocks [%d,%d], new blocks [%d,%d]", l2BlocksTemp[0].L2BlockNumber, l2BlocksTemp[len(l2BlocksTemp)-1].L2BlockNumber, l2Blocks[0].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber)
-		l2Txs, err = stateDB.GetDSL2Transactions(ctx, l2Blocks[0].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber, nil)
+	zeroValue := 0
+	if len(l2Blocks) > zeroValue {
+		log.Infof("Processing old blocks [%d,%d], new blocks [%d,%d]", l2BlocksTemp[zeroValue].L2BlockNumber, l2BlocksTemp[len(l2BlocksTemp)-1].L2BlockNumber, l2Blocks[zeroValue].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber)
+		l2Txs, err = stateDB.GetDSL2Transactions(ctx, l2Blocks[zeroValue].L2BlockNumber, l2Blocks[len(l2Blocks)-1].L2BlockNumber, nil)
 		if err != nil {
-			log.Errorf("Error getting L2 transactions for blocks starting at %d: %s", l2Blocks[0].L2BlockNumber, err.Error())
+			log.Errorf("Error getting L2 transactions for blocks starting at %d: %s", l2Blocks[zeroValue].L2BlockNumber, err.Error())
 			return err
 		}
 	}
