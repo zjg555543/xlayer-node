@@ -192,12 +192,12 @@ func (s *Server) signSeq(requestData Request) (error, string) {
 		signData = nil
 	}
 
-	to, data, err := s.ethClient.BuildMockSequenceBatchesTxData(s.seqAddress, sequences, common.HexToAddress(seqData.L2Coinbase), signData, txHashs)
+	_, data, err := s.ethClient.BuildMockSequenceBatchesTxData(s.seqAddress, sequences, common.HexToAddress(seqData.L2Coinbase), signData, txHashs)
 	if err != nil {
 		log.Errorf("error BuildSequenceBatchesTxData: %v", err)
 		return err, ""
 	}
-	to = &seqData.ContractAddress
+	to := &seqData.ContractAddress
 
 	// return s.getTxData(s.seqAddress, to, data)
 	return s.getLegacyTxData(s.seqAddress, to, data, seqData.Nonce, seqData.GasLimit, seqData.GasPrice)
@@ -245,13 +245,13 @@ func (s *Server) signAgg(requestData Request) (error, string) {
 		FinalProof:       proof,
 	}
 
-	to, data, err := s.ethClient.BuildTrustedVerifyBatchesTxData(aggData.InitNumBatch, aggData.FinalNewBatch, inputs)
+	_, data, err := s.ethClient.BuildTrustedVerifyBatchesTxData(aggData.InitNumBatch, aggData.FinalNewBatch, inputs)
 	if err != nil {
 		log.Errorf("error BuildTrustedVerifyBatchesTxData: %v", err)
 		return err, ""
 	}
 
-	to = &aggData.ContractAddress
+	to := &aggData.ContractAddress
 	// return s.getTxData(s.aggAddress, to, data)
 	return s.getLegacyTxData(s.aggAddress, to, data, aggData.Nonce, aggData.GasLimit, aggData.GasPrice)
 }
@@ -287,6 +287,7 @@ func (s *Server) getLegacyTxData(from common.Address, to *common.Address, data [
 	return nil, hex.EncodeToString(txBin)
 }
 
+// nolint:unused
 func (s *Server) getTxData(from common.Address, to *common.Address, data []byte) (error, string) {
 	nonce, err := s.ethClient.CurrentNonce(s.ctx, from)
 	if err != nil {

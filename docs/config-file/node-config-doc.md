@@ -248,6 +248,7 @@ Url=""
 | - [ForcedGas](#EthTxManager_ForcedGas )                         | No      | integer         | No         | -          | ForcedGas is the amount of gas to be forced in case of gas estimation error                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | - [GasPriceMarginFactor](#EthTxManager_GasPriceMarginFactor )   | No      | number          | No         | -          | GasPriceMarginFactor is used to multiply the suggested gas price provided by the network<br />in order to allow a different gas price to be set for all the transactions and making it<br />easier to have the txs prioritized in the pool, default value is 1.<br /><br />ex:<br />suggested gas price: 100<br />GasPriceMarginFactor: 1<br />gas price = 100<br /><br />suggested gas price: 100<br />GasPriceMarginFactor: 1.1<br />gas price = 110                                                                                                                                                                                              |
 | - [MaxGasPriceLimit](#EthTxManager_MaxGasPriceLimit )           | No      | integer         | No         | -          | MaxGasPriceLimit helps avoiding transactions to be sent over an specified<br />gas price amount, default value is 0, which means no limit.<br />If the gas price provided by the network and adjusted by the GasPriceMarginFactor<br />is greater than this configuration, transaction will have its gas price set to<br />the value configured in this config as the limit.<br /><br />ex:<br /><br />suggested gas price: 100<br />gas price margin factor: 20%<br />max gas price limit: 150<br />tx gas price = 120<br /><br />suggested gas price: 100<br />gas price margin factor: 20%<br />max gas price limit: 110<br />tx gas price = 110 |
+| - [CustodialAssets](#EthTxManager_CustodialAssets )             | No      | object          | No         | -          | CustodialAssets is the configuration for the custodial assets                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ### <a name="EthTxManager_FrequencyToMonitorTxs"></a>6.1. `EthTxManager.FrequencyToMonitorTxs`
 
@@ -408,27 +409,302 @@ tx gas price = 110
 MaxGasPriceLimit=0
 ```
 
+### <a name="EthTxManager_CustodialAssets"></a>6.7. `[EthTxManager.CustodialAssets]`
+
+**Type:** : `object`
+**Description:** CustodialAssets is the configuration for the custodial assets
+
+| Property                                                                | Pattern | Type             | Deprecated | Definition | Title/Description                                                             |
+| ----------------------------------------------------------------------- | ------- | ---------------- | ---------- | ---------- | ----------------------------------------------------------------------------- |
+| - [Enable](#EthTxManager_CustodialAssets_Enable )                       | No      | boolean          | No         | -          | Enable is the flag to enable the custodial assets                             |
+| - [URL](#EthTxManager_CustodialAssets_URL )                             | No      | string           | No         | -          | URL is the url to sign the custodial assets                                   |
+| - [Symbol](#EthTxManager_CustodialAssets_Symbol )                       | No      | integer          | No         | -          | Symbol is the symbol of the network, 2 prd, 2882 devnet                       |
+| - [SequencerAddr](#EthTxManager_CustodialAssets_SequencerAddr )         | No      | array of integer | No         | -          | SequencerAddr is the address of the sequencer                                 |
+| - [AggregatorAddr](#EthTxManager_CustodialAssets_AggregatorAddr )       | No      | array of integer | No         | -          | AggregatorAddr is the address of the aggregator                               |
+| - [WaitResultTimeout](#EthTxManager_CustodialAssets_WaitResultTimeout ) | No      | string           | No         | -          | Duration                                                                      |
+| - [OperateTypeSeq](#EthTxManager_CustodialAssets_OperateTypeSeq )       | No      | integer          | No         | -          | OperateTypeSeq is the operate type of the custodial assets for the sequencer  |
+| - [OperateTypeAgg](#EthTxManager_CustodialAssets_OperateTypeAgg )       | No      | integer          | No         | -          | OperateTypeAgg is the operate type of the custodial assets for the aggregator |
+| - [ProjectSymbol](#EthTxManager_CustodialAssets_ProjectSymbol )         | No      | integer          | No         | -          | ProjectSymbol is the project symbol of the custodial assets                   |
+| - [OperateSymbol](#EthTxManager_CustodialAssets_OperateSymbol )         | No      | integer          | No         | -          | OperateSymbol is the operate symbol of the custodial assets                   |
+| - [SysFrom](#EthTxManager_CustodialAssets_SysFrom )                     | No      | integer          | No         | -          | SysFrom is the sys from of the custodial assets                               |
+| - [UserID](#EthTxManager_CustodialAssets_UserID )                       | No      | integer          | No         | -          | UserID is the user id of the custodial assets                                 |
+| - [OperateAmount](#EthTxManager_CustodialAssets_OperateAmount )         | No      | integer          | No         | -          | OperateAmount is the operate amount of the custodial assets                   |
+| - [RequestSignURI](#EthTxManager_CustodialAssets_RequestSignURI )       | No      | string           | No         | -          | RequestSignURI is the request sign uri of the custodial assets                |
+| - [QuerySignURI](#EthTxManager_CustodialAssets_QuerySignURI )           | No      | string           | No         | -          | QuerySignURI is the query sign uri of the custodial assets                    |
+| - [AccessKey](#EthTxManager_CustodialAssets_AccessKey )                 | No      | string           | No         | -          | AccessKey is the access key of the custodial assets                           |
+| - [SecretKey](#EthTxManager_CustodialAssets_SecretKey )                 | No      | string           | No         | -          | SecretKey is the secret key of the custodial assets                           |
+
+#### <a name="EthTxManager_CustodialAssets_Enable"></a>6.7.1. `EthTxManager.CustodialAssets.Enable`
+
+**Type:** : `boolean`
+
+**Default:** `false`
+
+**Description:** Enable is the flag to enable the custodial assets
+
+**Example setting the default value** (false):
+```
+[EthTxManager.CustodialAssets]
+Enable=false
+```
+
+#### <a name="EthTxManager_CustodialAssets_URL"></a>6.7.2. `EthTxManager.CustodialAssets.URL`
+
+**Type:** : `string`
+
+**Default:** `"http://localhost:8080"`
+
+**Description:** URL is the url to sign the custodial assets
+
+**Example setting the default value** ("http://localhost:8080"):
+```
+[EthTxManager.CustodialAssets]
+URL="http://localhost:8080"
+```
+
+#### <a name="EthTxManager_CustodialAssets_Symbol"></a>6.7.3. `EthTxManager.CustodialAssets.Symbol`
+
+**Type:** : `integer`
+
+**Default:** `2882`
+
+**Description:** Symbol is the symbol of the network, 2 prd, 2882 devnet
+
+**Example setting the default value** (2882):
+```
+[EthTxManager.CustodialAssets]
+Symbol=2882
+```
+
+#### <a name="EthTxManager_CustodialAssets_SequencerAddr"></a>6.7.4. `EthTxManager.CustodialAssets.SequencerAddr`
+
+**Type:** : `array of integer`
+
+**Default:** `"0x1a13bddcc02d363366e04d4aa588d3c125b0ff6f"`
+
+**Description:** SequencerAddr is the address of the sequencer
+
+**Example setting the default value** ("0x1a13bddcc02d363366e04d4aa588d3c125b0ff6f"):
+```
+[EthTxManager.CustodialAssets]
+SequencerAddr="0x1a13bddcc02d363366e04d4aa588d3c125b0ff6f"
+```
+
+#### <a name="EthTxManager_CustodialAssets_AggregatorAddr"></a>6.7.5. `EthTxManager.CustodialAssets.AggregatorAddr`
+
+**Type:** : `array of integer`
+
+**Default:** `"0x66e39a1e507af777e8c385e2d91559e20e306303"`
+
+**Description:** AggregatorAddr is the address of the aggregator
+
+**Example setting the default value** ("0x66e39a1e507af777e8c385e2d91559e20e306303"):
+```
+[EthTxManager.CustodialAssets]
+AggregatorAddr="0x66e39a1e507af777e8c385e2d91559e20e306303"
+```
+
+#### <a name="EthTxManager_CustodialAssets_WaitResultTimeout"></a>6.7.6. `EthTxManager.CustodialAssets.WaitResultTimeout`
+
+**Title:** Duration
+
+**Type:** : `string`
+
+**Default:** `"2m0s"`
+
+**Description:** WaitResultTimeout is the timeout to wait for the result of the custodial assets
+
+**Examples:** 
+
+```json
+"1m"
+```
+
+```json
+"300ms"
+```
+
+**Example setting the default value** ("2m0s"):
+```
+[EthTxManager.CustodialAssets]
+WaitResultTimeout="2m0s"
+```
+
+#### <a name="EthTxManager_CustodialAssets_OperateTypeSeq"></a>6.7.7. `EthTxManager.CustodialAssets.OperateTypeSeq`
+
+**Type:** : `integer`
+
+**Default:** `1`
+
+**Description:** OperateTypeSeq is the operate type of the custodial assets for the sequencer
+
+**Example setting the default value** (1):
+```
+[EthTxManager.CustodialAssets]
+OperateTypeSeq=1
+```
+
+#### <a name="EthTxManager_CustodialAssets_OperateTypeAgg"></a>6.7.8. `EthTxManager.CustodialAssets.OperateTypeAgg`
+
+**Type:** : `integer`
+
+**Default:** `2`
+
+**Description:** OperateTypeAgg is the operate type of the custodial assets for the aggregator
+
+**Example setting the default value** (2):
+```
+[EthTxManager.CustodialAssets]
+OperateTypeAgg=2
+```
+
+#### <a name="EthTxManager_CustodialAssets_ProjectSymbol"></a>6.7.9. `EthTxManager.CustodialAssets.ProjectSymbol`
+
+**Type:** : `integer`
+
+**Default:** `3011`
+
+**Description:** ProjectSymbol is the project symbol of the custodial assets
+
+**Example setting the default value** (3011):
+```
+[EthTxManager.CustodialAssets]
+ProjectSymbol=3011
+```
+
+#### <a name="EthTxManager_CustodialAssets_OperateSymbol"></a>6.7.10. `EthTxManager.CustodialAssets.OperateSymbol`
+
+**Type:** : `integer`
+
+**Default:** `2`
+
+**Description:** OperateSymbol is the operate symbol of the custodial assets
+
+**Example setting the default value** (2):
+```
+[EthTxManager.CustodialAssets]
+OperateSymbol=2
+```
+
+#### <a name="EthTxManager_CustodialAssets_SysFrom"></a>6.7.11. `EthTxManager.CustodialAssets.SysFrom`
+
+**Type:** : `integer`
+
+**Default:** `3`
+
+**Description:** SysFrom is the sys from of the custodial assets
+
+**Example setting the default value** (3):
+```
+[EthTxManager.CustodialAssets]
+SysFrom=3
+```
+
+#### <a name="EthTxManager_CustodialAssets_UserID"></a>6.7.12. `EthTxManager.CustodialAssets.UserID`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** UserID is the user id of the custodial assets
+
+**Example setting the default value** (0):
+```
+[EthTxManager.CustodialAssets]
+UserID=0
+```
+
+#### <a name="EthTxManager_CustodialAssets_OperateAmount"></a>6.7.13. `EthTxManager.CustodialAssets.OperateAmount`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** OperateAmount is the operate amount of the custodial assets
+
+**Example setting the default value** (0):
+```
+[EthTxManager.CustodialAssets]
+OperateAmount=0
+```
+
+#### <a name="EthTxManager_CustodialAssets_RequestSignURI"></a>6.7.14. `EthTxManager.CustodialAssets.RequestSignURI`
+
+**Type:** : `string`
+
+**Default:** `"/priapi/v1/assetonchain/ecology/ecologyOperate"`
+
+**Description:** RequestSignURI is the request sign uri of the custodial assets
+
+**Example setting the default value** ("/priapi/v1/assetonchain/ecology/ecologyOperate"):
+```
+[EthTxManager.CustodialAssets]
+RequestSignURI="/priapi/v1/assetonchain/ecology/ecologyOperate"
+```
+
+#### <a name="EthTxManager_CustodialAssets_QuerySignURI"></a>6.7.15. `EthTxManager.CustodialAssets.QuerySignURI`
+
+**Type:** : `string`
+
+**Default:** `"/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"`
+
+**Description:** QuerySignURI is the query sign uri of the custodial assets
+
+**Example setting the default value** ("/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"):
+```
+[EthTxManager.CustodialAssets]
+QuerySignURI="/priapi/v1/assetonchain/ecology/querySignDataByOrderNo"
+```
+
+#### <a name="EthTxManager_CustodialAssets_AccessKey"></a>6.7.16. `EthTxManager.CustodialAssets.AccessKey`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** AccessKey is the access key of the custodial assets
+
+**Example setting the default value** (""):
+```
+[EthTxManager.CustodialAssets]
+AccessKey=""
+```
+
+#### <a name="EthTxManager_CustodialAssets_SecretKey"></a>6.7.17. `EthTxManager.CustodialAssets.SecretKey`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** SecretKey is the secret key of the custodial assets
+
+**Example setting the default value** (""):
+```
+[EthTxManager.CustodialAssets]
+SecretKey=""
+```
+
 ## <a name="Pool"></a>7. `[Pool]`
 
 **Type:** : `object`
 **Description:** Pool service configuration
 
-| Property                                                                        | Pattern | Type    | Deprecated | Definition | Title/Description                                                                                    |
-| ------------------------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| - [FreeClaimGasLimit](#Pool_FreeClaimGasLimit )                                 | No      | integer | No         | -          | FreeClaimGasLimit is the max gas allowed use to do a free claim                                      |
-| - [IntervalToRefreshBlockedAddresses](#Pool_IntervalToRefreshBlockedAddresses ) | No      | string  | No         | -          | Duration                                                                                             |
-| - [IntervalToRefreshGasPrices](#Pool_IntervalToRefreshGasPrices )               | No      | string  | No         | -          | Duration                                                                                             |
-| - [MaxTxBytesSize](#Pool_MaxTxBytesSize )                                       | No      | integer | No         | -          | MaxTxBytesSize is the max size of a transaction in bytes                                             |
-| - [MaxTxDataBytesSize](#Pool_MaxTxDataBytesSize )                               | No      | integer | No         | -          | MaxTxDataBytesSize is the max size of the data field of a transaction in bytes                       |
-| - [DB](#Pool_DB )                                                               | No      | object  | No         | -          | DB is the database configuration                                                                     |
-| - [DefaultMinGasPriceAllowed](#Pool_DefaultMinGasPriceAllowed )                 | No      | integer | No         | -          | DefaultMinGasPriceAllowed is the default min gas price to suggest                                    |
-| - [MinAllowedGasPriceInterval](#Pool_MinAllowedGasPriceInterval )               | No      | string  | No         | -          | Duration                                                                                             |
-| - [PollMinAllowedGasPriceInterval](#Pool_PollMinAllowedGasPriceInterval )       | No      | string  | No         | -          | Duration                                                                                             |
-| - [AccountQueue](#Pool_AccountQueue )                                           | No      | integer | No         | -          | AccountQueue represents the maximum number of non-executable transaction slots permitted per account |
-| - [GlobalQueue](#Pool_GlobalQueue )                                             | No      | integer | No         | -          | GlobalQueue represents the maximum number of non-executable transaction slots for all accounts       |
-| - [FreeGasAddress](#Pool_FreeGasAddress )                                       | No      | string  | No         | -          | FreeGasAddress is the default free gas address                                                       |
-| - [EffectiveGasPrice](#Pool_EffectiveGasPrice )                                 | No      | object  | No         | -          | EffectiveGasPrice is the config for the effective gas price calculation                              |
-| - [ForkID](#Pool_ForkID )                                                       | No      | integer | No         | -          | ForkID is the current fork ID of the chain                                                           |
+| Property                                                                        | Pattern | Type            | Deprecated | Definition | Title/Description                                                                                    |
+| ------------------------------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------- |
+| - [FreeClaimGasLimit](#Pool_FreeClaimGasLimit )                                 | No      | integer         | No         | -          | FreeClaimGasLimit is the max gas allowed use to do a free claim                                      |
+| - [IntervalToRefreshBlockedAddresses](#Pool_IntervalToRefreshBlockedAddresses ) | No      | string          | No         | -          | Duration                                                                                             |
+| - [IntervalToRefreshGasPrices](#Pool_IntervalToRefreshGasPrices )               | No      | string          | No         | -          | Duration                                                                                             |
+| - [MaxTxBytesSize](#Pool_MaxTxBytesSize )                                       | No      | integer         | No         | -          | MaxTxBytesSize is the max size of a transaction in bytes                                             |
+| - [MaxTxDataBytesSize](#Pool_MaxTxDataBytesSize )                               | No      | integer         | No         | -          | MaxTxDataBytesSize is the max size of the data field of a transaction in bytes                       |
+| - [DB](#Pool_DB )                                                               | No      | object          | No         | -          | DB is the database configuration                                                                     |
+| - [DefaultMinGasPriceAllowed](#Pool_DefaultMinGasPriceAllowed )                 | No      | integer         | No         | -          | DefaultMinGasPriceAllowed is the default min gas price to suggest                                    |
+| - [MinAllowedGasPriceInterval](#Pool_MinAllowedGasPriceInterval )               | No      | string          | No         | -          | Duration                                                                                             |
+| - [PollMinAllowedGasPriceInterval](#Pool_PollMinAllowedGasPriceInterval )       | No      | string          | No         | -          | Duration                                                                                             |
+| - [AccountQueue](#Pool_AccountQueue )                                           | No      | integer         | No         | -          | AccountQueue represents the maximum number of non-executable transaction slots permitted per account |
+| - [GlobalQueue](#Pool_GlobalQueue )                                             | No      | integer         | No         | -          | GlobalQueue represents the maximum number of non-executable transaction slots for all accounts       |
+| - [FreeGasAddress](#Pool_FreeGasAddress )                                       | No      | array of string | No         | -          | FreeGasAddress is the default free gas address                                                       |
+| - [EffectiveGasPrice](#Pool_EffectiveGasPrice )                                 | No      | object          | No         | -          | EffectiveGasPrice is the config for the effective gas price calculation                              |
+| - [ForkID](#Pool_ForkID )                                                       | No      | integer         | No         | -          | ForkID is the current fork ID of the chain                                                           |
 
 ### <a name="Pool_FreeClaimGasLimit"></a>7.1. `Pool.FreeClaimGasLimit`
 
@@ -734,16 +1010,16 @@ GlobalQueue=1024
 
 ### <a name="Pool_FreeGasAddress"></a>7.12. `Pool.FreeGasAddress`
 
-**Type:** : `string`
+**Type:** : `array of string`
 
-**Default:** `"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"`
+**Default:** `["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]`
 
 **Description:** FreeGasAddress is the default free gas address
 
-**Example setting the default value** ("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"):
+**Example setting the default value** (["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]):
 ```
 [Pool]
-FreeGasAddress="0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+FreeGasAddress=["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]
 ```
 
 ### <a name="Pool_EffectiveGasPrice"></a>7.13. `[Pool.EffectiveGasPrice]`
@@ -917,6 +1193,7 @@ ForkID=0
 | - [NacosWs](#RPC_NacosWs )                                                   | No      | object           | No         | -          | NacosWs configuration                                                                                                                                                                                                                                                                                                                              |
 | - [GasLimitFactor](#RPC_GasLimitFactor )                                     | No      | number           | No         | -          | GasLimitFactor is used to multiply the suggested gas provided by the network<br />in order to allow a enough gas to be set for all the transactions default value is 1.<br /><br />ex:<br />suggested gas limit: 100<br />GasLimitFactor: 1<br />gas limit = 100<br /><br />suggested gas limit: 100<br />GasLimitFactor: 1.1<br />gas limit = 110 |
 | - [DisableAPIs](#RPC_DisableAPIs )                                           | No      | array of string  | No         | -          | DisableAPIs disable some API                                                                                                                                                                                                                                                                                                                       |
+| - [RateLimit](#RPC_RateLimit )                                               | No      | object           | No         | -          | RateLimit enable rate limit                                                                                                                                                                                                                                                                                                                        |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -1406,6 +1683,127 @@ GasLimitFactor=1
 [RPC]
 DisableAPIs=[]
 ```
+
+### <a name="RPC_RateLimit"></a>8.22. `[RPC.RateLimit]`
+
+**Type:** : `object`
+**Description:** RateLimit enable rate limit
+
+| Property                                                 | Pattern | Type            | Deprecated | Definition | Title/Description                                                                 |
+| -------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | --------------------------------------------------------------------------------- |
+| - [Enabled](#RPC_RateLimit_Enabled )                     | No      | boolean         | No         | -          | Enabled defines if the rate limit is enabled or disabled                          |
+| - [RateLimitApis](#RPC_RateLimit_RateLimitApis )         | No      | array of string | No         | -          | RateLimitApis defines the apis that need to be rate limited                       |
+| - [RateLimitCount](#RPC_RateLimit_RateLimitCount )       | No      | integer         | No         | -          | RateLimitBurst defines the maximum burst size of requests                         |
+| - [RateLimitDuration](#RPC_RateLimit_RateLimitDuration ) | No      | integer         | No         | -          | RateLimitDuration defines the time window for the rate limit                      |
+| - [SpecialApis](#RPC_RateLimit_SpecialApis )             | No      | array of object | No         | -          | SpecialApis defines the apis that need to be rate limited with special rate limit |
+
+#### <a name="RPC_RateLimit_Enabled"></a>8.22.1. `RPC.RateLimit.Enabled`
+
+**Type:** : `boolean`
+
+**Default:** `false`
+
+**Description:** Enabled defines if the rate limit is enabled or disabled
+
+**Example setting the default value** (false):
+```
+[RPC.RateLimit]
+Enabled=false
+```
+
+#### <a name="RPC_RateLimit_RateLimitApis"></a>8.22.2. `RPC.RateLimit.RateLimitApis`
+
+**Type:** : `array of string`
+
+**Default:** `[]`
+
+**Description:** RateLimitApis defines the apis that need to be rate limited
+
+**Example setting the default value** ([]):
+```
+[RPC.RateLimit]
+RateLimitApis=[]
+```
+
+#### <a name="RPC_RateLimit_RateLimitCount"></a>8.22.3. `RPC.RateLimit.RateLimitCount`
+
+**Type:** : `integer`
+
+**Default:** `100`
+
+**Description:** RateLimitBurst defines the maximum burst size of requests
+
+**Example setting the default value** (100):
+```
+[RPC.RateLimit]
+RateLimitCount=100
+```
+
+#### <a name="RPC_RateLimit_RateLimitDuration"></a>8.22.4. `RPC.RateLimit.RateLimitDuration`
+
+**Type:** : `integer`
+
+**Default:** `1`
+
+**Description:** RateLimitDuration defines the time window for the rate limit
+
+**Example setting the default value** (1):
+```
+[RPC.RateLimit]
+RateLimitDuration=1
+```
+
+#### <a name="RPC_RateLimit_SpecialApis"></a>8.22.5. `RPC.RateLimit.SpecialApis`
+
+**Type:** : `array of object`
+
+**Default:** `[]`
+
+**Description:** SpecialApis defines the apis that need to be rate limited with special rate limit
+
+**Example setting the default value** ([]):
+```
+[RPC.RateLimit]
+SpecialApis=[]
+```
+
+|                      | Array restrictions |
+| -------------------- | ------------------ |
+| **Min items**        | N/A                |
+| **Max items**        | N/A                |
+| **Items unicity**    | False              |
+| **Additional items** | False              |
+| **Tuple validation** | See below          |
+
+| Each item of this array must be                       | Description                                                |
+| ----------------------------------------------------- | ---------------------------------------------------------- |
+| [SpecialApis items](#RPC_RateLimit_SpecialApis_items) | RateLimitItem defines the special rate limit for some apis |
+
+##### <a name="autogenerated_heading_3"></a>8.22.5.1. [RPC.RateLimit.SpecialApis.SpecialApis items]
+
+**Type:** : `object`
+**Description:** RateLimitItem defines the special rate limit for some apis
+
+| Property                                                 | Pattern | Type    | Deprecated | Definition | Title/Description                                   |
+| -------------------------------------------------------- | ------- | ------- | ---------- | ---------- | --------------------------------------------------- |
+| - [Api](#RPC_RateLimit_SpecialApis_items_Api )           | No      | string  | No         | -          | Api defines the api that need to be rate limited    |
+| - [Count](#RPC_RateLimit_SpecialApis_items_Count )       | No      | integer | No         | -          | Count defines the maximum burst size of requests    |
+| - [Duration](#RPC_RateLimit_SpecialApis_items_Duration ) | No      | integer | No         | -          | Duration defines the time window for the rate limit |
+
+##### <a name="RPC_RateLimit_SpecialApis_items_Api"></a>8.22.5.1.1. `RPC.RateLimit.SpecialApis.SpecialApis items.Api`
+
+**Type:** : `string`
+**Description:** Api defines the api that need to be rate limited
+
+##### <a name="RPC_RateLimit_SpecialApis_items_Count"></a>8.22.5.1.2. `RPC.RateLimit.SpecialApis.SpecialApis items.Count`
+
+**Type:** : `integer`
+**Description:** Count defines the maximum burst size of requests
+
+##### <a name="RPC_RateLimit_SpecialApis_items_Duration"></a>8.22.5.1.3. `RPC.RateLimit.SpecialApis.SpecialApis items.Duration`
+
+**Type:** : `integer`
+**Description:** Duration defines the time window for the rate limit
 
 ## <a name="Synchronizer"></a>9. `[Synchronizer]`
 
@@ -2368,7 +2766,7 @@ Must be one of:
 | - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                                                                                                                            |
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                                                                                                                               |
 | - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which address is going to receive the fees                                                                                                                                                                                                                                                                                                                                                                 |
-| - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
+| - [DAPermitApiPrivateKey](#SequenceSender_DAPermitApiPrivateKey )                                       | No      | object           | No         | -          | DAPermitApiPrivateKey defines all the key store files that are going<br />to sign batches for DA service                                                                                                                                                                                                                                                                                                                      |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                                                                                                                                   |
 | - [GasOffset](#SequenceSender_GasOffset )                                                               | No      | integer          | No         | -          | GasOffset is the amount of gas to be added to the gas estimation in order<br />to provide an amount that is higher than the estimated one. This is used<br />to avoid the TX getting reverted in case something has changed in the network<br />state after the estimation which can cause the TX to require more gas to be<br />executed.<br /><br />ex:<br />gas estimation: 1000<br />gas offset: 100<br />final gas: 1100 |
@@ -2477,18 +2875,18 @@ to sign the L1 txs
 L2Coinbase="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 ```
 
-### <a name="SequenceSender_PrivateKey"></a>11.7. `[SequenceSender.PrivateKey]`
+### <a name="SequenceSender_DAPermitApiPrivateKey"></a>11.7. `[SequenceSender.DAPermitApiPrivateKey]`
 
 **Type:** : `object`
-**Description:** PrivateKey defines all the key store files that are going
-to be read in order to provide the private keys to sign the L1 txs
+**Description:** DAPermitApiPrivateKey defines all the key store files that are going
+to sign batches for DA service
 
-| Property                                           | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
-| -------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
-| - [Path](#SequenceSender_PrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
-| - [Password](#SequenceSender_PrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
+| Property                                                      | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
+| ------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
+| - [Path](#SequenceSender_DAPermitApiPrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
+| - [Password](#SequenceSender_DAPermitApiPrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
 
-#### <a name="SequenceSender_PrivateKey_Path"></a>11.7.1. `SequenceSender.PrivateKey.Path`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Path"></a>11.7.1. `SequenceSender.DAPermitApiPrivateKey.Path`
 
 **Type:** : `string`
 
@@ -2498,11 +2896,11 @@ to be read in order to provide the private keys to sign the L1 txs
 
 **Example setting the default value** ("/pk/sequencer.keystore"):
 ```
-[SequenceSender.PrivateKey]
+[SequenceSender.DAPermitApiPrivateKey]
 Path="/pk/sequencer.keystore"
 ```
 
-#### <a name="SequenceSender_PrivateKey_Password"></a>11.7.2. `SequenceSender.PrivateKey.Password`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Password"></a>11.7.2. `SequenceSender.DAPermitApiPrivateKey.Password`
 
 **Type:** : `string`
 
@@ -2512,7 +2910,7 @@ Path="/pk/sequencer.keystore"
 
 **Example setting the default value** ("testonly"):
 ```
-[SequenceSender.PrivateKey]
+[SequenceSender.DAPermitApiPrivateKey]
 Password="testonly"
 ```
 
@@ -2967,7 +3365,7 @@ GenesisBlockNum=0
 | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
 | [GenesisActions items](#NetworkConfig_Genesis_GenesisActions_items) | GenesisAction represents one of the values set on the SMT during genesis. |
 
-##### <a name="autogenerated_heading_3"></a>13.4.3.1. [NetworkConfig.Genesis.GenesisActions.GenesisActions items]
+##### <a name="autogenerated_heading_4"></a>13.4.3.1. [NetworkConfig.Genesis.GenesisActions.GenesisActions items]
 
 **Type:** : `object`
 **Description:** GenesisAction represents one of the values set on the SMT during genesis.
@@ -3844,7 +4242,7 @@ ChainID=0
 | ----------------------------------------------------- | ------------------------------------ |
 | [ForkIDIntervals items](#State_ForkIDIntervals_items) | ForkIDInterval is a fork id interval |
 
-#### <a name="autogenerated_heading_4"></a>20.3.1. [State.ForkIDIntervals.ForkIDIntervals items]
+#### <a name="autogenerated_heading_5"></a>20.3.1. [State.ForkIDIntervals.ForkIDIntervals items]
 
 **Type:** : `object`
 **Description:** ForkIDInterval is a fork id interval
