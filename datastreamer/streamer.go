@@ -47,7 +47,7 @@ func (s *DataStreamer) Start(ctx context.Context) {
 		log.Fatalf("failed to start stream server, err: %v", err)
 	}
 
-	err = state.GenerateDataStreamerFile(ctx, s.streamServer, s.state, false, nil)
+	err = s.generateDataStreamerFile(ctx, s.streamServer, s.state)
 	if err != nil {
 		log.Fatalf("failed to generate data streamer file, err: %v", err)
 	}
@@ -288,4 +288,65 @@ func (s *DataStreamer) handleGER(streamServer *datastreamer.StreamServer, batch 
 		return ger, nil
 	}
 	return common.Hash{}, nil
+}
+
+func (s *DataStreamer) generateDataStreamerFile(ctx context.Context, streamServer *datastreamer.StreamServer, stateDB state.DSState) error {
+	header := streamServer.GetHeader()
+	if header.TotalEntries != 0 {
+		return nil
+	}
+
+	// Get Genesis block
+	genesisL2Block, err := stateDB.GetDSGenesisBlock(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	err = streamServer.StartAtomicOp()
+	if err != nil {
+		return err
+	}
+
+	bookMark := state.DSBookMark{
+		Type:          state.BookMarkTypeL2Block,
+		L2BlockNumber: genesisL2Block.L2BlockNumber,
+	}
+
+	_, err = streamServer.AddStreamBookmark(bookMark.Encode())
+	if err != nil {
+		return err
+	}
+
+	genesisBlock := state.DSL2BlockStart{
+		BatchNumber:    genesisL2Block.BatchNumber,
+		L2BlockNumber:  genesisL2Block.L2BlockNumber,
+		Timestamp:      genesisL2Block.Timestamp,
+		GlobalExitRoot: genesisL2Block.GlobalExitRoot,
+		Coinbase:       genesisL2Block.Coinbase,
+		ForkID:         genesisL2Block.ForkID,
+	}
+
+	log.Infof("Processing add stream entry, generate block:%v", genesisBlock.L2BlockNumber)
+	_, err = streamServer.AddStreamEntry(1, genesisBlock.Encode())
+	if err != nil {
+		return err
+	}
+
+	genesisBlockEnd := state.DSL2BlockEnd{
+		L2BlockNumber: genesisL2Block.L2BlockNumber,
+		BlockHash:     genesisL2Block.BlockHash,
+		StateRoot:     genesisL2Block.StateRoot,
+	}
+
+	_, err = streamServer.AddStreamEntry(state.EntryTypeL2BlockEnd, genesisBlockEnd.Encode())
+	if err != nil {
+		return err
+	}
+
+	err = streamServer.CommitAtomicOp()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
