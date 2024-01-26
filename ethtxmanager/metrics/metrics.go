@@ -14,11 +14,7 @@ const (
 
 // Register the metrics for the sequencer package.
 func Register() {
-	var (
-		counters []prometheus.CounterOpts
-	)
-
-	counters = []prometheus.CounterOpts{
+	var counters = []prometheus.CounterOpts{
 		{
 			Name: HaltCountName,
 			Help: "[ETHTXMANAGER] total count of halt",
