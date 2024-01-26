@@ -52,10 +52,10 @@ func (s *DataStreamer) Start(ctx context.Context) {
 		log.Fatalf("failed to generate data streamer file, err: %v", err)
 	}
 
-	s.loopDataStreamer(ctx)
+	s.run(ctx)
 }
 
-func (s *DataStreamer) loopDataStreamer(ctx context.Context) {
+func (s *DataStreamer) run(ctx context.Context) {
 	log.Infof("Starting data streamer loop")
 	for {
 		select {
@@ -65,7 +65,7 @@ func (s *DataStreamer) loopDataStreamer(ctx context.Context) {
 		default:
 			time.Sleep(s.cfg.WaitInterval.Duration)
 
-			latestBatchNum, latestBlockNum, err := s.getLatestBatchAndBlock(s.streamServer)
+			latestBatchNum, latestBlockNum, err := s.getLatestState(s.streamServer)
 			if err != nil {
 				log.Fatalf("Error getting current batch and block: %s", err.Error())
 				break
@@ -149,7 +149,7 @@ func (s *DataStreamer) handleDataStreamer(ctx context.Context, streamServer *dat
 	return err
 }
 
-func (s *DataStreamer) getLatestBatchAndBlock(streamServer *datastreamer.StreamServer) (uint64, uint64, error) {
+func (s *DataStreamer) getLatestState(streamServer *datastreamer.StreamServer) (uint64, uint64, error) {
 	header := streamServer.GetHeader()
 	if header.TotalEntries == 0 {
 		return 0, 0, errors.New("no entries in data streamer file")
