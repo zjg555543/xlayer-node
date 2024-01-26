@@ -167,4 +167,6 @@ ProfilingEnabled = false
 [DataStreamer]
 Port = 6900
 Filename = "/datastreamer/datastream.bin"
+WaitInterval = "1000ms"
+MaxBatchLimit = 1000
 
