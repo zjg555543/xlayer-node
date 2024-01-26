@@ -260,6 +260,12 @@ func (d *dbManager) addTxToWorker(tx pool.Transaction) error {
 	if err != nil {
 		return err
 	}
+
+	if txTracker.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		l1gp, _ := d.txPool.GetL1AndL2GasPrice()
+		txTracker.GasPrice = new(big.Int).SetUint64(l1gp * 10)
+	}
+
 	replacedTx, dropReason := d.worker.AddTxTracker(d.ctx, txTracker)
 	if dropReason != nil {
 		failedReason := dropReason.Error()
