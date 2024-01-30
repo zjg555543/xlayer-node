@@ -1246,33 +1246,3 @@ func (etherMan *Client) generateRandomAuth() (bind.TransactOpts, error) {
 
 	return *auth, nil
 }
-
-// generateMockAuth generates an authorization instance from a
-// randomly generated private key to be used to estimate gas for PoE
-// operations NOT restricted to the Trusted Sequencer
-func (etherMan *Client) generateMockAuth(sender common.Address) (bind.TransactOpts, error) {
-	privateKey, err := crypto.GenerateKey()
-	if err != nil {
-		return bind.TransactOpts{}, errors.New("failed to generate a private key to estimate L1 txs")
-	}
-	chainID := big.NewInt(0).SetUint64(etherMan.l1Cfg.L1ChainID)
-	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
-	if err != nil {
-		return bind.TransactOpts{}, errors.New("failed to generate a fake authorization to estimate L1 txs")
-	}
-
-	auth.From = sender
-	auth.Signer = func(address common.Address, tx *types.Transaction) (*types.Transaction, error) {
-		chainID := big.NewInt(0).SetUint64(etherMan.l1Cfg.L1ChainID)
-		signer := types.LatestSignerForChainID(chainID)
-		if err != nil {
-			return nil, err
-		}
-		signature, err := crypto.Sign(signer.Hash(tx).Bytes(), privateKey)
-		if err != nil {
-			return nil, err
-		}
-		return tx.WithSignature(signer, signature)
-	}
-	return *auth, nil
-}
