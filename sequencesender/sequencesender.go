@@ -5,17 +5,17 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
+	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
+	ethTypes "github.com/ethereum/go-ethereum/core/types"
+	"github.com/jackc/pgx/v4"
 	"time"
 
 	ethman "github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
-	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/log"
-	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
-	ethTypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/jackc/pgx/v4"
 )
 
 const (
@@ -56,7 +56,7 @@ func New(cfg Config, state stateInterface, etherman etherman, manager ethTxManag
 func (s *SequenceSender) Start(ctx context.Context) {
 	ticker := time.NewTicker(s.cfg.WaitPeriodSendSequence.Duration)
 	for {
-		s.tryToSendSequence(ctx, ticker)
+		s.tryToSendSequenceX1(ctx, ticker)
 	}
 }
 
@@ -72,7 +72,6 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	}, nil)
 
 	if retry {
-		waitTick(ctx, ticker)
 		return
 	}
 
@@ -99,7 +98,6 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	lastVirtualBatchNum, err := s.state.GetLastVirtualBatchNum(ctx, nil)
 	if err != nil {
 		log.Errorf("failed to get last virtual batch num, err: %v", err)
-		waitTick(ctx, ticker)
 		return
 	}
 
@@ -112,19 +110,9 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	metrics.SequencesSentToL1(float64(sequenceCount))
 
 	// add sequence to be monitored
-	signaturesAndAddrs, err := s.getSignaturesAndAddrsFromDataCommittee(ctx, sequences)
-	if err != nil {
-		log.Error("error getting signatures and addresses from the data committee: ", err)
-		waitTick(ctx, ticker)
-		return
-	}
-	if !s.isValidium() {
-		signaturesAndAddrs = nil
-	}
-	to, data, err := s.etherman.BuildSequenceBatchesTxData(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, signaturesAndAddrs)
+	to, data, err := s.etherman.BuildSequenceBatchesTxData(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase)
 	if err != nil {
 		log.Error("error estimating new sequenceBatches to add to eth tx manager: ", err)
-		waitTick(ctx, ticker)
 		return
 	}
 	firstSequence := sequences[0]
@@ -134,7 +122,6 @@ func (s *SequenceSender) tryToSendSequence(ctx context.Context, ticker *time.Tic
 	if err != nil {
 		mTxLogger := ethtxmanager.CreateLogger(ethTxManagerOwner, monitoredTxID, s.cfg.SenderAddress, to)
 		mTxLogger.Errorf("error to add sequences tx to eth tx manager: ", err)
-		waitTick(ctx, ticker)
 		return
 	}
 }
@@ -151,6 +138,7 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 	currentBatchNumToSequence := lastVirtualBatchNum + 1
 	sequences := []types.Sequence{}
 	// var estimatedGas uint64
+
 	var tx *ethTypes.Transaction
 
 	// Add sequences until too big for a single L1 tx or last batch is reached
@@ -192,37 +180,28 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 		}
 
 		sequences = append(sequences, seq)
-		if s.isValidium() {
-			if len(sequences) == int(s.cfg.MaxBatchesForL1) {
-				log.Infof(
-					"sequence should be sent to L1, because MaxBatchesForL1 (%d) has been reached",
-					s.cfg.MaxBatchesForL1,
-				)
-				return sequences, nil
-			}
-		} else {
-			// Check if can be send
-			tx, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, nil)
-			if err == nil && tx.Size() > s.cfg.MaxTxSizeForL1 {
-				metrics.SequencesOvesizedDataError()
-				log.Infof("oversized Data on TX oldHash %s (txSize %d > %d)", tx.Hash(), tx.Size(), s.cfg.MaxTxSizeForL1)
-				err = ErrOversizedData
-			}
-			if err != nil {
-				log.Infof("Handling estimage gas send sequence error: %v", err)
-				sequences, err = s.handleEstimateGasSendSequenceErr(ctx, sequences, currentBatchNumToSequence, err)
-				if sequences != nil {
-					// Handling the error gracefully, re-processing the sequence as a sanity check
-					_, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, nil)
-					return sequences, err
-				}
+		// Check if can be send
+		tx, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase)
+		if err == nil && tx.Size() > s.cfg.MaxTxSizeForL1 {
+			metrics.SequencesOvesizedDataError()
+			log.Infof("oversized Data on TX oldHash %s (txSize %d > %d)", tx.Hash(), tx.Size(), s.cfg.MaxTxSizeForL1)
+			err = ErrOversizedData
+		}
+		if err != nil {
+			log.Infof("Handling estimage gas send sequence error: %v", err)
+			sequences, err = s.handleEstimateGasSendSequenceErr(ctx, sequences, currentBatchNumToSequence, err)
+			if sequences != nil {
+				// Handling the error gracefully, re-processing the sequence as a sanity check
+				_, err = s.etherman.EstimateGasSequenceBatches(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase)
 				return sequences, err
 			}
+			return sequences, err
 		}
+		// estimatedGas = tx.Gas()
 
 		//Check if the current batch is the last before a change to a new forkid, in this case we need to close and send the sequence to L1
 		if (s.cfg.ForkUpgradeBatchNumber != 0) && (currentBatchNumToSequence == (s.cfg.ForkUpgradeBatchNumber)) {
-			log.Info("sequence should be sent to L1, as we have reached the batch %d from which a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber)
+			log.Infof("sequence should be sent to L1, as we have reached the batch %d from which a new forkid is applied (upgrade)", s.cfg.ForkUpgradeBatchNumber)
 			return sequences, nil
 		}
 
@@ -251,6 +230,72 @@ func (s *SequenceSender) getSequencesToSend(ctx context.Context) ([]types.Sequen
 
 	log.Info("not enough time has passed since last batch was virtualized, and the sequence could be bigger")
 	return nil, nil
+}
+
+// handleEstimateGasSendSequenceErr handles an error on the estimate gas. It will return:
+// nil, error: impossible to handle gracefully
+// sequence, nil: handled gracefully. Potentially manipulating the sequences
+// nil, nil: a situation that requires waiting
+func (s *SequenceSender) handleEstimateGasSendSequenceErr(
+	ctx context.Context,
+	sequences []types.Sequence,
+	currentBatchNumToSequence uint64,
+	err error,
+) ([]types.Sequence, error) {
+	// Insufficient allowance
+	if errors.Is(err, ethman.ErrInsufficientAllowance) {
+		return nil, err
+	}
+	if isDataForEthTxTooBig(err) {
+		// Remove the latest item and send the sequences
+		log.Infof(
+			"Done building sequences, selected batches to %d. Batch %d caused the L1 tx to be too big",
+			currentBatchNumToSequence-1, currentBatchNumToSequence,
+		)
+		sequences = sequences[:len(sequences)-1]
+		return sequences, nil
+	}
+
+	// while estimating gas a new block is not created and the POE SC may return
+	// an error regarding timestamp verification, this must be handled
+	if errors.Is(err, ethman.ErrTimestampMustBeInsideRange) {
+		// query the sc about the value of its lastTimestamp variable
+		lastTimestamp, err := s.etherman.GetLastBatchTimestamp()
+		if err != nil {
+			return nil, err
+		}
+		// check POE SC lastTimestamp against sequences' one
+		for _, seq := range sequences {
+			if seq.Timestamp < int64(lastTimestamp) {
+				// TODO: gracefully handle this situation by creating an L2 reorg
+				log.Fatalf("sequence timestamp %d is < POE SC lastTimestamp %d", seq.Timestamp, lastTimestamp)
+			}
+			lastTimestamp = uint64(seq.Timestamp)
+		}
+		blockTimestamp, err := s.etherman.GetLatestBlockTimestamp(ctx)
+		if err != nil {
+			log.Error("error getting block timestamp: ", err)
+		}
+		log.Debugf("block.timestamp: %d is smaller than seq.Timestamp: %d. A new block must be mined in L1 before the gas can be estimated.", blockTimestamp, sequences[0].Timestamp)
+		return nil, nil
+	}
+
+	// Unknown error
+	if len(sequences) == 1 {
+		// TODO: gracefully handle this situation by creating an L2 reorg
+		log.Errorf(
+			"Error when estimating gas for BatchNum %d (alone in the sequences): %v",
+			currentBatchNumToSequence, err,
+		)
+	}
+	// Remove the latest item and send the sequences
+	log.Infof(
+		"Done building sequences, selected batches to %d. Batch %d excluded due to unknown error: %v",
+		currentBatchNumToSequence, currentBatchNumToSequence+1, err,
+	)
+	sequences = sequences[:len(sequences)-1]
+
+	return sequences, nil
 }
 
 func isDataForEthTxTooBig(err error) bool {
