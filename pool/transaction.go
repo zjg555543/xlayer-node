@@ -1,7 +1,6 @@
 package pool
 
 import (
-	"strings"
 	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -62,22 +61,4 @@ func NewTransaction(tx types.Transaction, ip string, isWIP bool, p *Pool) *Trans
 	poolTx.IsClaims = poolTx.IsClaimTx(p.l2BridgeAddr, p.cfg.FreeClaimGasLimit)
 
 	return &poolTx
-}
-
-// IsClaimTx checks, if tx is a claim tx
-func (tx *Transaction) IsClaimTx(l2BridgeAddr common.Address, freeClaimGasLimit uint64) bool {
-	if tx.To() == nil {
-		return false
-	}
-
-	txGas := tx.Gas()
-	if txGas > freeClaimGasLimit {
-		return false
-	}
-
-	if *tx.To() == l2BridgeAddr &&
-		strings.HasPrefix("0x"+common.Bytes2Hex(tx.Data()), BridgeClaimMethodSignature) {
-		return true
-	}
-	return false
 }
