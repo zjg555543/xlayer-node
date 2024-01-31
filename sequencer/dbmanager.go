@@ -8,7 +8,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-data-streamer/datastreamer"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/pool"
-	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -147,20 +146,6 @@ func (d *dbManager) loadFromPool() {
 				log.Errorf("error adding transaction to worker: %v", err)
 			}
 		}
-	}
-}
-
-var countinterval = 10
-
-func (d *dbManager) countPendingTx() {
-	for {
-		<-time.After(time.Second * time.Duration(countinterval))
-		transactions, err := d.txPool.CountPendingTransactions(d.ctx)
-		if err != nil {
-			log.Errorf("load pending tx from pool: %v", err)
-			continue
-		}
-		metrics.PendingTxCount(int(transactions))
 	}
 }
 

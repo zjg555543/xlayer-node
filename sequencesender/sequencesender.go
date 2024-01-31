@@ -5,13 +5,13 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	ethman "github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
 	"time"
 
-	ethman "github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -302,22 +302,6 @@ func isDataForEthTxTooBig(err error) bool {
 	return errors.Is(err, ethman.ErrGasRequiredExceedsAllowance) ||
 		errors.Is(err, ErrOversizedData) ||
 		errors.Is(err, ethman.ErrContentLengthTooLarge)
-}
-
-func (s *SequenceSender) isValidium() bool {
-	if !s.cfg.UseValidium {
-		return false
-	}
-
-	committee, err := s.etherman.GetCurrentDataCommittee()
-	if err != nil {
-		return false
-	}
-
-	if len(committee.Members) <= 0 {
-		return false
-	}
-	return true
 }
 
 func waitTick(ctx context.Context, ticker *time.Ticker) {
