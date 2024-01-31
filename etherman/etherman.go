@@ -577,7 +577,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 		batches = append(batches, batch)
 	}
 
-	tx, err := etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase, nil) //TODO:scf ?????
+	tx, err := etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase, nil)
 	if err != nil {
 		if parsedErr, ok := tryParseError(err); ok {
 			err = parsedErr
