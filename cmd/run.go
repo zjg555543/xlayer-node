@@ -181,7 +181,8 @@ func start(cliCtx *cli.Context) error {
 				log.Fatal(err)
 			}
 			if poolInstance == nil {
-				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
+				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
+				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			seq := createSequencer(*c, poolInstance, st, eventLog)
 			go seq.Start(cliCtx.Context)
@@ -193,7 +194,8 @@ func start(cliCtx *cli.Context) error {
 				log.Fatal(err)
 			}
 			if poolInstance == nil {
-				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
+				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
+				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			seqSender := createSequenceSenderX1(*c, poolInstance, ethTxManagerStorage, st, eventLog)
 			go seqSender.Start(cliCtx.Context)
@@ -205,7 +207,8 @@ func start(cliCtx *cli.Context) error {
 				log.Fatal(err)
 			}
 			if poolInstance == nil {
-				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
+				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
+				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			if c.RPC.EnableL2SuggestedGasPricePolling {
 				// Needed for rejecting transactions with too low gas price
@@ -225,7 +228,8 @@ func start(cliCtx *cli.Context) error {
 				log.Fatal(err)
 			}
 			if poolInstance == nil {
-				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
+				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
+				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			go runSynchronizer(*c, etherman, ethTxManagerStorage, st, poolInstance, eventLog)
 		case ETHTXMANAGER:
@@ -245,7 +249,8 @@ func start(cliCtx *cli.Context) error {
 				log.Fatal(err)
 			}
 			if poolInstance == nil {
-				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
+				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
+				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			go runL2GasPriceSuggester(c.L2GasPriceSuggester, st, poolInstance, etherman, apolloClient)
 		}
@@ -505,14 +510,18 @@ func newState(ctx context.Context, c *config.Config, l2ChainID uint64, forkIDInt
 	return st
 }
 
-func createPool(cfgPool pool.Config, constraintsCfg state.BatchConstraintsCfg, l2BridgeAddr common.Address, l2ChainID uint64, st *state.State, eventLog *event.EventLog) *pool.Pool {
+func createPool(cfgPool pool.Config, constraintsCfg state.BatchConstraintsCfg, l2ChainID uint64, st *state.State, eventLog *event.EventLog) *pool.Pool {
 	runPoolMigrations(cfgPool.DB)
 	poolStorage, err := pgpoolstorage.NewPostgresPoolStorage(cfgPool.DB)
 	if err != nil {
 		log.Fatal(err)
 	}
-	poolInstance := pool.NewPool(cfgPool, constraintsCfg, poolStorage, st, l2BridgeAddr, l2ChainID, eventLog)
+	poolInstance := pool.NewPool(cfgPool, constraintsCfg, poolStorage, st, l2ChainID, eventLog)
 	return poolInstance
+}
+
+func setL2BridgeAddr(l2BridgeAddr common.Address) {
+	pool.SetL2BridgeAddr(l2BridgeAddr)
 }
 
 func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStorage, st *state.State) *ethtxmanager.Client {
