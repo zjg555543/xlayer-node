@@ -25,6 +25,12 @@ var (
 			Help: "[SYNCHRONIZER] verified batch num",
 		},
 	}
+	counters = []prometheus.CounterOpts{
+		{
+			Name: HaltCountName,
+			Help: "[SYNCHRONIZER] total count of halt",
+		},
+	}
 )
 
 // VirtualBatchNum set the gauge to the given virtual batch num

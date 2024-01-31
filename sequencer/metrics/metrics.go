@@ -63,10 +63,6 @@ func Register() {
 			Name: SequencesOversizedDataErrorName,
 			Help: "[SEQUENCER] total count of sequences with oversized data error",
 		},
-		{
-			Name: HaltCountName,
-			Help: "[SEQUENCER] total count of halt",
-		},
 	}
 
 	counterVecs = []metrics.CounterVecOpts{
@@ -92,14 +88,6 @@ func Register() {
 			Name: SequenceRewardInMaticName,
 			Help: "[SEQUENCER] reward for a sequence in Matic",
 		},
-		{
-			Name: PendingTxCountName,
-			Help: "[SEQUENCER] number of pending transactions",
-		},
-		{
-			Name: TrustBatchNumName,
-			Help: "[SEQUENCER] trust batch num",
-		},
 	}
 
 	histograms = []prometheus.HistogramOpts{
@@ -114,8 +102,10 @@ func Register() {
 	}
 
 	metrics.RegisterCounters(counters...)
+	metrics.RegisterCounters(countersX1...)
 	metrics.RegisterCounterVecs(counterVecs...)
 	metrics.RegisterGauges(gauges...)
+	metrics.RegisterGauges(gaugesX1...)
 	metrics.RegisterGaugeVecs(gaugeVecs...)
 	metrics.RegisterHistograms(histograms...)
 }

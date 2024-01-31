@@ -26,6 +26,23 @@ var (
 			Labels: []string{BatchFinalizeTypeLabelName},
 		},
 	}
+
+	gaugesX1 = []prometheus.GaugeOpts{
+		{
+			Name: PendingTxCountName,
+			Help: "[SEQUENCER] number of pending transactions",
+		},
+		{
+			Name: TrustBatchNumName,
+			Help: "[SEQUENCER] trust batch num",
+		},
+	}
+	countersX1 = []prometheus.CounterOpts{
+		{
+			Name: HaltCountName,
+			Help: "[SEQUENCER] total count of halt",
+		},
+	}
 )
 
 // BatchFinalizeTypeLabel batch finalize type label
