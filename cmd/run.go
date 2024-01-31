@@ -414,7 +414,27 @@ func createSequencer(cfg config.Config, pool *pool.Pool, st *state.State, eventL
 }
 
 func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxmanager.PostgresStorage, st *state.State, eventLog *event.EventLog) *sequencesender.SequenceSender {
-	panic("not used")
+	etherman, err := newEtherman(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	auth, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
+	if err != nil {
+		log.Fatal(err)
+	}
+	cfg.SequenceSender.SenderAddress = auth.From
+
+	cfg.SequenceSender.ForkUpgradeBatchNumber = cfg.ForkUpgradeBatchNumber
+
+	ethTxManager := ethtxmanager.New(cfg.EthTxManager, etherman, etmStorage, st)
+
+	seqSender, err := sequencesender.New(cfg.SequenceSender, st, etherman, ethTxManager, eventLog)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return seqSender
 }
 
 func runAggregator(ctx context.Context, c aggregator.Config, etherman *etherman.Client, ethTxManager *ethtxmanager.Client, st *state.State) {

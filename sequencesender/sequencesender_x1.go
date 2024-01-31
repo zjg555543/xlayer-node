@@ -206,3 +206,19 @@ func (s *SequenceSender) getSequencesToSendX1(ctx context.Context) ([]types.Sequ
 	log.Info("not enough time has passed since last batch was virtualized, and the sequence could be bigger")
 	return nil, nil
 }
+
+func (s *SequenceSender) isValidium() bool {
+	if !s.cfg.UseValidium {
+		return false
+	}
+
+	committee, err := s.etherman.GetCurrentDataCommittee()
+	if err != nil {
+		return false
+	}
+
+	if len(committee.Members) <= 0 {
+		return false
+	}
+	return true
+}
