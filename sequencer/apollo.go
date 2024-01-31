@@ -11,6 +11,8 @@ import (
 type ApolloConfig struct {
 	EnableApollo           bool
 	FullBatchSleepDuration types.Duration
+	PackBatchWhitelist     []string
+	GasPriceMultiple       float64
 
 	sync.RWMutex
 }
@@ -37,6 +39,8 @@ func UpdateConfig(apolloConfig Config) {
 	getApolloConfig().Lock()
 	getApolloConfig().EnableApollo = true
 	getApolloConfig().FullBatchSleepDuration = apolloConfig.Finalizer.FullBatchSleepDuration
+	getApolloConfig().PackBatchWhitelist = apolloConfig.DBManager.PackBatchWhitelist
+	getApolloConfig().GasPriceMultiple = apolloConfig.DBManager.GasPriceMultiple
 	getApolloConfig().Unlock()
 }
 
@@ -48,6 +52,32 @@ func getFullBatchSleepDuration(localDuration time.Duration) time.Duration {
 		ret = getApolloConfig().FullBatchSleepDuration.Duration
 	} else {
 		ret = localDuration
+	}
+
+	return ret
+}
+
+func getPackBatchWhitelist(whitelist []string) map[string]bool {
+	ret := make(map[string]bool, len(whitelist))
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		defer getApolloConfig().RUnlock()
+		whitelist = getApolloConfig().PackBatchWhitelist
+	}
+
+	for _, addr := range whitelist {
+		ret[addr] = true
+	}
+
+	return ret
+}
+
+func getGasPriceMultiple(gpMul float64) float64 {
+	ret := gpMul
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		defer getApolloConfig().RUnlock()
+		ret = getApolloConfig().GasPriceMultiple
 	}
 
 	return ret
