@@ -28,10 +28,6 @@ func (e *txSortedList) add(tx *TxTracker) bool {
 	e.mutex.Lock()
 	defer e.mutex.Unlock()
 
-	for _, v := range e.sorted {
-		fmt.Printf("%s,", v.FromStr)
-	}
-
 	if _, found := e.list[tx.HashStr]; !found {
 		e.list[tx.HashStr] = tx
 		e.addSort(tx)

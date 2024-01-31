@@ -341,7 +341,6 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 			time.Sleep(fullBatchSleepDuration)
 		}
 
-		time.Sleep(time.Second * 30)
 		tx := f.worker.GetBestFittingTx(f.batch.remainingResources)
 		metrics.WorkerProcessingTime(time.Since(start))
 		metrics.GetLogStatistics().CumulativeTiming(metrics.GetTx, time.Since(start))
