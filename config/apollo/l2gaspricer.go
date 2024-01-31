@@ -28,7 +28,7 @@ func (c *Client) fireL2GasPricer(key string, value *storage.ConfigChange) {
 	}
 	log.Infof("apollo l2gaspricer old config : %+v", value.OldValue.(string))
 	log.Infof("apollo l2gaspricer config changed: %+v", value.NewValue.(string))
-	c.updateL2GasPricer(&c.config.L2GasPriceSuggester, newConf.L2GasPriceSuggester)
+	gasprice.UpdateConfig(newConf.L2GasPriceSuggester)
 }
 
 func (c *Client) updateL2GasPricer(dstConfig *gasprice.Config, srcConfig gasprice.Config) {
