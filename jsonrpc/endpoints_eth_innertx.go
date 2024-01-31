@@ -194,6 +194,7 @@ func internalTxTraceToInnerTx(currentTx okFrame, name string, depth int, index i
 	return callTx
 }
 
+// GetBlockInternalTransactions returns internal transactions by block hash
 func (e *EthEndpoints) GetBlockInternalTransactions(hash types.ArgHash) (interface{}, types.Error) {
 	blockInternalTxs := make(map[common.Hash]interface{})
 	_, err := e.txMan.NewDbTxScope(e.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
