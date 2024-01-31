@@ -37,7 +37,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"github.com/0xPolygonHermez/zkevm-node/state/runtime/executor"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
@@ -158,6 +157,7 @@ func start(cliCtx *cli.Context) error {
 		log.Info("apollo config loaded")
 	}
 
+	pool.SetL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 	for _, component := range components {
 		switch component {
 		case AGGREGATOR:
@@ -182,7 +182,6 @@ func start(cliCtx *cli.Context) error {
 			}
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
-				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			seq := createSequencer(*c, poolInstance, st, eventLog)
 			go seq.Start(cliCtx.Context)
@@ -195,7 +194,6 @@ func start(cliCtx *cli.Context) error {
 			}
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
-				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			seqSender := createSequenceSenderX1(*c, poolInstance, ethTxManagerStorage, st, eventLog)
 			go seqSender.Start(cliCtx.Context)
@@ -208,7 +206,6 @@ func start(cliCtx *cli.Context) error {
 			}
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
-				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			if c.RPC.EnableL2SuggestedGasPricePolling {
 				// Needed for rejecting transactions with too low gas price
@@ -229,7 +226,6 @@ func start(cliCtx *cli.Context) error {
 			}
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
-				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			go runSynchronizer(*c, etherman, ethTxManagerStorage, st, poolInstance, eventLog)
 		case ETHTXMANAGER:
@@ -250,7 +246,6 @@ func start(cliCtx *cli.Context) error {
 			}
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
-				setL2BridgeAddr(c.NetworkConfig.L2BridgeAddr)
 			}
 			go runL2GasPriceSuggester(c.L2GasPriceSuggester, st, poolInstance, etherman, apolloClient)
 		}
@@ -518,10 +513,6 @@ func createPool(cfgPool pool.Config, constraintsCfg state.BatchConstraintsCfg, l
 	}
 	poolInstance := pool.NewPool(cfgPool, constraintsCfg, poolStorage, st, l2ChainID, eventLog)
 	return poolInstance
-}
-
-func setL2BridgeAddr(l2BridgeAddr common.Address) {
-	pool.SetL2BridgeAddr(l2BridgeAddr)
 }
 
 func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStorage, st *state.State) *ethtxmanager.Client {
