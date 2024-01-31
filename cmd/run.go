@@ -38,7 +38,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/state/runtime/executor"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
@@ -196,7 +195,7 @@ func start(cliCtx *cli.Context) error {
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, c.NetworkConfig.L2BridgeAddr, l2ChainID, st, eventLog)
 			}
-			seqSender := createSequenceSender(*c, poolInstance, ethTxManagerStorage, st, eventLog)
+			seqSender := createSequenceSenderX1(*c, poolInstance, ethTxManagerStorage, st, eventLog)
 			go seqSender.Start(cliCtx.Context)
 		case RPC:
 			ev.Component = event.Component_RPC
@@ -420,23 +419,17 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal(err)
 	}
 
-	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DAPermitApiPrivateKey.Path, cfg.SequenceSender.DAPermitApiPrivateKey.Password)
+	auth, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Infof("from pk %s, from sender %s", crypto.PubkeyToAddress(privKey.PublicKey), cfg.SequenceSender.SenderAddress.String())
-	if cfg.SequenceSender.SenderAddress.Cmp(common.Address{}) == 0 {
-		log.Fatal("Sequence sender address not found")
-	}
-	if privKey == nil {
-		log.Fatal("DA permit api private key not found")
-	}
+	cfg.SequenceSender.SenderAddress = auth.From
 
 	cfg.SequenceSender.ForkUpgradeBatchNumber = cfg.ForkUpgradeBatchNumber
 
 	ethTxManager := ethtxmanager.New(cfg.EthTxManager, etherman, etmStorage, st)
 
-	seqSender, err := sequencesender.New(cfg.SequenceSender, st, etherman, ethTxManager, eventLog, privKey)
+	seqSender, err := sequencesender.New(cfg.SequenceSender, st, etherman, ethTxManager, eventLog)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -529,7 +522,7 @@ func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStor
 	}
 
 	for _, privateKey := range cfg.EthTxManager.PrivateKeys {
-		_, _, err := etherman.LoadAuthFromKeyStore(privateKey.Path, privateKey.Password)
+		_, _, err := etherman.LoadAuthFromKeyStoreX1(privateKey.Path, privateKey.Password)
 		if err != nil {
 			log.Fatal(err)
 		}
