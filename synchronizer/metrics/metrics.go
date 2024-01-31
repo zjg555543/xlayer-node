@@ -79,12 +79,6 @@ func Register() {
 			Help: "[SYNCHRONIZER] process trusted batch time",
 		},
 	}
-	counters := []prometheus.CounterOpts{
-		{
-			Name: HaltCountName,
-			Help: "[SYNCHRONIZER] total count of halt",
-		},
-	}
 
 	metrics.RegisterGauges(gauge...)
 	metrics.RegisterHistograms(histograms...)
