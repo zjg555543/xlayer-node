@@ -15,6 +15,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/0xPolygonHermez/zkevm-node/log/traceid"
 	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -196,7 +197,7 @@ func (f *finalizer) Start(ctx context.Context, batch *WipBatch, processingReq *s
 }
 
 // storePendingTransactions stores the pending transactions in the database
-func (f *finalizer) storePendingTransactions(ctx context.Context) {
+func (f *finalizer) storePendingTransactions(ctxIn context.Context) {
 	for {
 		select {
 		case tx, ok := <-f.pendingTransactionsToStore:
@@ -204,6 +205,7 @@ func (f *finalizer) storePendingTransactions(ctx context.Context) {
 				// Channel is closed
 				return
 			}
+			ctx := context.WithValue(ctxIn, traceid.TraceID, traceid.Generate())
 
 			// Wait until f.storedFlushID >= tx.flushId
 			f.storedFlushIDCond.L.Lock()
@@ -224,7 +226,7 @@ func (f *finalizer) storePendingTransactions(ctx context.Context) {
 			f.worker.DeletePendingTxToStore(tx.hash, tx.from)
 
 			f.pendingTransactionsToStoreWG.Done()
-		case <-ctx.Done():
+		case <-ctxIn.Done():
 			// The context was cancelled from outside, Wait for all goroutines to finish, cleanup and exit
 			f.pendingTransactionsToStoreWG.Wait()
 			return
@@ -327,10 +329,13 @@ func (f *finalizer) addPendingTxToStore(ctx context.Context, txToStore transacti
 }
 
 // finalizeBatches runs the endless loop for processing transactions finalizing batches.
-func (f *finalizer) finalizeBatches(ctx context.Context) {
+func (f *finalizer) finalizeBatches(mctx context.Context) {
 	log.Debug("finalizer init loop")
 	showNotFoundTxLog := true // used to log debug only the first message when there is no txs to process
 	for {
+		ctx := context.WithValue(mctx, traceid.TraceID, traceid.Generate())
+		log := log.WithFields(traceid.GetPair(ctx))
+
 		start := now()
 		if f.batch.batchNumber == f.cfg.StopSequencerOnBatchNum {
 			f.halt(ctx, fmt.Errorf("finalizer reached stop sequencer batch number: %v", f.cfg.StopSequencerOnBatchNum))
@@ -447,6 +452,7 @@ func (f *finalizer) isBatchFull() bool {
 // finalizeBatch retries to until successful closes the current batch and opens a new one, potentially processing forced batches between the batch is closed and the resulting new empty batch
 func (f *finalizer) finalizeBatch(ctx context.Context) {
 	start := time.Now()
+	log := log.WithFields(traceid.GetPair(ctx))
 	metrics.GetLogStatistics().SetTag(metrics.FinalizeBatchNumber, strconv.Itoa(int(f.batch.batchNumber)))
 	defer func() {
 		metrics.ProcessingTime(time.Since(start))
@@ -510,6 +516,7 @@ func (f *finalizer) checkIfProverRestarted(proverID string) {
 func (f *finalizer) newWIPBatch(ctx context.Context) (*WipBatch, error) {
 	f.sharedResourcesMux.Lock()
 	defer f.sharedResourcesMux.Unlock()
+	log := log.WithFields(traceid.GetPair(ctx))
 
 	// Wait until all processed transactions are saved
 	startWait := time.Now()
@@ -626,7 +633,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker, first
 	if tx != nil {
 		txHash = tx.Hash.String()
 	}
-	log := log.WithFields("txHash", txHash, "batchNumber", f.processRequest.BatchNumber)
+	log := log.WithFields("txHash", txHash, "batchNumber", f.processRequest.BatchNumber, traceid.TraceID.String(), traceid.Get(ctx))
 	start := time.Now()
 	defer func() {
 		metrics.ProcessingTime(time.Since(start))
@@ -774,6 +781,7 @@ func (f *finalizer) processTransaction(ctx context.Context, tx *TxTracker, first
 
 // handleProcessTransactionResponse handles the response of transaction processing.
 func (f *finalizer) handleProcessTransactionResponse(ctx context.Context, tx *TxTracker, result *state.ProcessBatchResponse, oldStateRoot common.Hash) (errWg *sync.WaitGroup, err error) {
+	log := log.WithFields(traceid.GetPair(ctx))
 	// Handle Transaction Error
 	errorCode := executor.RomErrorCode(result.Responses[0].RomError)
 	if !state.IsStateRootChanged(errorCode) {
@@ -957,6 +965,7 @@ func (f *finalizer) CompareTxEffectiveGasPrice(ctx context.Context, tx *TxTracke
 
 // storeProcessedTx stores the processed transaction in the database.
 func (f *finalizer) storeProcessedTx(ctx context.Context, txToStore transactionToStore) {
+	log := log.WithFields(traceid.GetPair(ctx))
 	if txToStore.response != nil {
 		log.Infof("storeProcessedTx: storing processed txToStore: %s", txToStore.response.TxHash.String())
 	} else {
@@ -971,6 +980,7 @@ func (f *finalizer) storeProcessedTx(ctx context.Context, txToStore transactionT
 }
 
 func (f *finalizer) updateWorkerAfterSuccessfulProcessing(ctx context.Context, txHash common.Hash, txFrom common.Address, isForced bool, result *state.ProcessBatchResponse) {
+	log := log.WithFields(traceid.GetPair(ctx))
 	// Delete the transaction from the worker
 	if isForced {
 		f.worker.DeleteForcedTx(txHash, txFrom)

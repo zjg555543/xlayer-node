@@ -7,6 +7,7 @@ import (
 
 	"github.com/0xPolygonHermez/zkevm-data-streamer/datastreamer"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/0xPolygonHermez/zkevm-node/log/traceid"
 	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
@@ -289,6 +290,7 @@ func (d *dbManager) DeleteTransactionFromPool(ctx context.Context, txHash common
 // StoreProcessedTxAndDeleteFromPool stores a tx into the state and changes it status in the pool
 func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx transactionToStore) error {
 	d.checkStateInconsistency()
+	log := log.WithFields(traceid.GetPair(ctx))
 
 	log.Debugf("Storing tx %v", tx.response.TxHash)
 	dbTx, err := d.BeginStateTransaction(ctx)
@@ -301,6 +303,8 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 		return err
 	}
 
+	log.Debugf("Stored tx %v", tx.response.TxHash)
+
 	// Update batch l2 data
 	batch, err := d.state.GetBatchByNumber(ctx, tx.batchNumber, dbTx)
 	if err != nil {
@@ -311,7 +315,10 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 		return err
 	}
 
+	log.Debugf("Got batch %v", tx.batchNumber)
+
 	forkID := d.state.GetForkIDByBatchNumber(tx.batchNumber)
+	log.Debugf("ForkID %v", forkID)
 	txData, err := state.EncodeTransaction(tx.response.Tx, uint8(tx.response.EffectivePercentage), forkID)
 	if err != nil {
 		return err
@@ -327,12 +334,14 @@ func (d *dbManager) StoreProcessedTxAndDeleteFromPool(ctx context.Context, tx tr
 			}
 			return err
 		}
+		log.Debugf("Updated batch %v", tx.batchNumber)
 	}
 
 	err = dbTx.Commit(ctx)
 	if err != nil {
 		return err
 	}
+	log.Debugf("Committed batch %v", tx.batchNumber)
 
 	if !tx.isForcedBatch {
 		// Change Tx status to selected
