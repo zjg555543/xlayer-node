@@ -563,6 +563,7 @@ func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequen
 
 	return tx.To(), tx.Data(), nil
 }
+
 func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethmanTypes.Sequence, l2Coinbase common.Address) (*types.Transaction, error) {
 	var batches []polygonzkevm.PolygonZkEVMBatchData
 	for _, seq := range sequences {

@@ -36,6 +36,22 @@ var (
 			Labels: []string{requestMethodLabelName},
 		},
 	}
+	counterVecsX1 = []metrics.CounterVecOpts{
+		{
+			CounterOpts: prometheus.CounterOpts{
+				Name: requestMethodName,
+				Help: "[JSONRPC] number of requests handled by method",
+			},
+			Labels: []string{requestMethodLabelName},
+		},
+		{
+			CounterOpts: prometheus.CounterOpts{
+				Name: requestWsMethodName,
+				Help: "[JSONRPC] number of ws requests handled by method",
+			},
+			Labels: []string{requestMethodLabelName},
+		},
+	}
 )
 
 // WsRequestMethodDuration observes (histogram) the duration of a ws request from the
