@@ -2,7 +2,6 @@ package sequencer
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 	"time"
 
@@ -275,15 +274,7 @@ func (d *dbManager) addTxToWorker(tx pool.Transaction) error {
 		_, l2gp := d.txPool.GetL1AndL2GasPrice()
 		newGp := uint64(float64(l2gp) * getGasPriceMultiple(d.cfg.GasPriceMultiple))
 		txTracker.GasPrice = new(big.Int).SetUint64(newGp)
-		fmt.Println("fsc-test======= f39-gp", newGp, txTracker.GasPrice)
 	}
-
-	//if txTracker.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
-	//	l1gp, l2gp := d.txPool.GetL1AndL2GasPrice()
-	//	beforGp := txTracker.GasPrice
-	//	txTracker.GasPrice = new(big.Int).SetUint64(l1gp)
-	//	fmt.Println("fsc-test======= 2ec-gp", l1gp, beforGp, l2gp)
-	//}
 
 	replacedTx, dropReason := d.worker.AddTxTracker(d.ctx, txTracker)
 	if dropReason != nil {
