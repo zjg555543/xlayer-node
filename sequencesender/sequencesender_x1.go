@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -11,7 +13,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
-	"time"
 )
 
 func (s *SequenceSender) tryToSendSequenceX1(ctx context.Context, ticker *time.Ticker) {

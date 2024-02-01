@@ -81,7 +81,8 @@ func Environment(ctx context.Context, b *testing.B) (*operations.Manager, *ethcl
 	require.NoError(b, err)
 	eventLog := event.NewEventLog(event.Config{}, eventStorage)
 
-	pl := pool.NewPool(config, bc, s, st, common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"), params.ChainID, eventLog)
+	pl := pool.NewPool(config, bc, s, st, params.ChainID, eventLog)
+	pool.SetL2BridgeAddr(common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"))
 
 	// Print Info before send
 	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)

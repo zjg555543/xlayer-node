@@ -1,9 +1,10 @@
 package sequencer
 
 import (
+	"time"
+
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
-	"time"
 )
 
 var countinterval = 10
