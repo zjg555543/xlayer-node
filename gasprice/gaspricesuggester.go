@@ -14,11 +14,6 @@ type L2GasPricer interface {
 	UpdateGasPriceAvg()
 }
 
-// Apollo fetch dynamic config from apollo.
-type Apollo interface {
-	FetchL2GasPricerConfig(config *Config)
-}
-
 // NewL2GasPriceSuggester init.
 func NewL2GasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan *etherman.Client, state *state.State) {
 	var gpricer L2GasPricer

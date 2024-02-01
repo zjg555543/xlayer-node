@@ -30,39 +30,3 @@ func (c *Client) fireL2GasPricer(key string, value *storage.ConfigChange) {
 	log.Infof("apollo l2gaspricer config changed: %+v", value.NewValue.(string))
 	gasprice.UpdateConfig(newConf.L2GasPriceSuggester)
 }
-
-func (c *Client) updateL2GasPricer(dstConfig *gasprice.Config, srcConfig gasprice.Config) {
-	if c == nil || !c.config.Apollo.Enable || dstConfig == nil {
-		log.Infof("apollo is not enabled %v %v %v", c, dstConfig, srcConfig)
-		return
-	}
-	if dstConfig.DefaultGasPriceWei != srcConfig.DefaultGasPriceWei {
-		log.Infof("l2gaspricer default gas price changed from %d to %d",
-			dstConfig.DefaultGasPriceWei, srcConfig.DefaultGasPriceWei)
-		dstConfig.DefaultGasPriceWei = srcConfig.DefaultGasPriceWei
-	}
-	if dstConfig.MaxGasPriceWei != srcConfig.MaxGasPriceWei {
-		log.Infof("l2gaspricer max gas price changed from %d to %d",
-			dstConfig.MaxGasPriceWei, srcConfig.MaxGasPriceWei)
-		dstConfig.MaxGasPriceWei = srcConfig.MaxGasPriceWei
-	}
-	if dstConfig.Factor != srcConfig.Factor {
-		log.Infof("l2gaspricer factor changed from %v to %v",
-			dstConfig.Factor, srcConfig.Factor)
-		dstConfig.Factor = srcConfig.Factor
-	}
-	if dstConfig.GasPriceUsdt != srcConfig.GasPriceUsdt {
-		log.Infof("l2gaspricer gas price usdt changed from %v to %v",
-			dstConfig.GasPriceUsdt, srcConfig.GasPriceUsdt)
-		dstConfig.GasPriceUsdt = srcConfig.GasPriceUsdt
-	}
-}
-
-// FetchL2GasPricerConfig fetches the l2gaspricer config, called from gasprice module
-func (c *Client) FetchL2GasPricerConfig(config *gasprice.Config) {
-	if c == nil || !c.config.Apollo.Enable || config == nil {
-		return
-	}
-
-	c.updateL2GasPricer(config, c.config.L2GasPriceSuggester)
-}
