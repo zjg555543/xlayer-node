@@ -57,8 +57,8 @@ func newDBManager(ctx context.Context, config DBManagerCfg, txPool txPool, state
 		log.Error("failed to get number of reorgs: %v", err)
 	}
 
-	if len(config.PackBatchWhitelist) == 0 {
-		config.PackBatchWhitelist = append(config.PackBatchWhitelist, defaultPackBatchAddress)
+	if len(config.PackBatchSpacialList) == 0 {
+		config.PackBatchSpacialList = append(config.PackBatchSpacialList, defaultPackBatchAddress)
 	}
 	if config.GasPriceMultiple == 0 {
 		config.GasPriceMultiple = defaultGasPriceMul
@@ -269,8 +269,8 @@ func (d *dbManager) addTxToWorker(tx pool.Transaction) error {
 		return err
 	}
 
-	whitelist := getPackBatchWhitelist(d.cfg.PackBatchWhitelist)
-	if whitelist[txTracker.FromStr] {
+	addrs := getPackBatchSpacialList(d.cfg.PackBatchSpacialList)
+	if addrs[txTracker.FromStr] {
 		_, l2gp := d.txPool.GetL1AndL2GasPrice()
 		newGp := uint64(float64(l2gp) * getGasPriceMultiple(d.cfg.GasPriceMultiple))
 		txTracker.GasPrice = new(big.Int).SetUint64(newGp)
