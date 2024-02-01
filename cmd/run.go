@@ -413,6 +413,7 @@ func createSequencer(cfg config.Config, pool *pool.Pool, st *state.State, eventL
 	return seq
 }
 
+// nolint:unused
 func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxmanager.PostgresStorage, st *state.State, eventLog *event.EventLog) *sequencesender.SequenceSender {
 	etherman, err := newEtherman(cfg)
 	if err != nil {

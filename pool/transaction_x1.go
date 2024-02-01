@@ -1,12 +1,14 @@
 package pool
 
 import (
-	"github.com/ethereum/go-ethereum/common"
 	"strings"
+
+	"github.com/ethereum/go-ethereum/common"
 )
 
 var l2BridgeAddr common.Address
 
+// SetL2BridgeAddr sets the L2 bridge address
 func SetL2BridgeAddr(value common.Address) {
 	l2BridgeAddr = value
 }
