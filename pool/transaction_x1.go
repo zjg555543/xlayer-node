@@ -5,8 +5,14 @@ import (
 	"strings"
 )
 
+var l2BridgeAddr common.Address
+
+func SetL2BridgeAddr(value common.Address) {
+	l2BridgeAddr = value
+}
+
 // IsClaimTx checks, if tx is a claim tx
-func (tx *Transaction) IsClaimTx(l2BridgeAddr common.Address, freeClaimGasLimit uint64) bool {
+func (tx *Transaction) IsClaimTx(freeClaimGasLimit uint64) bool {
 	if tx.To() == nil {
 		return false
 	}

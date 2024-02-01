@@ -58,7 +58,7 @@ func NewTransaction(tx types.Transaction, ip string, isWIP bool, p *Pool) *Trans
 		IP:          ip,
 	}
 
-	poolTx.IsClaims = poolTx.IsClaimTx(p.l2BridgeAddr, p.cfg.FreeClaimGasLimit)
+	poolTx.IsClaims = poolTx.IsClaimTx(p.cfg.FreeClaimGasLimit)
 
 	return &poolTx
 }
