@@ -311,11 +311,16 @@ func runSynchronizer(cfg config.Config, etherman *etherman.Client, ethTxManagerS
 				log.Fatal(err)
 			}
 
-			_ = setEthermanDaX1(cfg, st, eth, false)
+			// X1 handler
+			setEthermanDaX1(cfg, st, eth, false)
 
 			etherManForL1 = append(etherManForL1, eth)
 		}
 	}
+
+	// X1 handler
+	setEthermanDaX1(cfg, st, etherman, false)
+
 	etm := ethtxmanager.New(cfg.EthTxManager, etherman, ethTxManagerStorage, st)
 	sy, err := synchronizer.NewSynchronizer(
 		cfg.IsTrustedSequencer, etherman, etherManForL1, st, pool, etm,

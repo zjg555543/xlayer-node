@@ -103,16 +103,16 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 			err error
 		)
 		if isSequenceSender {
-			_, pk, err = etherman.LoadAuthFromKeyStoreX1(c.SequenceSender.PrivateKey.Path, c.SequenceSender.PrivateKey.Password)
+			_, pk, err = etherman.LoadAuthFromKeyStoreX1(c.SequenceSender.DAPermitApiPrivateKey.Path, c.SequenceSender.DAPermitApiPrivateKey.Password)
 			if err != nil {
 				return nil, err
 			}
+			log.Infof("from pk %s", crypto.PubkeyToAddress(pk.PublicKey))
 		}
 		dacAddr, err := etherman.GetDAProtocolAddr()
 		if err != nil {
 			return nil, fmt.Errorf("error getting trusted sequencer URI. Error: %v", err)
 		}
-
 		daBackend, err = datacommittee.New(
 			c.Etherman.URL,
 			dacAddr,
@@ -135,7 +135,7 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 }
 
 func setEthermanDaX1(c config.Config, st *state.State, etherman *etherman.Client, isSequenceSender bool) *dataavailability.DataAvailability {
-	da, err := newDataAvailability(c, st, etherman, false)
+	da, err := newDataAvailability(c, st, etherman, isSequenceSender)
 	if err != nil {
 		log.Fatal(err)
 	}

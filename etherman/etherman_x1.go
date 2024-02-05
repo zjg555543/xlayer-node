@@ -328,7 +328,7 @@ func (etherMan *Client) VerifyGenBlockNumber(ctx context.Context, genBlockNumber
 
 // GetForks returns fork information
 func (etherMan *Client) GetForks(ctx context.Context, genBlockNumber uint64, lastL1BlockSynced uint64) ([]state.ForkIDInterval, error) {
-	log.Debug("Getting forkIDs from blockNumber: ", genBlockNumber)
+	log.Infof("Getting forkIDs from blockNumber:%v, lastL1BlockSynced:%v ", genBlockNumber, lastL1BlockSynced)
 	start := time.Now()
 	var logs []types.Log
 	log.Debug("Using ForkIDChunkSize: ", etherMan.cfg.ForkIDChunkSize)
@@ -346,11 +346,16 @@ func (etherMan *Client) GetForks(ctx context.Context, genBlockNumber uint64, las
 			Addresses: etherMan.SCAddresses,
 			Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
 		}
+		log.Infof("FromBlock: %d. ToBlock: %d", i, final)
+		for _, v := range etherMan.SCAddresses {
+			log.Infof("Querying logs for address: %s", v.String())
+		}
 		l, err := etherMan.EthClient.FilterLogs(ctx, query)
 		if err != nil {
 			return []state.ForkIDInterval{}, err
 		}
 		logs = append(logs, l...)
+		log.Infof("Logs found: %d", len(logs))
 	}
 
 	var forks []state.ForkIDInterval
@@ -1862,6 +1867,7 @@ func (etherMan *Client) GetDAProtocolName() (string, error) {
 }
 
 func (etherMan *Client) SetDataProvider(da dataavailability.BatchDataProvider) {
+	log.Infof("setting data provider")
 	etherMan.da = da
 }
 
