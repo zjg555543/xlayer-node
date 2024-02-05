@@ -129,7 +129,7 @@ func (s *SequenceSender) tryToSendSequenceX1(ctx context.Context) {
 		log.Error("error posting sequences to the data availability protocol: ", err)
 		return
 	}
-	to, data, err := s.etherman.BuildSequenceBatchesTxData(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, dataAvailabilityMessage)
+	to, data, err := s.etherman.BuildSequenceBatchesTxDataX1(s.cfg.SenderAddress, sequences, s.cfg.L2Coinbase, dataAvailabilityMessage)
 	if err != nil {
 		log.Error("error estimating new sequenceBatches to add to eth tx manager: ", err)
 		return

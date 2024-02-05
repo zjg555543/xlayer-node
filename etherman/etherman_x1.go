@@ -868,15 +868,15 @@ func (etherMan *Client) WaitTxToBeMined(ctx context.Context, tx *types.Transacti
 	return true, nil
 }
 
-// EstimateGasSequenceBatches estimates gas for sending batches
-func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (*types.Transaction, error) {
+// EstimateGasSequenceBatchesX1 estimates gas for sending batches
+func (etherMan *Client) EstimateGasSequenceBatchesX1(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (*types.Transaction, error) {
 	opts, err := etherMan.getAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, ErrPrivateKeyNotFound
 	}
 	opts.NoSend = true
 
-	tx, err := etherMan.sequenceBatches(opts, sequences, l2Coinbase, dataAvailabilityMessage)
+	tx, err := etherMan.sequenceBatchesX1(opts, sequences, l2Coinbase, dataAvailabilityMessage)
 	if err != nil {
 		return nil, err
 	}
@@ -884,8 +884,8 @@ func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequen
 	return tx, nil
 }
 
-// BuildSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
-func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (to *common.Address, data []byte, err error) {
+// BuildSequenceBatchesTxDataX1 builds a []bytes to be sent to the PoE SC method SequenceBatches.
+func (etherMan *Client) BuildSequenceBatchesTxDataX1(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (to *common.Address, data []byte, err error) {
 	opts, err := etherMan.getAuthByAddress(sender)
 	if err == ErrNotFound {
 		return nil, nil, fmt.Errorf("failed to build sequence batches, err: %w", ErrPrivateKeyNotFound)
@@ -896,7 +896,7 @@ func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequen
 	opts.GasLimit = uint64(1)
 	opts.GasPrice = big.NewInt(1)
 
-	tx, err := etherMan.sequenceBatches(opts, sequences, l2Coinbase, dataAvailabilityMessage)
+	tx, err := etherMan.sequenceBatchesX1(opts, sequences, l2Coinbase, dataAvailabilityMessage)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -904,7 +904,7 @@ func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequen
 	return tx.To(), tx.Data(), nil
 }
 
-func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (*types.Transaction, error) {
+func (etherMan *Client) sequenceBatchesX1(opts bind.TransactOpts, sequences []ethmanTypes.Sequence, l2Coinbase common.Address, dataAvailabilityMessage []byte) (*types.Transaction, error) {
 	var batches []polygonzkevm.PolygonValidiumEtrogValidiumBatchData
 	for _, seq := range sequences {
 		var ger common.Hash
@@ -1834,4 +1834,96 @@ func (etherMan *Client) GetDAProtocolName() (string, error) {
 
 func (etherMan *Client) SetDataProvider(da dataavailability.BatchDataProvider) {
 	etherMan.da = da
+}
+
+// EstimateGasSequenceBatches estimates gas for sending batches
+func (etherMan *Client) EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address) (*types.Transaction, error) {
+	opts, err := etherMan.getAuthByAddress(sender)
+	if err == ErrNotFound {
+		return nil, ErrPrivateKeyNotFound
+	}
+	opts.NoSend = true
+
+	tx, err := etherMan.sequenceBatches(opts, sequences, l2Coinbase)
+	if err != nil {
+		return nil, err
+	}
+
+	return tx, nil
+}
+
+func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethmanTypes.Sequence, l2Coinbase common.Address) (*types.Transaction, error) {
+	var batches []polygonzkevm.PolygonRollupBaseEtrogBatchData
+	for _, seq := range sequences {
+		var ger common.Hash
+		if seq.ForcedBatchTimestamp > 0 {
+			ger = seq.GlobalExitRoot
+		}
+		batch := polygonzkevm.PolygonRollupBaseEtrogBatchData{
+			Transactions:         seq.BatchL2Data,
+			ForcedGlobalExitRoot: ger,
+			ForcedTimestamp:      uint64(seq.ForcedBatchTimestamp),
+			ForcedBlockHashL1:    seq.PrevBlockHash,
+		}
+
+		batches = append(batches, batch)
+	}
+
+	tx, err := etherMan.ZkEVM.SequenceBatches(&opts, batches, l2Coinbase)
+	if err != nil {
+		log.Debugf("Batches to send: %+v", batches)
+		log.Debug("l2CoinBase: ", l2Coinbase)
+		log.Debug("Sequencer address: ", opts.From)
+		a, err2 := polygonzkevm.PolygonzkevmMetaData.GetAbi()
+		if err2 != nil {
+			log.Error("error getting abi. Error: ", err2)
+		}
+		input, err3 := a.Pack("sequenceBatches", batches, l2Coinbase)
+		if err3 != nil {
+			log.Error("error packing call. Error: ", err3)
+		}
+		ctx := context.Background()
+		var b string
+		block, err4 := etherMan.EthClient.BlockByNumber(ctx, nil)
+		if err4 != nil {
+			log.Error("error getting blockNumber. Error: ", err4)
+			b = "latest"
+		} else {
+			b = fmt.Sprintf("%x", block.Number())
+		}
+		log.Warnf(`Use the next command to debug it manually.
+		curl --location --request POST 'http://localhost:8545' \
+		--header 'Content-Type: application/json' \
+		--data-raw '{
+			"jsonrpc": "2.0",
+			"method": "eth_call",
+			"params": [{"from": "%s","to":"%s","data":"0x%s"},"0x%s"],
+			"id": 1
+		}'`, opts.From, &etherMan.SCAddresses[0], common.Bytes2Hex(input), b)
+		if parsedErr, ok := tryParseError(err); ok {
+			err = parsedErr
+		}
+	}
+
+	return tx, err
+}
+
+// BuildSequenceBatchesTxData builds a []bytes to be sent to the PoE SC method SequenceBatches.
+func (etherMan *Client) BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2Coinbase common.Address) (to *common.Address, data []byte, err error) {
+	opts, err := etherMan.getAuthByAddress(sender)
+	if err == ErrNotFound {
+		return nil, nil, fmt.Errorf("failed to build sequence batches, err: %w", ErrPrivateKeyNotFound)
+	}
+	opts.NoSend = true
+	// force nonce, gas limit and gas price to avoid querying it from the chain
+	opts.Nonce = big.NewInt(1)
+	opts.GasLimit = uint64(1)
+	opts.GasPrice = big.NewInt(1)
+
+	tx, err := etherMan.sequenceBatches(opts, sequences, l2Coinbase)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return tx.To(), tx.Data(), nil
 }

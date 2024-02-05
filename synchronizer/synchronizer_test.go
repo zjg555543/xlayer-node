@@ -38,6 +38,7 @@ type mocks struct {
 	EthTxManager *mock_syncinterfaces.EthTxManager
 	DbTx         *syncMocks.DbTxMock
 	ZKEVMClient  *mock_syncinterfaces.ZKEVMClientInterface
+	//EventLog     *eventLogMock
 }
 
 // Feature #2220 and  #2239: Optimize Trusted state synchronization

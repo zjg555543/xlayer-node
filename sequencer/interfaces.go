@@ -30,18 +30,21 @@ type txPool interface {
 	GetDefaultMinGasPriceAllowed() uint64
 	GetL1AndL2GasPrice() (uint64, uint64)
 
-	CountPendingTransactions(ctx context.Context) (uint64, error) // X1
+	CountPendingTransactions(ctx context.Context) (uint64, error)
 }
 
 // etherman contains the methods required to interact with ethereum.
 type etherman interface {
-	EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (*types.Transaction, error)
+	EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address) (*types.Transaction, error)
 	GetSendSequenceFee(numBatches uint64) (*big.Int, error)
 	TrustedSequencer() (common.Address, error)
 	GetLatestBatchNumber() (uint64, error)
 	GetLatestBlockTimestamp(ctx context.Context) (uint64, error)
-	BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error)
+	BuildSequenceBatchesTxData(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address) (to *common.Address, data []byte, err error)
 	GetLatestBlockNumber(ctx context.Context) (uint64, error)
+
+	EstimateGasSequenceBatchesX1(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (*types.Transaction, error)
+	BuildSequenceBatchesTxDataX1(sender common.Address, sequences []ethmanTypes.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error)
 }
 
 // stateInterface gathers the methods required to interact with the state.

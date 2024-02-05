@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"time"
 
-	//"github.com/0xPolygon/cdk-data-availability/client"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/log"
