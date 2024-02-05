@@ -1742,8 +1742,37 @@ func (etherMan *Client) AddOrReplaceAuth(auth bind.TransactOpts) error {
 }
 
 // LoadAuthFromKeyStore loads an authorization from a key store file
-func (etherMan *Client) LoadAuthFromKeyStore(path, password string) (*bind.TransactOpts, *ecdsa.PrivateKey, error) {
-	auth, pk, err := newAuthFromKeystore(path, password, etherMan.l1Cfg.L1ChainID)
+func (etherMan *Client) LoadAuthFromKeyStore(path, password string) (*bind.TransactOpts, error) {
+	auth, err := newAuthFromKeystore(path, password, etherMan.l1Cfg.L1ChainID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Infof("loaded authorization for address: %v", auth.From.String())
+	etherMan.auth[auth.From] = auth
+	return &auth, nil
+}
+
+// newAuthFromKeystore an authorization instance from a keystore file
+func newAuthFromKeystore(path, password string, chainID uint64) (bind.TransactOpts, error) {
+	log.Infof("reading key from: %v", path)
+	key, err := newKeyFromKeystore(path, password)
+	if err != nil {
+		return bind.TransactOpts{}, err
+	}
+	if key == nil {
+		return bind.TransactOpts{}, nil
+	}
+	auth, err := bind.NewKeyedTransactorWithChainID(key.PrivateKey, new(big.Int).SetUint64(chainID))
+	if err != nil {
+		return bind.TransactOpts{}, err
+	}
+	return *auth, nil
+}
+
+// LoadAuthFromKeyStoreX1 loads an authorization from a key store file
+func (etherMan *Client) LoadAuthFromKeyStoreX1(path, password string) (*bind.TransactOpts, *ecdsa.PrivateKey, error) {
+	auth, pk, err := newAuthFromKeystoreX1(path, password, etherMan.l1Cfg.L1ChainID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -1770,8 +1799,8 @@ func newKeyFromKeystore(path, password string) (*keystore.Key, error) {
 	return key, nil
 }
 
-// newAuthFromKeystore an authorization instance from a keystore file
-func newAuthFromKeystore(path, password string, chainID uint64) (bind.TransactOpts, *ecdsa.PrivateKey, error) {
+// newAuthFromKeystoreX1 an authorization instance from a keystore file
+func newAuthFromKeystoreX1(path, password string, chainID uint64) (bind.TransactOpts, *ecdsa.PrivateKey, error) {
 	log.Infof("reading key from: %v", path)
 	key, err := newKeyFromKeystore(path, password)
 	if err != nil {

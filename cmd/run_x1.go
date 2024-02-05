@@ -28,9 +28,9 @@ func createSequenceSenderX1(cfg config.Config, pool *pool.Pool, etmStorage *etht
 		log.Fatal(err)
 	}
 
-	da := setX1EthermanDA(cfg, st, etherman, true)
+	da := setEthermanDaX1(cfg, st, etherman, true)
 
-	_, privKey, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.DAPermitApiPrivateKey.Path, cfg.SequenceSender.DAPermitApiPrivateKey.Password)
+	_, privKey, err := etherman.LoadAuthFromKeyStoreX1(cfg.SequenceSender.DAPermitApiPrivateKey.Path, cfg.SequenceSender.DAPermitApiPrivateKey.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,7 +103,7 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 			err error
 		)
 		if isSequenceSender {
-			_, pk, err = etherman.LoadAuthFromKeyStore(c.SequenceSender.PrivateKey.Path, c.SequenceSender.PrivateKey.Password)
+			_, pk, err = etherman.LoadAuthFromKeyStoreX1(c.SequenceSender.PrivateKey.Path, c.SequenceSender.PrivateKey.Password)
 			if err != nil {
 				return nil, err
 			}
@@ -134,7 +134,7 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 	)
 }
 
-func setX1EthermanDA(c config.Config, st *state.State, etherman *etherman.Client, isSequenceSender bool) *dataavailability.DataAvailability {
+func setEthermanDaX1(c config.Config, st *state.State, etherman *etherman.Client, isSequenceSender bool) *dataavailability.DataAvailability {
 	da, err := newDataAvailability(c, st, etherman, false)
 	if err != nil {
 		log.Fatal(err)

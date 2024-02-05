@@ -311,7 +311,7 @@ func runSynchronizer(cfg config.Config, etherman *etherman.Client, ethTxManagerS
 				log.Fatal(err)
 			}
 
-			_ = setX1EthermanDA(cfg, st, eth, false)
+			_ = setEthermanDaX1(cfg, st, eth, false)
 
 			etherManForL1 = append(etherManForL1, eth)
 		}
@@ -407,7 +407,7 @@ func createSequenceSender(cfg config.Config, pool *pool.Pool, etmStorage *ethtxm
 		log.Fatal(err)
 	}
 
-	auth, _, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
+	auth, err := etherman.LoadAuthFromKeyStore(cfg.SequenceSender.PrivateKey.Path, cfg.SequenceSender.PrivateKey.Password)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -533,7 +533,7 @@ func createEthTxManager(cfg config.Config, etmStorage *ethtxmanager.PostgresStor
 	}
 
 	for _, privateKey := range cfg.EthTxManager.PrivateKeys {
-		_, _, err := etherman.LoadAuthFromKeyStore(privateKey.Path, privateKey.Password)
+		_, err := etherman.LoadAuthFromKeyStore(privateKey.Path, privateKey.Password)
 		if err != nil {
 			log.Fatal(err)
 		}
