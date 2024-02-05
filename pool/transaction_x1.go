@@ -1,9 +1,9 @@
 package pool
 
 import (
-	"github.com/0xPolygonHermez/zkevm-node/log"
 	"strings"
 
+	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/common"
 )
 
