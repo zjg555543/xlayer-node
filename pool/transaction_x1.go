@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"github.com/0xPolygonHermez/zkevm-node/log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -10,6 +11,7 @@ var l2BridgeAddr common.Address
 
 // SetL2BridgeAddr sets the L2 bridge address
 func SetL2BridgeAddr(value common.Address) {
+	log.Infof("Set L2 bridge address: %s", value.String())
 	l2BridgeAddr = value
 }
 

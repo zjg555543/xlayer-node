@@ -66,7 +66,6 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 		ZkEVMAddr:                 cfg.L1.PolygonZkEVMAddress,
 		PolAddr:                   cfg.L1.PolygonMaticAddress,
 		GlobalExitRootManagerAddr: cfg.L1.GlobalExitRootManagerAddr,
-		DataCommitteeAddr:         cfg.L1.DataCommitteeAddr,
 	}
 
 	var err error
@@ -75,7 +74,7 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 		log.Fatal("error creating etherman client. Error: %v", err)
 	}
 
-	_, srv.seqPrivateKey, err = srv.ethClient.LoadAuthFromKeyStoreX1(cfg.L1.SeqPrivateKey.Path, cfg.L1.SeqPrivateKey.Password)
+	_, srv.seqPrivateKey, err = srv.ethClient.LoadAuthFromKeyStore(cfg.L1.SeqPrivateKey.Path, cfg.L1.SeqPrivateKey.Password)
 	if err != nil {
 		log.Fatal("error loading sequencer private key. Error: %v", err)
 	}
@@ -83,7 +82,7 @@ func NewServer(cfg *config.Config, ctx context.Context) *Server {
 	srv.seqAddress = crypto.PubkeyToAddress(srv.seqPrivateKey.PublicKey)
 	log.Infof("Sequencer address: %s", srv.seqAddress.String())
 
-	_, srv.aggPrivateKey, err = srv.ethClient.LoadAuthFromKeyStoreX1(cfg.L1.AggPrivateKey.Path, cfg.L1.AggPrivateKey.Password)
+	_, srv.aggPrivateKey, err = srv.ethClient.LoadAuthFromKeyStore(cfg.L1.AggPrivateKey.Path, cfg.L1.AggPrivateKey.Password)
 	if err != nil {
 		log.Fatal("error loading aggregator private key. Error: %v", err)
 	}
