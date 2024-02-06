@@ -97,9 +97,14 @@ func (g *LastNL2BlocksGasPrice) UpdateGasPriceAvg() {
 	g.lastL2BlockNumber = l2BlockNumber
 	g.cacheLock.Unlock()
 
+	log.Debug("MaxPrice: ", g.cfg.MaxPrice)
+	log.Debug("IgnorePrice: ", g.cfg.IgnorePrice)
+	log.Debug("Factor: ", g.cfg.Factor)
+	log.Debug("lastPrice: ", g.lastPrice)
 	// Store gasPrices
 	factorAsPercentage := int64(g.cfg.Factor * 100) // nolint:gomnd
 	factor := big.NewInt(factorAsPercentage)
+	log.Debug("After New factor")
 	l1GasPriceDivBy100 := new(big.Int).Div(g.lastPrice, factor)
 	l1GasPrice := l1GasPriceDivBy100.Mul(l1GasPriceDivBy100, big.NewInt(100)) // nolint:gomnd
 	err = g.pool.SetGasPrices(g.ctx, g.lastPrice.Uint64(), l1GasPrice.Uint64())
