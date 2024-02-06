@@ -154,11 +154,16 @@ AggregatorAddr="0x70997970c51812dc3a010c7d01b50e0d17dc79c8"
 WaitResultTimeout="2m"
 
 [L2GasPriceSuggester]
-Type = "default"
-UpdatePeriod = "10s"
-Factor = 0.5
+Type = "lastnbatches"
 DefaultGasPriceWei = 1000000000
 MaxGasPriceWei = 0
+#MaxGasPrice = "1500000000"
+CheckBlocks = 5
+#IgnorePrice = "500000000"
+Percentile = 80
+UpdatePeriod = "10s"
+Factor = 0.5
+
 
 [MTClient]
 URI  = "x1-prover:50061"

@@ -29,10 +29,11 @@ type LastNL2BlocksGasPrice struct {
 // newLastNL2BlocksGasPriceSuggester init gas price suggester for last n l2 blocks strategy.
 func newLastNL2BlocksGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface) *LastNL2BlocksGasPrice {
 	return &LastNL2BlocksGasPrice{
-		cfg:   cfg,
-		ctx:   ctx,
-		state: state,
-		pool:  pool,
+		cfg:       cfg,
+		ctx:       ctx,
+		state:     state,
+		pool:      pool,
+		lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
 	}
 }
 
