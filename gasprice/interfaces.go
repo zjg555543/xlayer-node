@@ -19,7 +19,7 @@ type poolInterface interface {
 	DeleteGasPricesHistoryOlderThan(ctx context.Context, date time.Time) error
 }
 
-// stateInterface gathers the methods required to interact with the state.
+// stateMock gathers the methods required to interact with the state.
 type stateInterface interface {
 	GetLastL2BlockNumber(ctx context.Context, dbTx pgx.Tx) (uint64, error)
 	GetTxsByBlockNumber(ctx context.Context, blockNumber uint64, dbTx pgx.Tx) ([]*types.Transaction, error)

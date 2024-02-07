@@ -33,11 +33,12 @@ func TestUpdateGasPriceFixed(t *testing.T) {
 	}
 	l1GasPrice := big.NewInt(10000000000)
 	l2GasPrice := uint64(25000000000000)
+	state := new(stateMock)
 	poolM := new(poolMock)
 	ethM := new(ethermanMock)
 	ethM.On("GetL1GasPrice", ctx).Return(l1GasPrice).Once()
 	poolM.On("SetGasPrices", ctx, l2GasPrice, l1GasPrice.Uint64()).Return(nil).Once()
-	f := newFixedGasPriceSuggester(ctx, cfg, poolM, ethM, nil)
+	f := newFixedGasPriceSuggester(ctx, cfg, state, poolM, ethM, nil)
 
 	ethM.On("GetL1GasPrice", ctx).Return(l1GasPrice, l1GasPrice).Once()
 	poolM.On("SetGasPrices", ctx, l2GasPrice, l1GasPrice.Uint64()).Return(nil).Once()
@@ -134,11 +135,12 @@ func TestUpdateGasPriceAvgCases(t *testing.T) {
 
 	for _, tc := range testcases {
 		ctx := context.Background()
+		state := new(stateMock)
 		poolM := new(poolMock)
 		ethM := new(ethermanMock)
 		ethM.On("GetL1GasPrice", ctx).Return(tc.l1GasPrice).Twice()
 		poolM.On("SetGasPrices", ctx, tc.l2GasPrice, tc.l1GasPrice.Uint64()).Return(nil).Twice()
-		f := newFixedGasPriceSuggester(ctx, tc.cfg, poolM, ethM, nil)
+		f := newFixedGasPriceSuggester(ctx, tc.cfg, state, poolM, ethM, nil)
 		f.UpdateGasPriceAvg()
 	}
 }
