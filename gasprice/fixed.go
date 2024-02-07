@@ -10,6 +10,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"sync"
 	"sort"
+	"errors"
 )
 
 const (
@@ -194,16 +195,48 @@ func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uin
 	sort.Sort(sorter)
 
 	var prices []*big.Int
+	var lowPrices []*big.Int
+	var highPrices []*big.Int
 	for _, tx := range sorter.txs {
 		tip := tx.GasTipCap()
 		if ignorePrice != nil && tip.Cmp(ignorePrice) == -1 {
 			continue
 		}
-		prices = append(prices, tip)
-		if len(prices) >= limit {
+		lowPrices = append(lowPrices, tip)
+		if len(lowPrices) >= limit {
 			break
 		}
 	}
+
+	sorter.Reverse()
+	for _, tx := range sorter.txs {
+		tip := tx.GasTipCap()
+		if ignorePrice != nil && tip.Cmp(ignorePrice) == -1 {
+			continue
+		}
+		highPrices = append(highPrices, tip)
+		if len(highPrices) >= limit {
+			break
+		}
+	}
+
+	if len(highPrices) != len(lowPrices) {
+		err := errors.New("len(highPrices) != len(lowPrices)")
+		log.Errorf("getL2BlockTxsTips err: %v", err)
+		select {
+		case result <- results{nil, err}:
+		case <-quit:
+		}
+		return
+	}
+
+	for i := 0; i < len(lowPrices); i++ {
+		// priceSample[i] = avg(lowPrices[i], highPrices[i])
+		sum := new(big.Int).Add(lowPrices[i], highPrices[i])
+		price := new(big.Int).Quo(sum, big.NewInt(2))
+		prices = append(prices, price)
+	}
+
 	select {
 	case result <- results{prices, nil}:
 	case <-quit:
