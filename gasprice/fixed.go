@@ -89,6 +89,7 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 
 	if f.cfg.EnableDynamicFixed {
 		//todo: judge if there is congestion
+		log.Debug("enable dynamic fixed strategy")
 		f.calDynamicGPFromLastNBatches()
 		if result.Cmp(f.lastPrice) < 0 {
 			result = new(big.Int).Set(f.lastPrice)
@@ -180,6 +181,11 @@ func (f *FixedGasPrice) calDynamicGPFromLastNBatches() {
 	f.lastPrice = price
 	f.lastL2BlockNumber = l2BlockNumber
 	f.cacheLock.Unlock()
+
+	log.Debug("MaxPrice: ", f.cfg.MaxPrice)
+	log.Debug("IgnorePrice: ", f.cfg.IgnorePrice)
+	log.Debug("Factor: ", f.cfg.Factor)
+	log.Debug("lastPrice: ", f.lastPrice)
 }
 
 func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uint64, limit int, ignorePrice *big.Int, result chan results, quit chan struct{}) {
