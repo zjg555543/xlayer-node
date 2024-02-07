@@ -8,6 +8,8 @@ import (
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"sync"
+	"sort"
 )
 
 const (
@@ -24,17 +26,26 @@ type FixedGasPrice struct {
 	eth     ethermanInterface
 	ratePrc *KafkaProcessor
 
+	lastL2BlockNumber uint64
+	lastPrice         *big.Int
+
+	cacheLock sync.RWMutex
+	fetchLock sync.Mutex
+	state     stateInterface
+
 	apolloConfig Apollo
 }
 
 // newFixedGasPriceSuggester inits l2 fixed price suggester.
-func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FixedGasPrice {
+func newFixedGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FixedGasPrice {
 	gps := &FixedGasPrice{
-		cfg:     cfg,
-		pool:    pool,
-		ctx:     ctx,
-		eth:     ethMan,
-		ratePrc: newKafkaProcessor(cfg, ctx),
+		cfg:       cfg,
+		pool:      pool,
+		ctx:       ctx,
+		eth:       ethMan,
+		ratePrc:   newKafkaProcessor(cfg, ctx),
+		state:     state,
+		lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
 
 		apolloConfig: fetch,
 	}
@@ -74,6 +85,15 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 		log.Warn("setting MaxGasPriceWei for L2")
 		result = maxGasPrice
 	}
+
+	if f.cfg.EnableDynamicFixed {
+		//todo: judge if there is congestion
+		f.calDynamicGPFromLastNBatches()
+		if result.Cmp(f.lastPrice) < 0 {
+			result = new(big.Int).Set(f.lastPrice)
+		}
+	}
+
 	var truncateValue *big.Int
 	log.Debug("Full L2 gas price value: ", result, ". Length: ", len(result.String()), ". L1 gas price value: ", l1GasPrice)
 
@@ -98,5 +118,94 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 		}
 	} else {
 		log.Error("nil value detected. Skipping...")
+	}
+}
+
+func (f *FixedGasPrice) calDynamicGPFromLastNBatches() {
+	l2BlockNumber, err := f.state.GetLastL2BlockNumber(f.ctx, nil)
+	if err != nil {
+		log.Errorf("failed to get last l2 block number, err: %v", err)
+	}
+	f.cacheLock.RLock()
+	lastL2BlockNumber, lastPrice := f.lastL2BlockNumber, f.lastPrice
+	f.cacheLock.RUnlock()
+	if l2BlockNumber == lastL2BlockNumber {
+		log.Debug("Block is still the same, no need to update the gas price at the moment, lastL2BlockNumber: ", lastL2BlockNumber)
+		return
+	}
+
+	f.fetchLock.Lock()
+	defer f.fetchLock.Unlock()
+
+	var (
+		sent, exp int
+		number    = lastL2BlockNumber
+		result    = make(chan results, f.cfg.CheckBlocks)
+		quit      = make(chan struct{})
+		results   []*big.Int
+	)
+
+	for sent < f.cfg.CheckBlocks && number > 0 {
+		go f.getL2BlockTxsTips(f.ctx, number, sampleNumber, f.cfg.IgnorePrice, result, quit)
+		sent++
+		exp++
+		number--
+	}
+
+	for exp > 0 {
+		res := <-result
+		if res.err != nil {
+			close(quit)
+			return
+		}
+		exp--
+
+		if len(res.values) == 0 {
+			res.values = []*big.Int{lastPrice}
+		}
+		results = append(results, res.values...)
+	}
+
+	price := lastPrice
+	if len(results) > 0 {
+		sort.Sort(bigIntArray(results))
+		price = results[(len(results)-1)*f.cfg.Percentile/100]
+	}
+	if price.Cmp(f.cfg.MaxPrice) > 0 {
+		price = f.cfg.MaxPrice
+	}
+
+	f.cacheLock.Lock()
+	f.lastPrice = price
+	f.lastL2BlockNumber = l2BlockNumber
+	f.cacheLock.Unlock()
+}
+
+func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uint64, limit int, ignorePrice *big.Int, result chan results, quit chan struct{}) {
+	txs, err := f.state.GetTxsByBlockNumber(ctx, l2BlockNumber, nil)
+	if txs == nil {
+		select {
+		case result <- results{nil, err}:
+		case <-quit:
+		}
+		return
+	}
+	sorter := newSorter(txs)
+	sort.Sort(sorter)
+
+	var prices []*big.Int
+	for _, tx := range sorter.txs {
+		tip := tx.GasTipCap()
+		if ignorePrice != nil && tip.Cmp(ignorePrice) == -1 {
+			continue
+		}
+		prices = append(prices, tip)
+		if len(prices) >= limit {
+			break
+		}
+	}
+	select {
+	case result <- results{prices, nil}:
+	case <-quit:
 	}
 }
