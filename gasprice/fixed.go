@@ -237,9 +237,7 @@ func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uin
 	}
 
 	for i := 0; i < len(lowPrices); i++ {
-		// priceSample[i] = avg(lowPrices[i], highPrices[i])
-		sum := new(big.Int).Add(lowPrices[i], highPrices[i])
-		price := new(big.Int).Quo(sum, big.NewInt(2))
+		price := getAvgPrice(lowPrices[i], highPrices[i])
 		prices = append(prices, price)
 	}
 
@@ -247,4 +245,10 @@ func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uin
 	case result <- results{prices, nil}:
 	case <-quit:
 	}
+}
+
+func getAvgPrice(low *big.Int, high *big.Int) *big.Int {
+	avg := new(big.Int).Add(low, high)
+	avg = avg.Quo(avg, big.NewInt(2))
+	return avg
 }
