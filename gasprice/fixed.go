@@ -248,7 +248,8 @@ func (f *FixedGasPrice) getL2BlockTxsTips(ctx context.Context, l2BlockNumber uin
 }
 
 func getAvgPrice(low *big.Int, high *big.Int) *big.Int {
+	var divisor int64 = 2
 	avg := new(big.Int).Add(low, high)
-	avg = avg.Quo(avg, big.NewInt(2))
+	avg = avg.Quo(avg, big.NewInt(divisor))
 	return avg
 }
