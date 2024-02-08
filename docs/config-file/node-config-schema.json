@@ -1503,6 +1503,11 @@
 					"description": "EnableFollowerAdjustByL2L1Price is dynamic adjust the factor through the L1 and L2 coins price in follower strategy",
 					"default": false
 				},
+				"EnableDynamicFixed": {
+					"type": "boolean",
+					"description": "EnableDynamicFixed is dynamic adjust the factor in fixed strategy",
+					"default": false
+				},
 				"Factor": {
 					"type": "number",
 					"default": 0.15
