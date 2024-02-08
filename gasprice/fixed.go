@@ -2,15 +2,15 @@ package gasprice
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
+	"sort"
 	"strconv"
+	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
 	"github.com/0xPolygonHermez/zkevm-node/log"
-	"sync"
-	"sort"
-	"errors"
 )
 
 const (
