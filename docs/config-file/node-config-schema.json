@@ -1505,7 +1505,6 @@
 				},
 				"EnableDynamicFixed": {
 					"type": "boolean",
-					"description": "EnableDynamicFixed is dynamic adjust the factor in fixed strategy",
 					"default": false
 				},
 				"Factor": {
