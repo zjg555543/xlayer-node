@@ -88,11 +88,18 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	}
 
 	if f.cfg.EnableDynamicFixed {
-		//todo: judge if there is congestion
+
 		log.Debug("enable dynamic fixed strategy")
-		f.calDynamicGPFromLastNBatches()
-		if result.Cmp(f.lastPrice) < 0 {
-			result = new(big.Int).Set(f.lastPrice)
+		// judge if there is congestion
+		isCongested, err := f.isCongested()
+		if err != nil {
+			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
+		}
+		if isCongested {
+			f.calDynamicGPFromLastNBatches()
+			if result.Cmp(f.lastPrice) < 0 {
+				result = new(big.Int).Set(f.lastPrice)
+			}
 		}
 	}
 
@@ -252,4 +259,15 @@ func getAvgPrice(low *big.Int, high *big.Int) *big.Int {
 	avg := new(big.Int).Add(low, high)
 	avg = avg.Quo(avg, big.NewInt(divisor))
 	return avg
+}
+
+func (f *FixedGasPrice) isCongested() (bool, error) {
+	txCount, err := f.pool.CountPendingTransactions(f.ctx)
+	if err != nil {
+		return false, err
+	}
+	if txCount >= f.cfg.CongestionTxThreshold {
+		return true, nil
+	}
+	return false, nil
 }

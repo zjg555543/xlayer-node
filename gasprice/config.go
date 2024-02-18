@@ -55,5 +55,7 @@ type Config struct {
 
 	EnableDynamicFixed bool `mapstructure:"EnableDynamicFixed"`
 
+	CongestionTxThreshold uint64 `mapstructure:"CongestionTxThreshold"`
+
 	Factor float64 `mapstructure:"Factor"`
 }

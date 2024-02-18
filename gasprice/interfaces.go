@@ -5,9 +5,10 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
+
+	"github.com/0xPolygonHermez/zkevm-node/pool"
 )
 
 // Consumer interfaces required by the package.
@@ -17,6 +18,7 @@ type poolInterface interface {
 	SetGasPrices(ctx context.Context, l2GasPrice uint64, l1GasPrice uint64) error
 	GetGasPrices(ctx context.Context) (pool.GasPrices, error)
 	DeleteGasPricesHistoryOlderThan(ctx context.Context, date time.Time) error
+	CountPendingTransactions(ctx context.Context) (uint64, error)
 }
 
 // stateMock gathers the methods required to interact with the state.
