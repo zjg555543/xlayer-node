@@ -27,8 +27,9 @@ func TestUpdateGasPriceDefault(t *testing.T) {
 	defaultGasPriceDivByFactor := new(big.Int).Div(new(big.Int).SetUint64(cfg.DefaultGasPriceWei), factor)
 	l1GasPrice := new(big.Int).Mul(defaultGasPriceDivByFactor, big.NewInt(100)).Uint64() // nolint:gomnd
 
+	state := new(stateMock)
 	poolM := new(poolMock)
 	poolM.On("SetGasPrices", ctx, cfg.DefaultGasPriceWei, l1GasPrice).Return(nil).Twice()
-	dge := newDefaultGasPriceSuggester(ctx, cfg, poolM, nil)
+	dge := newDefaultGasPriceSuggester(ctx, cfg, state, poolM, nil)
 	dge.UpdateGasPriceAvg()
 }
