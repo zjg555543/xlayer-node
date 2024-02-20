@@ -10,32 +10,45 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
-func calDynamicGP(ctx context.Context, cfg Config, state stateInterface, lastL2BlockNum *uint64, lastGP *big.Int, cacheLock *sync.RWMutex, fetchLock *sync.Mutex) {
-	l2BlockNumber, err := state.GetLastL2BlockNumber(ctx, nil)
+type BasicGasPricer struct {
+	cfg  Config
+	pool poolInterface
+	ctx  context.Context
+
+	lastL2BlockNumber uint64
+	lastPrice         *big.Int
+
+	cacheLock sync.RWMutex
+	fetchLock sync.Mutex
+	state     stateInterface
+}
+
+func (b *BasicGasPricer) calDynamicGP() {
+	l2BlockNumber, err := b.state.GetLastL2BlockNumber(b.ctx, nil)
 	if err != nil {
 		log.Errorf("failed to get last l2 block number, err: %v", err)
 	}
-	cacheLock.RLock()
-	lastL2BlockNumber, lastPrice := *lastL2BlockNum, new(big.Int).Set(lastGP)
-	cacheLock.RUnlock()
+	b.cacheLock.RLock()
+	lastL2BlockNumber, lastPrice := b.lastL2BlockNumber, new(big.Int).Set(b.lastPrice)
+	b.cacheLock.RUnlock()
 	if l2BlockNumber == lastL2BlockNumber {
 		log.Debug("Block is still the same, no need to update the gas price at the moment, lastL2BlockNumber: ", lastL2BlockNumber)
 		return
 	}
 
-	fetchLock.Lock()
-	defer fetchLock.Unlock()
+	b.fetchLock.Lock()
+	defer b.fetchLock.Unlock()
 
 	var (
 		sent, exp int
 		number    = lastL2BlockNumber
-		result    = make(chan results, cfg.CheckBlocks)
+		result    = make(chan results, b.cfg.CheckBlocks)
 		quit      = make(chan struct{})
 		results   []*big.Int
 	)
 
-	for sent < cfg.CheckBlocks && number > 0 {
-		go getL2BlockTxsTips(ctx, state, number, sampleNumber, cfg.IgnorePrice, result, quit)
+	for sent < b.cfg.CheckBlocks && number > 0 {
+		go b.getL2BlockTxsTips(number, sampleNumber, b.cfg.IgnorePrice, result, quit)
 		sent++
 		exp++
 		number--
@@ -58,17 +71,17 @@ func calDynamicGP(ctx context.Context, cfg Config, state stateInterface, lastL2B
 	price := lastPrice
 	if len(results) > 0 {
 		sort.Sort(bigIntArray(results))
-		price = results[(len(results)-1)*cfg.Percentile/100]
+		price = results[(len(results)-1)*b.cfg.Percentile/100]
 	}
 
-	cacheLock.Lock()
-	lastGP = price
-	lastL2BlockNum = &l2BlockNumber
-	cacheLock.Unlock()
+	b.cacheLock.Lock()
+	b.lastPrice = price
+	b.lastL2BlockNumber = l2BlockNumber
+	b.cacheLock.Unlock()
 }
 
-func getL2BlockTxsTips(ctx context.Context, state stateInterface, l2BlockNumber uint64, limit int, ignorePrice *big.Int, result chan results, quit chan struct{}) {
-	txs, err := state.GetTxsByBlockNumber(ctx, l2BlockNumber, nil)
+func (b *BasicGasPricer) getL2BlockTxsTips(l2BlockNumber uint64, limit int, ignorePrice *big.Int, result chan results, quit chan struct{}) {
+	txs, err := b.state.GetTxsByBlockNumber(b.ctx, l2BlockNumber, nil)
 	if txs == nil {
 		select {
 		case result <- results{nil, err}:
@@ -126,20 +139,19 @@ func getL2BlockTxsTips(ctx context.Context, state stateInterface, l2BlockNumber 
 	}
 }
 
-func isCongested(ctx context.Context, cfg Config, pool poolInterface) (bool, error) {
-	txCount, err := pool.CountPendingTransactions(ctx)
+func (b *BasicGasPricer) isCongested() (bool, error) {
+	txCount, err := b.pool.CountPendingTransactions(b.ctx)
 	if err != nil {
 		return false, err
 	}
-	if txCount >= cfg.CongestionTxThreshold {
+	if txCount >= b.cfg.CongestionTxThreshold {
 		return true, nil
 	}
 	return false, nil
 }
 
 func getAvgPrice(low *big.Int, high *big.Int) *big.Int {
-	var divisor int64 = 2
 	avg := new(big.Int).Add(low, high)
-	avg = avg.Quo(avg, big.NewInt(divisor))
+	avg = avg.Quo(avg, big.NewInt(2)) //nolint:gomnd
 	return avg
 }

@@ -4,43 +4,30 @@ import (
 	"context"
 	"fmt"
 	"math/big"
-	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
 // DefaultGasPricer gas price from config is set.
 type DefaultGasPricer struct {
-	cfg        Config
-	pool       poolInterface
-	ctx        context.Context
+	BasicGasPricer
+
 	l1GasPrice uint64
-
-	lastL2BlockNumber uint64
-	lastPrice         *big.Int
-
-	cacheLock sync.RWMutex
-	fetchLock sync.Mutex
-	state     stateInterface
 
 	apolloConfig Apollo
 }
 
 // newDefaultGasPriceSuggester init default gas price suggester.
 func newDefaultGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface, fetch Apollo) *DefaultGasPricer {
-	// Apply factor to calculate l1 gasPrice
-	factorAsPercentage := int64(cfg.Factor * 100) // nolint:gomnd
-	factor := big.NewInt(factorAsPercentage)
-	defaultGasPriceDivByFactor := new(big.Int).Div(new(big.Int).SetUint64(cfg.DefaultGasPriceWei), factor)
 
 	gpe := &DefaultGasPricer{
-		ctx:        ctx,
-		cfg:        cfg,
-		pool:       pool,
-		l1GasPrice: new(big.Int).Mul(defaultGasPriceDivByFactor, big.NewInt(100)).Uint64(), // nolint:gomnd
-		state:      state,
-		lastPrice:  new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
-
+		BasicGasPricer: BasicGasPricer{
+			cfg:       cfg,
+			pool:      pool, // nolint:gomnd
+			ctx:       ctx,
+			lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
+			state:     state,
+		},
 		apolloConfig: fetch,
 	}
 	gpe.UpdateGasPriceAvg()
@@ -55,16 +42,15 @@ func (d *DefaultGasPricer) UpdateGasPriceAvg() {
 
 	result := new(big.Int).SetUint64(d.cfg.DefaultGasPriceWei)
 	if d.cfg.EnableDynamicGP {
-
 		log.Debug("enable dynamic gas price")
 		// judge if there is congestion
-		isCongested, err := isCongested(d.ctx, d.cfg, d.pool)
+		isCongested, err := d.isCongested()
 		if err != nil {
 			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
 		}
 		if isCongested {
 			log.Warn("there is congestion for L2")
-			calDynamicGP(d.ctx, d.cfg, d.state, &d.lastL2BlockNumber, d.lastPrice, &d.cacheLock, &d.fetchLock)
+			d.calDynamicGP()
 			if result.Cmp(d.lastPrice) < 0 {
 				result = new(big.Int).Set(d.lastPrice)
 			}
@@ -81,14 +67,13 @@ func (d *DefaultGasPricer) UpdateGasPriceAvg() {
 		}
 	}
 
-	err := d.pool.SetGasPrices(d.ctx, result.Uint64(), d.l1GasPrice)
-	if err != nil {
-		panic(fmt.Errorf("failed to set default gas price, err: %v", err))
-	}
-}
+	// Apply factor to calculate l1 gasPrice
+	factorAsPercentage := int64(d.cfg.Factor * 100) // nolint:gomnd
+	factor := big.NewInt(factorAsPercentage)
+	gasPriceDivByFactor := new(big.Int).Div(result, factor)
 
-func (d *DefaultGasPricer) setDefaultGasPrice() {
-	err := d.pool.SetGasPrices(d.ctx, d.cfg.DefaultGasPriceWei, d.l1GasPrice)
+	d.l1GasPrice = new(big.Int).Mul(gasPriceDivByFactor, big.NewInt(100)).Uint64()
+	err := d.pool.SetGasPrices(d.ctx, result.Uint64(), d.l1GasPrice)
 	if err != nil {
 		panic(fmt.Errorf("failed to set default gas price, err: %v", err))
 	}

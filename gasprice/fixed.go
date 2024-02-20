@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
-	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -19,18 +18,10 @@ const (
 
 // FixedGasPrice struct
 type FixedGasPrice struct {
-	cfg     Config
-	pool    poolInterface
-	ctx     context.Context
+	BasicGasPricer
+
 	eth     ethermanInterface
 	ratePrc *KafkaProcessor
-
-	lastL2BlockNumber uint64
-	lastPrice         *big.Int
-
-	cacheLock sync.RWMutex
-	fetchLock sync.Mutex
-	state     stateInterface
 
 	apolloConfig Apollo
 }
@@ -38,14 +29,15 @@ type FixedGasPrice struct {
 // newFixedGasPriceSuggester inits l2 fixed price suggester.
 func newFixedGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FixedGasPrice {
 	gps := &FixedGasPrice{
-		cfg:       cfg,
-		pool:      pool,
-		ctx:       ctx,
-		eth:       ethMan,
-		ratePrc:   newKafkaProcessor(cfg, ctx),
-		state:     state,
-		lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
-
+		BasicGasPricer: BasicGasPricer{
+			cfg:       cfg,
+			pool:      pool, // nolint:gomnd
+			ctx:       ctx,
+			lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
+			state:     state,
+		},
+		eth:          ethMan,
+		ratePrc:      newKafkaProcessor(cfg, ctx),
 		apolloConfig: fetch,
 	}
 	gps.UpdateGasPriceAvg()
@@ -76,16 +68,15 @@ func (f *FixedGasPrice) UpdateGasPriceAvg() {
 	res.Int(result)
 
 	if f.cfg.EnableDynamicGP {
-
 		log.Debug("enable dynamic gas price")
 		// judge if there is congestion
-		isCongested, err := isCongested(f.ctx, f.cfg, f.pool)
+		isCongested, err := f.isCongested()
 		if err != nil {
 			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
 		}
 		if isCongested {
 			log.Warn("there is congestion for L2")
-			calDynamicGP(f.ctx, f.cfg, f.state, &f.lastL2BlockNumber, f.lastPrice, &f.cacheLock, &f.fetchLock)
+			f.calDynamicGP()
 			if result.Cmp(f.lastPrice) < 0 {
 				result = new(big.Int).Set(f.lastPrice)
 			}
