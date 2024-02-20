@@ -19,7 +19,6 @@ type DefaultGasPricer struct {
 
 // newDefaultGasPriceSuggester init default gas price suggester.
 func newDefaultGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface, fetch Apollo) *DefaultGasPricer {
-
 	gpe := &DefaultGasPricer{
 		BasicGasPricer: BasicGasPricer{
 			cfg:       cfg,
