@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"sync"
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -18,16 +19,25 @@ type FollowerGasPrice struct {
 	eth      ethermanInterface
 	kafkaPrc *KafkaProcessor
 
+	lastL2BlockNumber uint64
+	lastPrice         *big.Int
+
+	cacheLock sync.RWMutex
+	fetchLock sync.Mutex
+	state     stateInterface
+
 	apolloConfig Apollo
 }
 
 // newFollowerGasPriceSuggester inits l2 follower gas price suggester which is based on the l1 gas price.
-func newFollowerGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FollowerGasPrice {
+func newFollowerGasPriceSuggester(ctx context.Context, cfg Config, state stateInterface, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FollowerGasPrice {
 	gps := &FollowerGasPrice{
-		cfg:  cfg,
-		pool: pool,
-		ctx:  ctx,
-		eth:  ethMan,
+		cfg:       cfg,
+		pool:      pool,
+		ctx:       ctx,
+		eth:       ethMan,
+		state:     state,
+		lastPrice: new(big.Int).SetUint64(cfg.DefaultGasPriceWei),
 
 		apolloConfig: fetch,
 	}
@@ -69,6 +79,24 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	// Store l2 gasPrice calculated
 	result := new(big.Int)
 	res.Int(result)
+
+	if f.cfg.EnableDynamicGP {
+
+		log.Debug("enable dynamic gas price")
+		// judge if there is congestion
+		isCongested, err := isCongested(f.ctx, f.cfg, f.pool)
+		if err != nil {
+			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
+		}
+		if isCongested {
+			log.Warn("there is congestion for L2")
+			calDynamicGP(f.ctx, f.cfg, f.state, &f.lastL2BlockNumber, f.lastPrice, &f.cacheLock, &f.fetchLock)
+			if result.Cmp(f.lastPrice) < 0 {
+				result = new(big.Int).Set(f.lastPrice)
+			}
+		}
+	}
+
 	minGasPrice := big.NewInt(0).SetUint64(f.cfg.DefaultGasPriceWei)
 	if minGasPrice.Cmp(result) == 1 { // minGasPrice > result
 		log.Warn("setting DefaultGasPriceWei for L2")

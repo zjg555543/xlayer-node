@@ -28,10 +28,10 @@ func NewL2GasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface,
 		gpricer = newLastNL2BlocksGasPriceSuggester(ctx, cfg, state, pool)
 	case FollowerType:
 		log.Info("Follower type selected")
-		gpricer = newFollowerGasPriceSuggester(ctx, cfg, pool, ethMan, fetch)
+		gpricer = newFollowerGasPriceSuggester(ctx, cfg, state, pool, ethMan, fetch)
 	case DefaultType:
 		log.Info("Default type selected")
-		gpricer = newDefaultGasPriceSuggester(ctx, cfg, pool, fetch)
+		gpricer = newDefaultGasPriceSuggester(ctx, cfg, state, pool, fetch)
 	case FixedType:
 		log.Info("Fixed type selected")
 		gpricer = newFixedGasPriceSuggester(ctx, cfg, state, pool, ethMan, fetch)

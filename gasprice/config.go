@@ -53,7 +53,7 @@ type Config struct {
 	// EnableFollowerAdjustByL2L1Price is dynamic adjust the factor through the L1 and L2 coins price in follower strategy
 	EnableFollowerAdjustByL2L1Price bool `mapstructure:"EnableFollowerAdjustByL2L1Price"`
 
-	EnableDynamicFixed bool `mapstructure:"EnableDynamicFixed"`
+	EnableDynamicGP bool `mapstructure:"EnableDynamicGP"`
 
 	CongestionTxThreshold uint64 `mapstructure:"CongestionTxThreshold"`
 
