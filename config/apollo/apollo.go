@@ -91,7 +91,7 @@ func (c *CustomChangeListener) OnChange(changeEvent *storage.ChangeEvent) {
 			case JsonRPCRO, JsonRPCExplorer, JsonRPCSubgraph, JsonRPCLight, JsonRPCBridge, JsonRPCWO:
 				c.fireJsonRPC(key, value)
 			case Pool:
-
+				c.firePool(key, value)
 			}
 		}
 	}
