@@ -72,7 +72,7 @@ func (d *DefaultGasPricer) UpdateGasPriceAvg() {
 	factor := big.NewInt(factorAsPercentage)
 	gasPriceDivByFactor := new(big.Int).Div(result, factor)
 
-	d.l1GasPrice = new(big.Int).Mul(gasPriceDivByFactor, big.NewInt(100)).Uint64()
+	d.l1GasPrice = new(big.Int).Mul(gasPriceDivByFactor, big.NewInt(100)).Uint64() // nolint:gomnd
 	err := d.pool.SetGasPrices(d.ctx, result.Uint64(), d.l1GasPrice)
 	if err != nil {
 		panic(fmt.Errorf("failed to set default gas price, err: %v", err))

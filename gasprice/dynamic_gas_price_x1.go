@@ -10,6 +10,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
+// BasicGasPricer struct.
 type BasicGasPricer struct {
 	cfg  Config
 	pool poolInterface
