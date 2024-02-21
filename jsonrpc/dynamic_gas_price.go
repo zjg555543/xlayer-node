@@ -69,7 +69,7 @@ func (e *EthEndpoints) calcDynamicGP(ctx context.Context) {
 	)
 
 	for sent < e.cfg.DynamicGP.CheckBatches && number > 0 {
-		go e.getL2BatchTxsTips(ctx, number, e.cfg.DynamicGP.SampleNumer, result, quit)
+		go e.getL2BatchTxsTips(ctx, number, e.cfg.DynamicGP.SampleNumber, result, quit)
 		sent++
 		exp++
 		number--
