@@ -24,7 +24,7 @@ type DynamicGPConfig struct {
 	CheckBatches int `mapstructure:"CheckBatches"`
 
 	// SampleTxNumer defines the number of sampled gas prices in each batch
-	SampleNumer int `mapstructure:"SampleNumber"`
+	SampleNumber int `mapstructure:"SampleNumber"`
 
 	// Percentile defines the sampling weight of all sampled gas prices
 	Percentile int `mapstructure:"Percentile"`
