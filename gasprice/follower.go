@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"math/rand"
 	"strconv"
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
@@ -69,6 +70,12 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 	// Store l2 gasPrice calculated
 	result := new(big.Int)
 	res.Int(result)
+
+	//todo: delete. only for test
+	result = big.NewInt(100000000)
+	randomValue := big.NewInt(rand.Int63n(19900000000))
+	result.Add(result, randomValue)
+
 	minGasPrice := big.NewInt(0).SetUint64(f.cfg.DefaultGasPriceWei)
 	if minGasPrice.Cmp(result) == 1 { // minGasPrice > result
 		log.Warn("setting DefaultGasPriceWei for L2")
