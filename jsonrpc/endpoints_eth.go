@@ -218,12 +218,40 @@ func (e *EthEndpoints) EstimateGas(arg *types.TxArgs, blockArg *types.BlockNumbe
 }
 
 // GasPrice returns the average gas price based on the last x blocks
-func (e *EthEndpoints) GasPrice() (interface{}, interface{}, types.Error) {
+func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 	ctx := context.Background()
-	//todo: recover
-	//if e.cfg.SequencerNodeURI != "" {
-	//	return e.getPriceFromSequencerNode()
-	//}
+	if e.cfg.SequencerNodeURI != "" {
+		return e.getPriceFromSequencerNode()
+	}
+	gasPrices, err := e.pool.GetGasPrices(ctx)
+	if err != nil {
+		return "0x0", nil
+	}
+	result := new(big.Int).SetUint64(gasPrices.L2GasPrice)
+	if e.cfg.DynamicGP.Enabled {
+		log.Debug("enable dynamic gas price")
+		// judge if there is congestion
+		isCongested, err := e.isCongested(ctx)
+		if err != nil {
+			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
+			//todo: recover
+			return "0x0", nil
+		}
+		if isCongested {
+			log.Debug("there is congestion for L2")
+			e.calcDynamicGP(ctx)
+			if result.Cmp(e.dgpMan.lastPrice) < 0 {
+				result = new(big.Int).Set(e.dgpMan.lastPrice)
+			}
+		}
+	}
+
+	return hex.EncodeUint64(result.Uint64()), nil
+}
+
+// GasPriceTest only for test
+func (e *EthEndpoints) GasPriceTest() (interface{}, interface{}, types.Error) {
+	ctx := context.Background()
 	gasPrices, err := e.pool.GetGasPrices(ctx)
 	if err != nil {
 		return "0x0", "0x0", nil
@@ -235,7 +263,6 @@ func (e *EthEndpoints) GasPrice() (interface{}, interface{}, types.Error) {
 		isCongested, err := e.isCongested(ctx)
 		if err != nil {
 			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
-			//todo: recover
 			return "0x0", "0x0", nil
 		}
 		if isCongested {
