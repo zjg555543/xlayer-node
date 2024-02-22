@@ -248,6 +248,20 @@ func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 	return hex.EncodeUint64(result.Uint64()), nil
 }
 
+// RawGasPrice returns the raw gas price only for test
+func (e *EthEndpoints) RawGasPrice() (interface{}, types.Error) {
+	ctx := context.Background()
+	if e.cfg.SequencerNodeURI != "" {
+		return e.getPriceFromSequencerNode()
+	}
+	gasPrices, err := e.pool.GetGasPrices(ctx)
+	if err != nil {
+		return "0x0", nil
+	}
+
+	return hex.EncodeUint64(gasPrices.L2GasPrice), nil
+}
+
 func (e *EthEndpoints) getPriceFromSequencerNode() (interface{}, types.Error) {
 	res, err := client.JSONRPCCall(e.cfg.SequencerNodeURI, "eth_gasPrice")
 	if err != nil {
