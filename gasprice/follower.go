@@ -73,7 +73,7 @@ func (f *FollowerGasPrice) UpdateGasPriceAvg() {
 
 	//todo: delete. only for test
 	result = big.NewInt(100000000)
-	randomValue := big.NewInt(rand.Int63n(9900000000))
+	randomValue := big.NewInt(rand.Int63n(900000000))
 	result.Add(result, randomValue)
 
 	minGasPrice := big.NewInt(0).SetUint64(f.cfg.DefaultGasPriceWei)
