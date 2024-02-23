@@ -200,6 +200,7 @@ func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isW
 		log.Errorf("Pre execution error: %v", err)
 		return err
 	}
+	log.Warnf("OutOfCounters Error (Node level) for tx: %s, ExecutionResponse: +%v", tx.Hash().String(), preExecutionResponse)
 
 	if preExecutionResponse.isOOC {
 		event := &event.Event{
