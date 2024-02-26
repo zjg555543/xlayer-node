@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 	"time"
-	
+
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/client"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
