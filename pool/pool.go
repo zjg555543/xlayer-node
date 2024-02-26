@@ -229,6 +229,7 @@ func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isW
 			EventID:     event.EventID_PreexecutionOOG,
 			Description: tx.Hash().String(),
 		}
+		log.Warnf("OutOfGas Error (Node level) for tx: %s, ExecutionResponse: +%v", tx.Hash().String(), preExecutionResponse)
 
 		err := p.eventLog.LogEvent(ctx, event)
 		if err != nil {
