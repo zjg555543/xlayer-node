@@ -1,6 +1,6 @@
 ---
 name: Report a bug
-about: Something with X1 is not working as expected
+about: Something with XLayer is not working as expected
 title: ''
 labels: 'type:bug'
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 
 #### System information
 
-X1 Node version: `v0.0.X-RCXX`
+XLayer Node version: `v0.0.X-RCXX`
 OS & Version: `Windows/Linux/OSX`
 Commit hash : (if `develop`)
 Network: `Mainnet/Testnet`

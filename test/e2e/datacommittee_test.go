@@ -111,8 +111,8 @@ func TestDataCommittee(t *testing.T) {
 	// Spin up M DAC nodes
 	dacNodeConfig := config.Config{
 		L1: config.L1Config{
-			RpcURL:               "http://x1-mock-l1-network:8545",
-			WsURL:                "ws://x1-mock-l1-network:8546",
+			RpcURL:               "http://xlayer-mock-l1-network:8545",
+			WsURL:                "ws://xlayer-mock-l1-network:8546",
 			ZkEVMAddress:         "0x0D9088C72Cd4F08e9dDe474D8F5394147f64b22C",
 			DataCommitteeAddress: "0x6Ae5b0863dBF3477335c0102DBF432aFf04ceb22",
 			Timeout:              cTypes.NewDuration(time.Minute * 3),
@@ -126,7 +126,7 @@ func TestDataCommittee(t *testing.T) {
 			Name:      "committee_db",
 			User:      "committee_user",
 			Password:  "committee_password",
-			Host:      "x1-data-availability-db",
+			Host:      "xlayer-data-availability-db",
 			Port:      "5432",
 			EnableLog: false,
 			MaxConns:  10,
@@ -181,7 +181,7 @@ func TestDataCommittee(t *testing.T) {
 			"--name", "x1-data-availability-"+strconv.Itoa(m.i),
 			"-v", cfgFile+":/app/config.json",
 			"-v", ksFile+":"+ksFile,
-			"--network", "x1",
+			"--network", "xlayer",
 			dacNodeContainer,
 			"/bin/sh", "-c",
 			"/app/x1-data-availability run --cfg /app/config.json",

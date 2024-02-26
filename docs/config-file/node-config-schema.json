@@ -321,7 +321,7 @@
 						"Host": {
 							"type": "string",
 							"description": "Host address of database",
-							"default": "x1-pool-db"
+							"default": "xlayer-pool-db"
 						},
 						"Port": {
 							"type": "string",
@@ -1516,7 +1516,7 @@
 			"properties": {
 				"URI": {
 					"type": "string",
-					"default": "x1-prover:50071"
+					"default": "xlayer-prover:50071"
 				},
 				"MaxResourceExhaustedAttempts": {
 					"type": "integer",
@@ -1547,7 +1547,7 @@
 				"URI": {
 					"type": "string",
 					"description": "URI is the server URI.",
-					"default": "x1-prover:50061"
+					"default": "xlayer-prover:50061"
 				}
 			},
 			"additionalProperties": false,
@@ -1660,7 +1660,7 @@
 				"Host": {
 					"type": "string",
 					"description": "Host address of database",
-					"default": "x1-state-db"
+					"default": "xlayer-state-db"
 				},
 				"Port": {
 					"type": "string",
@@ -1765,7 +1765,7 @@
 						"Host": {
 							"type": "string",
 							"description": "Host address of database",
-							"default": "x1-state-db"
+							"default": "xlayer-state-db"
 						},
 						"Port": {
 							"type": "string",

@@ -862,14 +862,14 @@ Password="pool_password"
 
 **Type:** : `string`
 
-**Default:** `"x1-pool-db"`
+**Default:** `"xlayer-pool-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("x1-pool-db"):
+**Example setting the default value** ("xlayer-pool-db"):
 ```
 [Pool.DB]
-Host="x1-pool-db"
+Host="xlayer-pool-db"
 ```
 
 #### <a name="Pool_DB_Port"></a>7.6.5. `Pool.DB.Port`
@@ -3761,12 +3761,12 @@ Factor=0.15
 
 **Type:** : `string`
 
-**Default:** `"x1-prover:50071"`
+**Default:** `"xlayer-prover:50071"`
 
-**Example setting the default value** ("x1-prover:50071"):
+**Example setting the default value** ("xlayer-prover:50071"):
 ```
 [Executor]
-URI="x1-prover:50071"
+URI="xlayer-prover:50071"
 ```
 
 ### <a name="Executor_MaxResourceExhaustedAttempts"></a>15.2. `Executor.MaxResourceExhaustedAttempts`
@@ -3834,14 +3834,14 @@ MaxGRPCMessageSize=100000000
 
 **Type:** : `string`
 
-**Default:** `"x1-prover:50061"`
+**Default:** `"xlayer-prover:50061"`
 
 **Description:** URI is the server URI.
 
-**Example setting the default value** ("x1-prover:50061"):
+**Example setting the default value** ("xlayer-prover:50061"):
 ```
 [MTClient]
-URI="x1-prover:50061"
+URI="xlayer-prover:50061"
 ```
 
 ## <a name="Metrics"></a>17. `[Metrics]`
@@ -4125,14 +4125,14 @@ Password="prover_pass"
 
 **Type:** : `string`
 
-**Default:** `"x1-state-db"`
+**Default:** `"xlayer-state-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("x1-state-db"):
+**Example setting the default value** ("xlayer-state-db"):
 ```
 [HashDB]
-Host="x1-state-db"
+Host="xlayer-state-db"
 ```
 
 ### <a name="HashDB_Port"></a>19.5. `HashDB.Port`
@@ -4404,14 +4404,14 @@ Password="state_password"
 
 **Type:** : `string`
 
-**Default:** `"x1-state-db"`
+**Default:** `"xlayer-state-db"`
 
 **Description:** Host address of database
 
-**Example setting the default value** ("x1-state-db"):
+**Example setting the default value** ("xlayer-state-db"):
 ```
 [State.DB]
-Host="x1-state-db"
+Host="xlayer-state-db"
 ```
 
 #### <a name="State_DB_Port"></a>20.8.5. `State.DB.Port`
