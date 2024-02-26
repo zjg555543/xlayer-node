@@ -545,4 +545,4 @@ services:
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/x1-signer http -cfg /app/config.toml"
+      - "/app/xlayer-signer http -cfg /app/config.toml"
