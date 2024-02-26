@@ -12,6 +12,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
 
+// DynamicGPConfig represents the configuration of the dynamic gas price
 type DynamicGPConfig struct {
 
 	// Enabled defines if the dynamic gas price is enabled or disabled
@@ -36,6 +37,7 @@ type DynamicGPConfig struct {
 	MinPrice uint64 `mapstructure:"MinPrice"`
 }
 
+// DynamicGPManager allows to update recommended gas price
 type DynamicGPManager struct {
 	lastL2BatchNumber uint64
 	lastPrice         *big.Int
