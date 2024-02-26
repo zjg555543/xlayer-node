@@ -7,9 +7,8 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/core/types"
-
 	"github.com/0xPolygonHermez/zkevm-node/log"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // DynamicGPConfig represents the configuration of the dynamic gas price
