@@ -234,7 +234,6 @@ func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 		isCongested, err := e.isCongested(ctx)
 		if err != nil {
 			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
-			//todo: recover
 			return "0x0", nil
 		}
 		if isCongested {
@@ -247,46 +246,6 @@ func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 	}
 
 	return hex.EncodeUint64(result.Uint64()), nil
-}
-
-// GasPriceTest only for test
-func (e *EthEndpoints) GasPriceTest() (interface{}, types.Error) {
-	type GPR struct {
-		RawGP string `json:"rgp"`
-		DGP   string `json:"dgp"`
-	}
-
-	res := &GPR{
-		RawGP: "",
-		DGP:   "",
-	}
-
-	ctx := context.Background()
-	gasPrices, err := e.pool.GetGasPrices(ctx)
-	if err != nil {
-		return res, nil
-	}
-	result := new(big.Int).SetUint64(gasPrices.L2GasPrice)
-	if e.cfg.DynamicGP.Enabled {
-		log.Debug("enable dynamic gas price")
-		// judge if there is congestion
-		isCongested, err := e.isCongested(ctx)
-		if err != nil {
-			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
-			return res, nil
-		}
-		if isCongested {
-			log.Debug("there is congestion for L2")
-			e.calcDynamicGP(ctx)
-			if result.Cmp(e.dgpMan.lastPrice) < 0 {
-				result = new(big.Int).Set(e.dgpMan.lastPrice)
-			}
-		}
-	}
-	res.RawGP = hex.EncodeUint64(gasPrices.L2GasPrice)
-	res.DGP = hex.EncodeUint64(result.Uint64())
-
-	return res, nil
 }
 
 func (e *EthEndpoints) getPriceFromSequencerNode() (interface{}, types.Error) {
