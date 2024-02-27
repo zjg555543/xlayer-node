@@ -96,6 +96,16 @@ func (e *EthEndpoints) calcDynamicGP(ctx context.Context) {
 		price = results[(len(results)-1)*e.cfg.DynamicGP.Percentile/100]
 	}
 
+	minGasPrice := big.NewInt(0).SetUint64(e.cfg.DynamicGP.MinPrice)
+	if minGasPrice.Cmp(price) == 1 {
+		price = minGasPrice
+	}
+
+	maxGasPrice := new(big.Int).SetUint64(e.cfg.DynamicGP.MaxPrice)
+	if e.cfg.DynamicGP.MaxPrice > 0 && price.Cmp(maxGasPrice) == 1 {
+		price = maxGasPrice
+	}
+
 	e.dgpMan.cacheLock.Lock()
 	e.dgpMan.lastPrice = price
 	e.dgpMan.lastL2BatchNumber = l2BatchNumber
