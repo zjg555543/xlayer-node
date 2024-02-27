@@ -155,7 +155,6 @@ require (
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	golang.org/x/time v0.3.0 // indirect
 	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230920204549-e6e6cdab5c13 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
@@ -178,6 +177,7 @@ require (
 	github.com/prometheus/client_golang v1.17.0
 	github.com/segmentio/kafka-go v0.4.43
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9
+	golang.org/x/time v0.3.0
 )
 
 replace github.com/0xPolygon/cdk-data-availability => github.com/okx/x1-data-availability v0.0.0-20231113064732-3afebde141fc
