@@ -227,6 +227,11 @@ func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 		return "0x0", nil
 	}
 	result := new(big.Int).SetUint64(gasPrices.L2GasPrice)
+	if getApolloConfig().Enable() {
+		getApolloConfig().RLock()
+		e.cfg.DynamicGP = getApolloConfig().DynamicGP
+		getApolloConfig().RUnlock()
+	}
 	if e.cfg.DynamicGP.Enabled {
 		log.Debug("enable dynamic gas price")
 		// judge if there is congestion
