@@ -506,6 +506,11 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	}
 
 	// Reject transactions with a gas price lower than the minimum gas price
+	if getApolloConfig().enable() {
+		getApolloConfig().RLock()
+		log.Infof("from: %v, isFreeGasAddress: %v, address: %v, poolTx.IsClaims: %v", from.String(), isFreeGasAddress(p.cfg.FreeGasAddress, from), getApolloConfig().FreeGasAddresses, poolTx.IsClaims)
+		getApolloConfig().RUnlock()
+	}
 	if !isFreeGasAddress(p.cfg.FreeGasAddress, from) || !poolTx.IsClaims {
 		p.minSuggestedGasPriceMux.RLock()
 		gasPriceCmp := poolTx.GasPrice().Cmp(p.minSuggestedGasPrice)
