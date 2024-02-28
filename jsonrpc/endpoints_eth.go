@@ -238,7 +238,7 @@ func (e *EthEndpoints) GasPrice() (interface{}, types.Error) {
 		isCongested, err := e.isCongested(ctx)
 		if err != nil {
 			log.Errorf("failed to count pool txs by status pending while judging if the pool is congested: ", err)
-			return "0x0", nil
+			return hex.EncodeUint64(gasPrices.L2GasPrice), nil
 		}
 		if isCongested {
 			log.Debug("there is congestion for L2")
