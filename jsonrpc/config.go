@@ -89,6 +89,9 @@ type Config struct {
 
 	// RateLimit enable rate limit
 	RateLimit RateLimitConfig `mapstructure:"RateLimit"`
+
+	// DynamicGP defines the config of dynamic gas price
+	DynamicGP DynamicGPConfig `mapstructure:"DynamicGP"`
 }
 
 // RateLimitConfig has parameters to config the rate limit
