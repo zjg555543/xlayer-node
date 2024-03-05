@@ -2898,6 +2898,7 @@ Must be one of:
 | - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                                                                                                                            |
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                                                                                                                               |
 | - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which address is going to receive the fees                                                                                                                                                                                                                                                                                                                                                                 |
+| - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
 | - [DAPermitApiPrivateKey](#SequenceSender_DAPermitApiPrivateKey )                                       | No      | object           | No         | -          | DAPermitApiPrivateKey defines all the key store files that are going<br />to sign batches for DA service                                                                                                                                                                                                                                                                                                                      |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                                                                                                                                   |
@@ -3007,7 +3008,46 @@ to sign the L1 txs
 L2Coinbase="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 ```
 
-### <a name="SequenceSender_DAPermitApiPrivateKey"></a>11.7. `[SequenceSender.DAPermitApiPrivateKey]`
+### <a name="SequenceSender_PrivateKey"></a>11.7. `[SequenceSender.PrivateKey]`
+
+**Type:** : `object`
+**Description:** PrivateKey defines all the key store files that are going
+to be read in order to provide the private keys to sign the L1 txs
+
+| Property                                           | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
+| -------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
+| - [Path](#SequenceSender_PrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
+| - [Password](#SequenceSender_PrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
+
+#### <a name="SequenceSender_PrivateKey_Path"></a>11.7.1. `SequenceSender.PrivateKey.Path`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** Path is the file path for the key store file
+
+**Example setting the default value** (""):
+```
+[SequenceSender.PrivateKey]
+Path=""
+```
+
+#### <a name="SequenceSender_PrivateKey_Password"></a>11.7.2. `SequenceSender.PrivateKey.Password`
+
+**Type:** : `string`
+
+**Default:** `""`
+
+**Description:** Password is the password to decrypt the key store file
+
+**Example setting the default value** (""):
+```
+[SequenceSender.PrivateKey]
+Password=""
+```
+
+### <a name="SequenceSender_DAPermitApiPrivateKey"></a>11.8. `[SequenceSender.DAPermitApiPrivateKey]`
 
 **Type:** : `object`
 **Description:** DAPermitApiPrivateKey defines all the key store files that are going
@@ -3018,7 +3058,7 @@ to sign batches for DA service
 | - [Path](#SequenceSender_DAPermitApiPrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
 | - [Password](#SequenceSender_DAPermitApiPrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
 
-#### <a name="SequenceSender_DAPermitApiPrivateKey_Path"></a>11.7.1. `SequenceSender.DAPermitApiPrivateKey.Path`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Path"></a>11.8.1. `SequenceSender.DAPermitApiPrivateKey.Path`
 
 **Type:** : `string`
 
@@ -3032,7 +3072,7 @@ to sign batches for DA service
 Path="/pk/sequencer.keystore"
 ```
 
-#### <a name="SequenceSender_DAPermitApiPrivateKey_Password"></a>11.7.2. `SequenceSender.DAPermitApiPrivateKey.Password`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Password"></a>11.8.2. `SequenceSender.DAPermitApiPrivateKey.Password`
 
 **Type:** : `string`
 
@@ -3046,7 +3086,7 @@ Path="/pk/sequencer.keystore"
 Password="testonly"
 ```
 
-### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.8. `SequenceSender.ForkUpgradeBatchNumber`
+### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.9. `SequenceSender.ForkUpgradeBatchNumber`
 
 **Type:** : `integer`
 
@@ -3060,7 +3100,7 @@ Password="testonly"
 ForkUpgradeBatchNumber=0
 ```
 
-### <a name="SequenceSender_UseValidium"></a>11.9. `SequenceSender.UseValidium`
+### <a name="SequenceSender_UseValidium"></a>11.10. `SequenceSender.UseValidium`
 
 **Type:** : `boolean`
 
@@ -3074,7 +3114,7 @@ ForkUpgradeBatchNumber=0
 UseValidium=true
 ```
 
-### <a name="SequenceSender_GasOffset"></a>11.10. `SequenceSender.GasOffset`
+### <a name="SequenceSender_GasOffset"></a>11.11. `SequenceSender.GasOffset`
 
 **Type:** : `integer`
 
