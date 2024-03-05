@@ -46,6 +46,14 @@ func (l *logStatisticsInstance) SetTag(tag logTag, value string) {
 	l.tags[tag] = value
 }
 
+func (l *logStatisticsInstance) GetTag(tag logTag) string {
+	return l.tags[tag]
+}
+
+func (l *logStatisticsInstance) GetStatistics(tag logTag) int64 {
+	return l.statistics[tag]
+}
+
 func (l *logStatisticsInstance) UpdateTimestamp(tag logTag, tm time.Time) {
 	l.timestamp[tag] = tm
 }
@@ -83,12 +91,4 @@ func (l *logStatisticsInstance) Summary() string {
 		"BatchCloseReason<" + l.tags[BatchCloseReason] + ">"
 
 	return result
-}
-
-func (l *logStatisticsInstance) GetTag(tag logTag) string {
-	return l.tags[tag]
-}
-
-func (l *logStatisticsInstance) GetStatistics(tag logTag) int64 {
-	return l.statistics[tag]
 }

@@ -20,7 +20,7 @@ type EthermanMock struct {
 }
 
 // BuildSequenceBatchesTxData provides a mock function with given fields: sender, sequences, l2CoinBase
-func (_m *EthermanMock) BuildSequenceBatchesTxData(sender common.Address, sequences []types.Sequence, l2CoinBase common.Address) (*common.Address, []byte, error) {
+func (_m *EthermanMock) BuildSequenceBatchesTxData(sender common.Address, sequences []types.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (*common.Address, []byte, error) {
 	ret := _m.Called(sender, sequences, l2CoinBase)
 
 	var r0 *common.Address
@@ -54,21 +54,17 @@ func (_m *EthermanMock) BuildSequenceBatchesTxData(sender common.Address, sequen
 	return r0, r1, r2
 }
 
-func (_m *EthermanMock) BuildSequenceBatchesTxDataX1(sender common.Address, sequences []types.Sequence, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error){
-	return nil, nil, nil
-}
-
-// EstimateGasSequenceBatches provides a mock function with given fields: sender, sequences, l2Coinbase
-func (_m *EthermanMock) EstimateGasSequenceBatches(sender common.Address, sequences []types.Sequence, l2Coinbase common.Address) (*coretypes.Transaction, error){
-	ret := _m.Called(sender, sequences, l2Coinbase)
+// EstimateGasSequenceBatches provides a mock function with given fields: sender, sequences, l2CoinBase
+func (_m *EthermanMock) EstimateGasSequenceBatches(sender common.Address, sequences []types.Sequence, l2CoinBase common.Address, committeeSignaturesAndAddrs []byte) (*coretypes.Transaction, error) {
+	ret := _m.Called(sender, sequences, l2CoinBase)
 
 	var r0 *coretypes.Transaction
 	var r1 error
 	if rf, ok := ret.Get(0).(func(common.Address, []types.Sequence, common.Address) (*coretypes.Transaction, error)); ok {
-		return rf(sender, sequences, l2Coinbase)
+		return rf(sender, sequences, l2CoinBase)
 	}
 	if rf, ok := ret.Get(0).(func(common.Address, []types.Sequence, common.Address) *coretypes.Transaction); ok {
-		r0 = rf(sender, sequences, l2Coinbase)
+		r0 = rf(sender, sequences, l2CoinBase)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*coretypes.Transaction)
@@ -76,16 +72,12 @@ func (_m *EthermanMock) EstimateGasSequenceBatches(sender common.Address, sequen
 	}
 
 	if rf, ok := ret.Get(1).(func(common.Address, []types.Sequence, common.Address) error); ok {
-		r1 = rf(sender, sequences, l2Coinbase)
+		r1 = rf(sender, sequences, l2CoinBase)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
-}
-
-func (_m *EthermanMock) EstimateGasSequenceBatchesX1(sender common.Address, sequences []types.Sequence, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (*coretypes.Transaction, error){
-	return nil, nil
 }
 
 // GetLastBatchTimestamp provides a mock function with given fields:

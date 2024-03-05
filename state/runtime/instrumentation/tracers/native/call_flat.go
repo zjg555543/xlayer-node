@@ -142,6 +142,15 @@ func NewFlatCallTracer(ctx *tracers.Context, cfg json.RawMessage) (tracers.Trace
 	return &flatCallTracer{tracer: t, ctx: ctx, config: config}, nil
 }
 
+// SetFlatCallTracerLimit set the limit for flatCallFrame.
+func SetFlatCallTracerLimit(t tracers.Tracer, l int) tracers.Tracer {
+	if flatTracer, ok := t.(*flatCallTracer); ok {
+		flatTracer.limit = l
+		return flatTracer
+	}
+	return t
+}
+
 // CaptureStart implements the EVMLogger interface to initialize the tracing operation.
 func (t *flatCallTracer) CaptureStart(env *fakevm.FakeEVM, from common.Address, to common.Address, create bool, input []byte, gas uint64, value *big.Int) {
 	t.tracer.CaptureStart(env, from, to, create, input, gas, value)
