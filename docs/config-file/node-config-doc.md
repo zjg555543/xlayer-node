@@ -1194,6 +1194,7 @@ ForkID=0
 | - [GasLimitFactor](#RPC_GasLimitFactor )                                     | No      | number           | No         | -          | GasLimitFactor is used to multiply the suggested gas provided by the network<br />in order to allow a enough gas to be set for all the transactions default value is 1.<br /><br />ex:<br />suggested gas limit: 100<br />GasLimitFactor: 1<br />gas limit = 100<br /><br />suggested gas limit: 100<br />GasLimitFactor: 1.1<br />gas limit = 110 |
 | - [DisableAPIs](#RPC_DisableAPIs )                                           | No      | array of string  | No         | -          | DisableAPIs disable some API                                                                                                                                                                                                                                                                                                                       |
 | - [RateLimit](#RPC_RateLimit )                                               | No      | object           | No         | -          | RateLimit enable rate limit                                                                                                                                                                                                                                                                                                                        |
+| - [DynamicGP](#RPC_DynamicGP )                                               | No      | object           | No         | -          | DynamicGP defines the config of dynamic gas price                                                                                                                                                                                                                                                                                                  |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -1804,6 +1805,119 @@ SpecialApis=[]
 
 **Type:** : `integer`
 **Description:** Duration defines the time window for the rate limit
+
+### <a name="RPC_DynamicGP"></a>8.23. `[RPC.DynamicGP]`
+
+**Type:** : `object`
+**Description:** DynamicGP defines the config of dynamic gas price
+
+| Property                                                         | Pattern | Type    | Deprecated | Definition | Title/Description                                                                     |
+| ---------------------------------------------------------------- | ------- | ------- | ---------- | ---------- | ------------------------------------------------------------------------------------- |
+| - [Enabled](#RPC_DynamicGP_Enabled )                             | No      | boolean | No         | -          | Enabled defines if the dynamic gas price is enabled or disabled                       |
+| - [CongestionTxThreshold](#RPC_DynamicGP_CongestionTxThreshold ) | No      | integer | No         | -          | CongestionTxThreshold defines the tx threshold to measure whether there is congestion |
+| - [CheckBatches](#RPC_DynamicGP_CheckBatches )                   | No      | integer | No         | -          | CheckBatches defines the number of recent Batches used to sample gas price            |
+| - [SampleNumber](#RPC_DynamicGP_SampleNumber )                   | No      | integer | No         | -          | SampleTxNumer defines the number of sampled gas prices in each batch                  |
+| - [Percentile](#RPC_DynamicGP_Percentile )                       | No      | integer | No         | -          | Percentile defines the sampling weight of all sampled gas prices                      |
+| - [MaxPrice](#RPC_DynamicGP_MaxPrice )                           | No      | integer | No         | -          | MaxPrice defines the dynamic gas price upper limit                                    |
+| - [MinPrice](#RPC_DynamicGP_MinPrice )                           | No      | integer | No         | -          | MinPrice defines the dynamic gas price lower limit                                    |
+
+#### <a name="RPC_DynamicGP_Enabled"></a>8.23.1. `RPC.DynamicGP.Enabled`
+
+**Type:** : `boolean`
+
+**Default:** `false`
+
+**Description:** Enabled defines if the dynamic gas price is enabled or disabled
+
+**Example setting the default value** (false):
+```
+[RPC.DynamicGP]
+Enabled=false
+```
+
+#### <a name="RPC_DynamicGP_CongestionTxThreshold"></a>8.23.2. `RPC.DynamicGP.CongestionTxThreshold`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** CongestionTxThreshold defines the tx threshold to measure whether there is congestion
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+CongestionTxThreshold=0
+```
+
+#### <a name="RPC_DynamicGP_CheckBatches"></a>8.23.3. `RPC.DynamicGP.CheckBatches`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** CheckBatches defines the number of recent Batches used to sample gas price
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+CheckBatches=0
+```
+
+#### <a name="RPC_DynamicGP_SampleNumber"></a>8.23.4. `RPC.DynamicGP.SampleNumber`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** SampleTxNumer defines the number of sampled gas prices in each batch
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+SampleNumber=0
+```
+
+#### <a name="RPC_DynamicGP_Percentile"></a>8.23.5. `RPC.DynamicGP.Percentile`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** Percentile defines the sampling weight of all sampled gas prices
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+Percentile=0
+```
+
+#### <a name="RPC_DynamicGP_MaxPrice"></a>8.23.6. `RPC.DynamicGP.MaxPrice`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** MaxPrice defines the dynamic gas price upper limit
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+MaxPrice=0
+```
+
+#### <a name="RPC_DynamicGP_MinPrice"></a>8.23.7. `RPC.DynamicGP.MinPrice`
+
+**Type:** : `integer`
+
+**Default:** `0`
+
+**Description:** MinPrice defines the dynamic gas price lower limit
+
+**Example setting the default value** (0):
+```
+[RPC.DynamicGP]
+MinPrice=0
+```
 
 ## <a name="Synchronizer"></a>9. `[Synchronizer]`
 
@@ -2594,10 +2708,12 @@ FullBatchSleepDuration="0s"
 **Type:** : `object`
 **Description:** DBManager's specific config properties
 
-| Property                                                                     | Pattern | Type   | Deprecated | Definition | Title/Description |
-| ---------------------------------------------------------------------------- | ------- | ------ | ---------- | ---------- | ----------------- |
-| - [PoolRetrievalInterval](#Sequencer_DBManager_PoolRetrievalInterval )       | No      | string | No         | -          | Duration          |
-| - [L2ReorgRetrievalInterval](#Sequencer_DBManager_L2ReorgRetrievalInterval ) | No      | string | No         | -          | Duration          |
+| Property                                                                     | Pattern | Type            | Deprecated | Definition | Title/Description |
+| ---------------------------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ----------------- |
+| - [PoolRetrievalInterval](#Sequencer_DBManager_PoolRetrievalInterval )       | No      | string          | No         | -          | Duration          |
+| - [L2ReorgRetrievalInterval](#Sequencer_DBManager_L2ReorgRetrievalInterval ) | No      | string          | No         | -          | Duration          |
+| - [PackBatchSpacialList](#Sequencer_DBManager_PackBatchSpacialList )         | No      | array of string | No         | -          | -                 |
+| - [GasPriceMultiple](#Sequencer_DBManager_GasPriceMultiple )                 | No      | number          | No         | -          | -                 |
 
 #### <a name="Sequencer_DBManager_PoolRetrievalInterval"></a>10.7.1. `Sequencer.DBManager.PoolRetrievalInterval`
 
@@ -2645,6 +2761,22 @@ PoolRetrievalInterval="500ms"
 ```
 [Sequencer.DBManager]
 L2ReorgRetrievalInterval="5s"
+```
+
+#### <a name="Sequencer_DBManager_PackBatchSpacialList"></a>10.7.3. `Sequencer.DBManager.PackBatchSpacialList`
+
+**Type:** : `array of string`
+
+#### <a name="Sequencer_DBManager_GasPriceMultiple"></a>10.7.4. `Sequencer.DBManager.GasPriceMultiple`
+
+**Type:** : `number`
+
+**Default:** `0`
+
+**Example setting the default value** (0):
+```
+[Sequencer.DBManager]
+GasPriceMultiple=0
 ```
 
 ### <a name="Sequencer_StreamServer"></a>10.8. `[Sequencer.StreamServer]`
@@ -2766,7 +2898,6 @@ Must be one of:
 | - [MaxBatchesForL1](#SequenceSender_MaxBatchesForL1 )                                                   | No      | integer          | No         | -          | MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx                                                                                                                                                                                                                                                                                                                                            |
 | - [SenderAddress](#SequenceSender_SenderAddress )                                                       | No      | array of integer | No         | -          | SenderAddress defines which private key the eth tx manager needs to use<br />to sign the L1 txs                                                                                                                                                                                                                                                                                                                               |
 | - [L2Coinbase](#SequenceSender_L2Coinbase )                                                             | No      | array of integer | No         | -          | L2Coinbase defines which address is going to receive the fees                                                                                                                                                                                                                                                                                                                                                                 |
-| - [PrivateKey](#SequenceSender_PrivateKey )                                                             | No      | object           | No         | -          | PrivateKey defines all the key store files that are going<br />to be read in order to provide the private keys to sign the L1 txs                                                                                                                                                                                                                                                                                             |
 | - [DAPermitApiPrivateKey](#SequenceSender_DAPermitApiPrivateKey )                                       | No      | object           | No         | -          | DAPermitApiPrivateKey defines all the key store files that are going<br />to sign batches for DA service                                                                                                                                                                                                                                                                                                                      |
 | - [ForkUpgradeBatchNumber](#SequenceSender_ForkUpgradeBatchNumber )                                     | No      | integer          | No         | -          | Batch number where there is a forkid change (fork upgrade)                                                                                                                                                                                                                                                                                                                                                                    |
 | - [UseValidium](#SequenceSender_UseValidium )                                                           | No      | boolean          | No         | -          | UseValidium is a flag to enable/disable the use of validium                                                                                                                                                                                                                                                                                                                                                                   |
@@ -2876,46 +3007,7 @@ to sign the L1 txs
 L2Coinbase="0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
 ```
 
-### <a name="SequenceSender_PrivateKey"></a>11.7. `[SequenceSender.PrivateKey]`
-
-**Type:** : `object`
-**Description:** PrivateKey defines all the key store files that are going
-to be read in order to provide the private keys to sign the L1 txs
-
-| Property                                           | Pattern | Type   | Deprecated | Definition | Title/Description                                      |
-| -------------------------------------------------- | ------- | ------ | ---------- | ---------- | ------------------------------------------------------ |
-| - [Path](#SequenceSender_PrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
-| - [Password](#SequenceSender_PrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
-
-#### <a name="SequenceSender_PrivateKey_Path"></a>11.7.1. `SequenceSender.PrivateKey.Path`
-
-**Type:** : `string`
-
-**Default:** `""`
-
-**Description:** Path is the file path for the key store file
-
-**Example setting the default value** (""):
-```
-[SequenceSender.PrivateKey]
-Path=""
-```
-
-#### <a name="SequenceSender_PrivateKey_Password"></a>11.7.2. `SequenceSender.PrivateKey.Password`
-
-**Type:** : `string`
-
-**Default:** `""`
-
-**Description:** Password is the password to decrypt the key store file
-
-**Example setting the default value** (""):
-```
-[SequenceSender.PrivateKey]
-Password=""
-```
-
-### <a name="SequenceSender_DAPermitApiPrivateKey"></a>11.8. `[SequenceSender.DAPermitApiPrivateKey]`
+### <a name="SequenceSender_DAPermitApiPrivateKey"></a>11.7. `[SequenceSender.DAPermitApiPrivateKey]`
 
 **Type:** : `object`
 **Description:** DAPermitApiPrivateKey defines all the key store files that are going
@@ -2926,7 +3018,7 @@ to sign batches for DA service
 | - [Path](#SequenceSender_DAPermitApiPrivateKey_Path )         | No      | string | No         | -          | Path is the file path for the key store file           |
 | - [Password](#SequenceSender_DAPermitApiPrivateKey_Password ) | No      | string | No         | -          | Password is the password to decrypt the key store file |
 
-#### <a name="SequenceSender_DAPermitApiPrivateKey_Path"></a>11.8.1. `SequenceSender.DAPermitApiPrivateKey.Path`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Path"></a>11.7.1. `SequenceSender.DAPermitApiPrivateKey.Path`
 
 **Type:** : `string`
 
@@ -2940,7 +3032,7 @@ to sign batches for DA service
 Path="/pk/sequencer.keystore"
 ```
 
-#### <a name="SequenceSender_DAPermitApiPrivateKey_Password"></a>11.8.2. `SequenceSender.DAPermitApiPrivateKey.Password`
+#### <a name="SequenceSender_DAPermitApiPrivateKey_Password"></a>11.7.2. `SequenceSender.DAPermitApiPrivateKey.Password`
 
 **Type:** : `string`
 
@@ -2954,7 +3046,7 @@ Path="/pk/sequencer.keystore"
 Password="testonly"
 ```
 
-### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.9. `SequenceSender.ForkUpgradeBatchNumber`
+### <a name="SequenceSender_ForkUpgradeBatchNumber"></a>11.8. `SequenceSender.ForkUpgradeBatchNumber`
 
 **Type:** : `integer`
 
@@ -2968,7 +3060,7 @@ Password="testonly"
 ForkUpgradeBatchNumber=0
 ```
 
-### <a name="SequenceSender_UseValidium"></a>11.10. `SequenceSender.UseValidium`
+### <a name="SequenceSender_UseValidium"></a>11.9. `SequenceSender.UseValidium`
 
 **Type:** : `boolean`
 
@@ -2982,7 +3074,7 @@ ForkUpgradeBatchNumber=0
 UseValidium=true
 ```
 
-### <a name="SequenceSender_GasOffset"></a>11.11. `SequenceSender.GasOffset`
+### <a name="SequenceSender_GasOffset"></a>11.10. `SequenceSender.GasOffset`
 
 **Type:** : `integer`
 

@@ -23,16 +23,20 @@ type FixedGasPrice struct {
 	ctx     context.Context
 	eth     ethermanInterface
 	ratePrc *KafkaProcessor
+
+	apolloConfig Apollo
 }
 
 // newFixedGasPriceSuggester inits l2 fixed price suggester.
-func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface) *FixedGasPrice {
+func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterface, ethMan ethermanInterface, fetch Apollo) *FixedGasPrice {
 	gps := &FixedGasPrice{
 		cfg:     cfg,
 		pool:    pool,
 		ctx:     ctx,
 		eth:     ethMan,
 		ratePrc: newKafkaProcessor(cfg, ctx),
+
+		apolloConfig: fetch,
 	}
 	gps.UpdateGasPriceAvg()
 	return gps
@@ -40,10 +44,9 @@ func newFixedGasPriceSuggester(ctx context.Context, cfg Config, pool poolInterfa
 
 // UpdateGasPriceAvg updates the gas price.
 func (f *FixedGasPrice) UpdateGasPriceAvg() {
-	if getApolloConfig().Enable() {
-		f.cfg = getApolloConfig().get()
+	if f.apolloConfig != nil {
+		f.apolloConfig.FetchL2GasPricerConfig(&f.cfg)
 	}
-
 	ctx := context.Background()
 	// Get L1 gasprice
 	l1GasPrice := f.eth.GetL1GasPrice(f.ctx)

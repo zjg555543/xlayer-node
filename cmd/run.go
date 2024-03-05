@@ -247,7 +247,7 @@ func start(cliCtx *cli.Context) error {
 			if poolInstance == nil {
 				poolInstance = createPool(c.Pool, c.State.Batch.Constraints, l2ChainID, st, eventLog)
 			}
-			go runL2GasPriceSuggester(c.L2GasPriceSuggester, st, poolInstance, etherman)
+			go runL2GasPriceSuggester(c.L2GasPriceSuggester, st, poolInstance, etherman, apolloClient)
 		}
 	}
 
@@ -450,9 +450,9 @@ func runAggregator(ctx context.Context, c aggregator.Config, etherman *etherman.
 }
 
 // runL2GasPriceSuggester init gas price gasPriceEstimator based on type in config.
-func runL2GasPriceSuggester(cfg gasprice.Config, state *state.State, pool *pool.Pool, etherman *etherman.Client) {
+func runL2GasPriceSuggester(cfg gasprice.Config, state *state.State, pool *pool.Pool, etherman *etherman.Client, fetch gasprice.Apollo) {
 	ctx := context.Background()
-	gasprice.NewL2GasPriceSuggester(ctx, cfg, pool, etherman, state)
+	gasprice.NewL2GasPriceSuggester(ctx, cfg, pool, etherman, state, fetch)
 }
 
 func waitSignal(cancelFuncs []context.CancelFunc) {
