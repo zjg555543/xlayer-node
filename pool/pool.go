@@ -54,7 +54,6 @@ type Pool struct {
 	startTimestamp          time.Time
 	gasPrices               GasPrices
 	gasPricesMux            *sync.RWMutex
-	l2BridgeAddr            common.Address
 	effectiveGasPrice       *EffectiveGasPrice
 }
 
