@@ -285,11 +285,3 @@ func (v *verifyBatchesTrustedAggregatorArgs) marshal(contractAddress common.Addr
 
 	return string(ret), nil
 }
-
-func (c *Client) halt(err error) {
-	for {
-		log.Errorf("fatal error: %s", err.Error())
-		log.Error("halting the eth tx manager")
-		time.Sleep(5 * time.Second) //nolint:gomnd
-	}
-}
