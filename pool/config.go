@@ -43,6 +43,12 @@ type Config struct {
 
 	// ForkID is the current fork ID of the chain
 	ForkID uint64 `mapstructure:"ForkID"`
+
+	// X1 config
+	// FreeGasAddress is the default free gas address
+	FreeGasAddress []string `mapstructure:"FreeGasAddress"`
+	// FreeClaimGasLimit is the max gas allowed use to do a free claim
+	FreeClaimGasLimit uint64 `mapstructure:"FreeClaimGasLimit"`
 }
 
 // EffectiveGasPriceCfg contains the configuration properties for the effective gas price

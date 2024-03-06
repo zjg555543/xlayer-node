@@ -21,6 +21,9 @@ type NetworkConfig struct {
 	L1Config etherman.L1Config `json:"l1Config"`
 	// L1: Genesis of the rollup, first block number and root
 	Genesis state.Genesis
+
+	// L2: address of the `PolygonZkEVMBridge proxy` smart contract
+	L2BridgeAddr common.Address
 }
 
 type network string

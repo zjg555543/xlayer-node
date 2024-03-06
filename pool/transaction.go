@@ -46,10 +46,13 @@ type Transaction struct {
 	IsWIP                 bool
 	IP                    string
 	FailedReason          *string
+
+	// X1 config
+	IsClaims bool
 }
 
 // NewTransaction creates a new transaction
-func NewTransaction(tx types.Transaction, ip string, isWIP bool) *Transaction {
+func NewTransaction(tx types.Transaction, ip string, isWIP bool, p *Pool) *Transaction {
 	poolTx := Transaction{
 		Transaction: tx,
 		Status:      TxStatusPending,
@@ -57,6 +60,9 @@ func NewTransaction(tx types.Transaction, ip string, isWIP bool) *Transaction {
 		IsWIP:       isWIP,
 		IP:          ip,
 	}
+
+	// X1 handler
+	poolTx.IsClaims = poolTx.IsClaimTx(p.cfg.FreeClaimGasLimit)
 
 	return &poolTx
 }
