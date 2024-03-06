@@ -41,4 +41,7 @@ type Config struct {
 	// gas offset: 100
 	// final gas: 1100
 	GasOffset uint64 `mapstructure:"GasOffset"`
+	// X1 config
+	// MaxBatchesForL1 is the maximum amount of batches to be sequenced in a single L1 tx
+	MaxBatchesForL1 uint64 `mapstructure:"MaxBatchesForL1"`
 }

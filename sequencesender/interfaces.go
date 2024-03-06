@@ -21,6 +21,9 @@ type etherman interface {
 	EstimateGasSequenceBatches(sender common.Address, sequences []ethmanTypes.Sequence, maxSequenceTimestamp uint64, initSequenceBatchNumber uint64, l2Coinbase common.Address) (*types.Transaction, error)
 	GetLatestBlockHeader(ctx context.Context) (*types.Header, error)
 	GetLatestBatchNumber() (uint64, error)
+
+	BuildSequenceBatchesTxDataX1(sender common.Address, sequences []ethmanTypes.Sequence, maxSequenceTimestamp uint64, initSequenceBatchNumber uint64, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (to *common.Address, data []byte, err error)
+	EstimateGasSequenceBatchesX1(sender common.Address, sequences []ethmanTypes.Sequence, maxSequenceTimestamp uint64, initSequenceBatchNumber uint64, l2Coinbase common.Address, committeeSignaturesAndAddrs []byte) (*types.Transaction, error)
 }
 
 // stateInterface gathers the methods required to interact with the state.
