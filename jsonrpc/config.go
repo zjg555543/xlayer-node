@@ -65,6 +65,10 @@ type Config struct {
 
 	// ZKCountersLimits defines the ZK Counter limits
 	ZKCountersLimits ZKCountersLimits
+
+	// X1 config
+	// DynamicGP defines the config of dynamic gas price
+	DynamicGP DynamicGPConfig `mapstructure:"DynamicGP"`
 }
 
 // ZKCountersLimits defines the ZK Counter limits
