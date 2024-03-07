@@ -909,6 +909,12 @@ func (s *ClientSynchronizer) processSequenceBatches(sequencedBatches []etherman.
 		} else {
 			batchL2Data, err = s.getBatchL2Data(sbatch.BatchNumber, sbatch.TransactionsHash)
 			if err != nil {
+				log.Errorf("error getting batchL2Data. BatchNumber: %d, error: %v", sbatch.BatchNumber, err)
+				rollbackErr := dbTx.Rollback(s.ctx)
+				if rollbackErr != nil {
+					log.Errorf("error rolling back state. BatchNumber: %d, BlockNumber: %d, rollbackErr: %s, error : %v", sbatch.BatchNumber, blockNumber, rollbackErr.Error(), err)
+					return rollbackErr
+				}
 				return err
 			}
 		}
