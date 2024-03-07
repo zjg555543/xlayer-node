@@ -246,14 +246,17 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 	}
 	pol, err := pol.NewPol(l1Config.PolAddr, ethClient)
 	if err != nil {
+		log.Errorf("error NewPol. Error: %w", err)
 		return nil, err
 	}
 	dapAddr, err := zkevm.DataAvailabilityProtocol(&bind.CallOpts{Pending: false})
 	if err != nil {
+		log.Errorf("error DataAvailabilityProtocol. Error: %w", err)
 		return nil, err
 	}
 	dap, err := dataavailabilityprotocol.NewDataavailabilityprotocol(dapAddr, ethClient)
 	if err != nil {
+		log.Errorf("error NewDataavailabilityprotocol. Error: %w", err)
 		return nil, err
 	}
 	var scAddresses []common.Address
