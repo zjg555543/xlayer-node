@@ -33,14 +33,14 @@ func TestEthTransfer(t *testing.T) {
 	require.NoError(t, err)
 	time.Sleep(5 * time.Second)
 	// Load account with balance on local genesis
-	auth, err := operations.GetAuth(operations.DefaultSequencerPrivateKey, operations.DefaultL2ChainID)
+	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
 	require.NoError(t, err)
 	// Load eth client
 	client, err := ethclient.Dial(operations.DefaultL2NetworkURL)
 	require.NoError(t, err)
 	// Send txs
 	nTxs := 10
-	amount := big.NewInt(10000)
+	amount := big.NewInt(1)
 	toAddress := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
 	require.NoError(t, err)
