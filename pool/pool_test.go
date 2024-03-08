@@ -1626,16 +1626,6 @@ func Test_WhitelistedAddress_Enable(t *testing.T) {
 	time.Sleep(cfg.IntervalToRefreshWhiteAddresses.Duration)
 
 	// get whitelisted when try to add new tx
-	tx = ethTypes.NewTx(&ethTypes.LegacyTx{
-		Nonce:    1,
-		GasPrice: big.NewInt(0).SetInt64(int64(gasPrices.L2GasPrice)),
-		Gas:      24000,
-		To:       &auth.From,
-		Value:    big.NewInt(1000),
-	})
-	signedTx, err = auth.Signer(auth.From, tx)
-	require.NoError(t, err)
-
 	err = p.AddTx(ctx, *signedTx, ip)
 	require.NoError(t, err)
 
@@ -1645,6 +1635,16 @@ func Test_WhitelistedAddress_Enable(t *testing.T) {
 
 	// wait it to refresh
 	time.Sleep(cfg.IntervalToRefreshBlockedAddresses.Duration)
+
+	tx = ethTypes.NewTx(&ethTypes.LegacyTx{
+		Nonce:    1,
+		GasPrice: big.NewInt(0).SetInt64(int64(gasPrices.L2GasPrice)),
+		Gas:      24000,
+		To:       &auth.From,
+		Value:    big.NewInt(1000),
+	})
+	signedTx, err = auth.Signer(auth.From, tx)
+	require.NoError(t, err)
 
 	// disallowed to add tx again
 	err = p.AddTx(ctx, *signedTx, ip)
@@ -1757,6 +1757,17 @@ func Test_WhitelistedAddress_Disable(t *testing.T) {
 
 	// remove whitelist
 	_, err = poolSqlDB.Exec(ctx, "DELETE FROM pool.whitelisted WHERE addr = $1", auth.From.String())
+	require.NoError(t, err)
+
+	// get whitelisted when try to add new tx
+	tx = ethTypes.NewTx(&ethTypes.LegacyTx{
+		Nonce:    2,
+		GasPrice: big.NewInt(0).SetInt64(int64(gasPrices.L2GasPrice)),
+		Gas:      24000,
+		To:       &auth.From,
+		Value:    big.NewInt(1000),
+	})
+	signedTx, err = auth.Signer(auth.From, tx)
 	require.NoError(t, err)
 
 	// wait it to refresh
