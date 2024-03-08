@@ -250,16 +250,16 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 	//dapAddr, err := zkevm.DataAvailabilityProtocol(&bind.CallOpts{Pending: false})
-	dapAddr, err := oldZkevm.DataCommitteeAddress(&bind.CallOpts{Pending: false})
-	if err != nil {
-		log.Errorf("error DataAvailabilityProtocol. Error: %w", err)
-		return nil, err
-	}
-	dap, err := dataavailabilityprotocol.NewDataavailabilityprotocol(dapAddr, ethClient)
-	if err != nil {
-		log.Errorf("error NewDataavailabilityprotocol. Error: %w", err)
-		return nil, err
-	}
+	////dapAddr, err := oldZkevm.DataCommitteeAddress(&bind.CallOpts{Pending: false})
+	//if err != nil {
+	//	log.Errorf("error DataAvailabilityProtocol. Error: %w", err)
+	//	return nil, err
+	//}
+	//dap, err := dataavailabilityprotocol.NewDataavailabilityprotocol(dapAddr, ethClient)
+	//if err != nil {
+	//	log.Errorf("error NewDataavailabilityprotocol. Error: %w", err)
+	//	return nil, err
+	//}
 	var scAddresses []common.Address
 	scAddresses = append(scAddresses, l1Config.ZkEVMAddr, l1Config.RollupManagerAddr, l1Config.GlobalExitRootManagerAddr)
 
@@ -291,7 +291,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		Pol:                      pol,
 		GlobalExitRootManager:    globalExitRoot,
 		OldGlobalExitRootManager: oldGlobalExitRoot,
-		DAProtocol:               dap,
+		DAProtocol:               nil,
 		SCAddresses:              scAddresses,
 		RollupID:                 rollupID,
 		GasProviders: externalGasProviders{
@@ -2080,7 +2080,9 @@ func (etherMan *Client) GetDAProtocolAddr() (common.Address, error) {
 
 // GetDAProtocolName returns the name of the data availability protocol
 func (etherMan *Client) GetDAProtocolName() (string, error) {
-	return etherMan.DAProtocol.GetProcotolName(&bind.CallOpts{Pending: false})
+	//return etherMan.DAProtocol.GetProcotolName(&bind.CallOpts{Pending: false})
+	//todo
+	return string(dataavailability.DataAvailabilityCommittee), nil
 }
 
 // SetDataProvider sets the data provider
