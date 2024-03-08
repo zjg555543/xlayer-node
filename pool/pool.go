@@ -513,8 +513,8 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	if getEnableWhitelist(p.cfg.EnableWhitelist) {
 		_, listed := p.whitelistedAddresses.Load(from.String())
 		if !listed {
-			log.Infof("%v: %v", ErrBlockedSender.Error(), from.String())
-			return ErrBlockedSender
+			log.Infof("%v: %v", ErrNoWhitelistedSender.Error(), from.String())
+			return ErrNoWhitelistedSender
 		}
 	}
 
