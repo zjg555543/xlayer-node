@@ -36,6 +36,7 @@ type storage interface {
 	DeleteTransactionByHash(ctx context.Context, hash common.Hash) error
 	MarkWIPTxsAsPending(ctx context.Context) error
 	GetAllAddressesBlocked(ctx context.Context) ([]common.Address, error)
+	GetAllAddressesWhitelisted(ctx context.Context) ([]common.Address, error)
 	MinL2GasPriceSince(ctx context.Context, timestamp time.Time) (uint64, error)
 }
 

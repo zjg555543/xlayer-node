@@ -48,6 +48,7 @@ type Pool struct {
 	cfg                     Config
 	batchConstraintsCfg     state.BatchConstraintsCfg
 	blockedAddresses        sync.Map
+	whitelistedAddresses    sync.Map
 	minSuggestedGasPrice    *big.Int
 	minSuggestedGasPriceMux *sync.RWMutex
 	eventLog                *event.EventLog
@@ -77,13 +78,15 @@ type GasPrices struct {
 func NewPool(cfg Config, batchConstraintsCfg state.BatchConstraintsCfg, s storage, st stateInterface, l2BridgeAddr common.Address, chainID uint64, eventLog *event.EventLog) *Pool {
 	startTimestamp := time.Now()
 	p := &Pool{
-		cfg:                     cfg,
-		batchConstraintsCfg:     batchConstraintsCfg,
-		startTimestamp:          startTimestamp,
-		storage:                 s,
-		state:                   st,
-		chainID:                 chainID,
-		blockedAddresses:        sync.Map{},
+		cfg:                  cfg,
+		batchConstraintsCfg:  batchConstraintsCfg,
+		startTimestamp:       startTimestamp,
+		storage:              s,
+		state:                st,
+		chainID:              chainID,
+		blockedAddresses:     sync.Map{},
+		whitelistedAddresses: sync.Map{},
+
 		minSuggestedGasPriceMux: new(sync.RWMutex),
 		minSuggestedGasPrice:    big.NewInt(int64(cfg.DefaultMinGasPriceAllowed)),
 		eventLog:                eventLog,
@@ -158,6 +161,54 @@ func (p *Pool) refreshBlockedAddresses() {
 
 	for _, unblockedAddress := range unblockedAddresses {
 		p.blockedAddresses.Delete(unblockedAddress)
+	}
+}
+
+// StartRefreshingWhiteAddressesPeriodically will make this instance of the pool
+// to check periodically(accordingly to the configuration) for updates regarding
+// the white address and update the in memory blocked addresses
+func (p *Pool) StartRefreshingWhiteAddressesPeriodically() {
+	if !getEnableWhitelist(p.cfg.EnableWhitelist) {
+		return
+	}
+
+	p.refreshWhitelistedAddresses()
+	go func(p *Pool) {
+		for {
+			time.Sleep(p.cfg.IntervalToRefreshWhiteAddresses.Duration)
+			p.refreshWhitelistedAddresses()
+		}
+	}(p)
+}
+
+// refreshWhitelistedAddresses refreshes the list of whitelisted addresses for the provided instance of pool
+func (p *Pool) refreshWhitelistedAddresses() {
+	whitelistedAddresses, err := p.storage.GetAllAddressesWhitelisted(context.Background())
+	if err != nil {
+		log.Error("failed to load whitelisted addresses")
+		return
+	}
+
+	whitelistedAddressesMap := sync.Map{}
+	for _, whitelistedAddress := range whitelistedAddresses {
+		whitelistedAddressesMap.Store(whitelistedAddress.String(), 1)
+		p.whitelistedAddresses.Store(whitelistedAddress.String(), 1)
+	}
+
+	nonWhitelistedAddresses := []string{}
+	p.whitelistedAddresses.Range(func(key, value any) bool {
+		addrHex := key.(string)
+		_, found := whitelistedAddressesMap.Load(addrHex)
+		if found {
+			return true
+		}
+
+		nonWhitelistedAddresses = append(nonWhitelistedAddresses, addrHex)
+		return true
+	})
+
+	for _, nonWhitelistedAddress := range nonWhitelistedAddresses {
+		p.whitelistedAddresses.Delete(nonWhitelistedAddress)
 	}
 }
 
@@ -456,6 +507,15 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 	if blocked {
 		log.Infof("%v: %v", ErrBlockedSender.Error(), from.String())
 		return ErrBlockedSender
+	}
+
+	// check if sender is whitelisted
+	if getEnableWhitelist(p.cfg.EnableWhitelist) {
+		_, listed := p.whitelistedAddresses.Load(from.String())
+		if !listed {
+			log.Infof("%v: %v", ErrBlockedSender.Error(), from.String())
+			return ErrBlockedSender
+		}
 	}
 
 	lastL2Block, err := p.state.GetLastL2Block(ctx, nil)
