@@ -419,6 +419,7 @@ func (p *Pool) validateTx(ctx context.Context, poolTx Transaction) error {
 
 	// check chain id
 	txChainID := poolTx.ChainId().Uint64()
+	log.Error("txChainID:", txChainID, "; p.chainID:", p.chainID)
 	if txChainID != p.chainID && txChainID != 0 {
 		return ErrInvalidChainID
 	}

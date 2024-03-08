@@ -373,12 +373,9 @@ func (etherMan *Client) GetForks(ctx context.Context, genBlockNumber uint64, las
 		query := ethereum.FilterQuery{
 			FromBlock: new(big.Int).SetUint64(i),
 			ToBlock:   new(big.Int).SetUint64(final),
-		//	Addresses: etherMan.SCAddresses,
-		//	Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
+			Addresses: etherMan.SCAddresses,
+			Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
 		}
-		log.Debug("query:", query)
-		log.Debug("SCAddresses", etherMan.SCAddresses)
-		log.Debug("updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash", updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash)
 		
 		l, err := etherMan.EthClient.FilterLogs(ctx, query)
 		log.Debug("log:", l)
