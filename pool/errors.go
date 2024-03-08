@@ -31,7 +31,7 @@ var (
 	ErrBlockedSender = errors.New("blocked sender")
 
 	// ErrNoWhitelistedSender is returned if the transaction is sent by a no whitelisted account.
-	ErrNoWhitelistedSender = errors.New("no whitelisted sender")
+	ErrNoWhitelistedSender = errors.New("not whitelisted sender")
 
 	// ErrGasLimit is returned if a transaction's requested gas limit exceeds the
 	// maximum allowance of the current block.
