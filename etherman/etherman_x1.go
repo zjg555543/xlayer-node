@@ -214,6 +214,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 	// Create smc clients
+	fmt.Println("url:", cfg.URL, "addr", l1Config.ZkEVMAddr)
 	zkevm, err := polygonzkevm.NewPolygonvalidiumX1(l1Config.ZkEVMAddr, ethClient)
 	if err != nil {
 		log.Errorf("error creating Polygonzkevm client (%s). Error: %w", l1Config.ZkEVMAddr.String(), err)
@@ -372,15 +373,21 @@ func (etherMan *Client) GetForks(ctx context.Context, genBlockNumber uint64, las
 		query := ethereum.FilterQuery{
 			FromBlock: new(big.Int).SetUint64(i),
 			ToBlock:   new(big.Int).SetUint64(final),
-			Addresses: etherMan.SCAddresses,
-			Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
+		//	Addresses: etherMan.SCAddresses,
+		//	Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
 		}
+		log.Debug("query:", query)
+		log.Debug("SCAddresses", etherMan.SCAddresses)
+		log.Debug("updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash", updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash)
+		
 		l, err := etherMan.EthClient.FilterLogs(ctx, query)
+		log.Debug("log:", l)
 		if err != nil {
 			return []state.ForkIDInterval{}, err
 		}
 		logs = append(logs, l...)
 	}
+	log.Debug("logs", logs)
 
 	var forks []state.ForkIDInterval
 	for i, l := range logs {

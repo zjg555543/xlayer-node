@@ -7,6 +7,7 @@ import (
 	"errors"
 	"math/big"
 	"strings"
+	"fmt"
 
 	ethereum "github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -70,6 +71,8 @@ func DeployPolygonvalidiumX1(auth *bind.TransactOpts, backend bind.ContractBacke
 	}
 
 	address, tx, contract, err := bind.DeployContract(auth, *parsed, common.FromHex(PolygonvalidiumX1Bin), backend, _globalExitRootManager, _pol, _bridgeAddress, _rollupManager)
+	fmt.Println("address", address, "contract", contract)
+
 	if err != nil {
 		return common.Address{}, nil, nil, err
 	}
