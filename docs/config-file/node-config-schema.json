@@ -182,7 +182,7 @@
 				"MaxTxBytesSize": {
 					"type": "integer",
 					"description": "MaxTxBytesSize is the max size of a transaction in bytes",
-					"default": 100132
+					"default": 19532
 				},
 				"MaxTxDataBytesSize": {
 					"type": "integer",
