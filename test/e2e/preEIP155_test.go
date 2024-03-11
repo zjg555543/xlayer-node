@@ -71,7 +71,7 @@ func TestPreEIP155Tx(t *testing.T) {
 			Data:     data,
 		})
 
-		privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(network.PrivateKey, "0x"))
+		privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(priKey, "0x"))
 		require.NoError(t, err)
 
 		signedTx, err := types.SignTx(tx, types.HomesteadSigner{}, privateKey)
