@@ -2,8 +2,6 @@ package e2e
 
 import (
 	"context"
-	"github.com/0xPolygonHermez/zkevm-node/hex"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
 	"strings"
@@ -38,14 +36,14 @@ func TestEthTransfer(t *testing.T) {
 	time.Sleep(5 * time.Second)
 
 	// Load account with balance on local genesis
-	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
+	auth, err := operations.GetAuth(operations.DefaultSequencerPrivateKey, operations.DefaultL2ChainID)
 	require.NoError(t, err)
 	// Load eth client
 	client, err := ethclient.Dial(operations.DefaultL2NetworkURL)
 	require.NoError(t, err)
 
 	// send to sequencer
-	sendToSequencer(t, ctx, client, auth)
+	sendToSequencer(t, ctx, client)
 
 	// Send txs
 	nTxs := 10
@@ -80,7 +78,9 @@ func TestEthTransfer(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client, auth *bind.TransactOpts) {
+func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client) {
+	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
+	require.NoError(t, err)
 	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
 	require.NoError(t, err)
 	nonce, err := client.PendingNonceAt(ctx, auth.From)
@@ -90,7 +90,7 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	require.NoError(t, err)
 
 	to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	data := hex.DecodeBig("0x64fbb77c").Bytes()
+	data := senderBalance.Bytes()
 
 	log.Infof("Receiver Addr: %v", to.String())
 	log.Infof("Sender Addr: %v", auth.From.String())
@@ -120,6 +120,9 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 
 	//log.Debug("privateKey:", privateKey, ", from:", auth.From)
 	err = client.SendTransaction(ctx, signedTx)
+	require.NoError(t, err)
+
+	err = operations.WaitTxToBeMined(ctx, client, signedTx, operations.DefaultTimeoutTxToBeMined)
 	require.NoError(t, err)
 
 	seqBalance, err := client.BalanceAt(ctx, to, nil)
