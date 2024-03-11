@@ -281,6 +281,21 @@
 						"300ms"
 					]
 				},
+				"IntervalToRefreshWhiteAddresses": {
+					"type": "string",
+					"title": "Duration",
+					"description": "IntervalToRefreshWhiteAddresses is the time it takes to sync the\nwhite address list from db to memory",
+					"default": "1m0s",
+					"examples": [
+						"1m",
+						"300ms"
+					]
+				},
+				"EnableWhitelist": {
+					"type": "boolean",
+					"description": "EnableWhitelist is a flag to enable/disable the whitelist",
+					"default": false
+				},
 				"IntervalToRefreshGasPrices": {
 					"type": "string",
 					"title": "Duration",
