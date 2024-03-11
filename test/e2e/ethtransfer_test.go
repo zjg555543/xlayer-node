@@ -50,18 +50,18 @@ func TestEthTransfer(t *testing.T) {
 	// Send txs
 	nTxs := 10
 	amount := big.NewInt(1)
-	toAddress := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
+	to := common.HexToAddress("0x70997970C51812dc3A010C7d01b50e0d17dc79C8")
 	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
 	require.NoError(t, err)
 	senderNonce, err := client.PendingNonceAt(ctx, auth.From)
 	require.NoError(t, err)
 
-	log.Infof("Receiver Addr: %v", toAddress.String())
+	log.Infof("Receiver Addr: %v", to.String())
 	log.Infof("Sender Addr: %v", auth.From.String())
 	log.Infof("Sender Balance: %v", senderBalance.String())
 	log.Infof("Sender Nonce: %v", senderNonce)
 
-	gasLimit, err := client.EstimateGas(ctx, ethereum.CallMsg{From: auth.From, To: &toAddress, Value: amount})
+	gasLimit, err := client.EstimateGas(ctx, ethereum.CallMsg{From: auth.From, To: &to, Value: amount})
 	require.NoError(t, err)
 
 	gasPrice, err := client.SuggestGasPrice(ctx)
@@ -81,6 +81,8 @@ func TestEthTransfer(t *testing.T) {
 }
 
 func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client, auth *bind.TransactOpts) {
+	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
+	require.NoError(t, err)
 	nonce, err := client.PendingNonceAt(ctx, auth.From)
 	require.NoError(t, err)
 
@@ -89,6 +91,11 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 
 	to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 	data := hex.DecodeBig("0x64fbb77c").Bytes()
+
+	log.Infof("Receiver Addr: %v", to.String())
+	log.Infof("Sender Addr: %v", auth.From.String())
+	log.Infof("Sender Balance: %v", senderBalance.String())
+	log.Infof("Sender Nonce: %v", nonce)
 
 	gas, err := client.EstimateGas(ctx, ethereum.CallMsg{
 		From: auth.From,
@@ -115,7 +122,7 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	err = client.SendTransaction(ctx, signedTx)
 	require.NoError(t, err)
 
-	senderBalance, err := client.BalanceAt(ctx, to, nil)
-	log.Debug("sequencer balance:", senderBalance)
+	seqBalance, err := client.BalanceAt(ctx, to, nil)
+	log.Debug("sequencer balance:", seqBalance)
 	require.NoError(t, err)
 }
