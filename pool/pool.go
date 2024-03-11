@@ -168,10 +168,6 @@ func (p *Pool) refreshBlockedAddresses() {
 // to check periodically(accordingly to the configuration) for updates regarding
 // the white address and update the in memory blocked addresses
 func (p *Pool) StartRefreshingWhiteAddressesPeriodically() {
-	if !getEnableWhitelist(p.cfg.EnableWhitelist) {
-		return
-	}
-
 	p.refreshWhitelistedAddresses()
 	go func(p *Pool) {
 		for {
