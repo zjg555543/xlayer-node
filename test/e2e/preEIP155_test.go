@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"math/big"
+	"os/exec"
 	"strings"
 	"testing"
 	"time"
@@ -22,6 +23,23 @@ func TestPreEIP155Tx(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
+	// Edit config
+	const path = "../../test/config/test.node.config.toml"
+	require.NoError(t,
+		exec.Command("sed", "-i", "s/DefaultMinGasPriceAllowed = 1000000000/DefaultMinGasPriceAllowed = 0/g", path).Run(),
+	)
+	require.NoError(t,
+		exec.Command("sed", "-i", "s/EnableL2SuggestedGasPricePolling = true/EnableL2SuggestedGasPricePolling = false/g", path).Run(),
+	)
+	// Undo edit config
+	defer func() {
+		require.NoError(t,
+			exec.Command("sed", "-i", "s/DefaultMinGasPriceAllowed = 0/DefaultMinGasPriceAllowed = 1000000000/g", path).Run(),
+		)
+		require.NoError(t,
+			exec.Command("sed", "-i", "s/EnableL2SuggestedGasPricePolling = false/EnableL2SuggestedGasPricePolling = true/g", path).Run(),
+		)
+	}()
 
 	var err error
 	err = operations.Teardown()
@@ -100,6 +118,23 @@ func TestFakeEIP155With_V_As35(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
+	// Edit config
+	const path = "../../test/config/test.node.config.toml"
+	require.NoError(t,
+		exec.Command("sed", "-i", "s/DefaultMinGasPriceAllowed = 1000000000/DefaultMinGasPriceAllowed = 0/g", path).Run(),
+	)
+	require.NoError(t,
+		exec.Command("sed", "-i", "s/EnableL2SuggestedGasPricePolling = true/EnableL2SuggestedGasPricePolling = false/g", path).Run(),
+	)
+	// Undo edit config
+	defer func() {
+		require.NoError(t,
+			exec.Command("sed", "-i", "s/DefaultMinGasPriceAllowed = 0/DefaultMinGasPriceAllowed = 1000000000/g", path).Run(),
+		)
+		require.NoError(t,
+			exec.Command("sed", "-i", "s/EnableL2SuggestedGasPricePolling = false/EnableL2SuggestedGasPricePolling = true/g", path).Run(),
+		)
+	}()
 
 	var err error
 	err = operations.Teardown()
