@@ -41,7 +41,7 @@ func TestPreEIP155Tx(t *testing.T) {
 	for _, network := range networks {
 		log.Debugf(network.Name)
 		client := operations.MustGetClient(network.URL)
-		auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		auth := operations.MustGetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", network.ChainID)
 
 		nonce, err := client.PendingNonceAt(ctx, auth.From)
 		require.NoError(t, err)
@@ -73,6 +73,7 @@ func TestPreEIP155Tx(t *testing.T) {
 		signedTx, err := types.SignTx(tx, types.HomesteadSigner{}, privateKey)
 		require.NoError(t, err)
 
+		//log.Debug("privateKey:", privateKey, ", from:", auth.From)
 		err = client.SendTransaction(ctx, signedTx)
 		require.NoError(t, err)
 
