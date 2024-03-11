@@ -60,9 +60,6 @@ func TestPreEIP155Tx(t *testing.T) {
 		log.Debugf(network.Name)
 		client := operations.MustGetClient(network.URL)
 		priKey := network.PrivateKey
-		if network.Name == "Local L1" {
-			priKey = "0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38"
-		}
 		auth := operations.MustGetAuth(priKey, network.ChainID)
 
 		nonce, err := client.PendingNonceAt(ctx, auth.From)
