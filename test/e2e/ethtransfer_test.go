@@ -2,7 +2,11 @@ package e2e
 
 import (
 	"context"
+	"github.com/0xPolygonHermez/zkevm-node/hex"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/crypto"
 	"math/big"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,12 +36,17 @@ func TestEthTransfer(t *testing.T) {
 	err = opsman.Setup()
 	require.NoError(t, err)
 	time.Sleep(5 * time.Second)
+
 	// Load account with balance on local genesis
 	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
 	require.NoError(t, err)
 	// Load eth client
 	client, err := ethclient.Dial(operations.DefaultL2NetworkURL)
 	require.NoError(t, err)
+
+	// send to sequencer
+	sendToSequencer(t, ctx, client, auth)
+
 	// Send txs
 	nTxs := 10
 	amount := big.NewInt(1)
@@ -68,5 +77,45 @@ func TestEthTransfer(t *testing.T) {
 	}
 
 	_, err = operations.ApplyL2Txs(ctx, txs, auth, client, operations.VerifiedConfirmationLevel)
+	require.NoError(t, err)
+}
+
+func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client, auth *bind.TransactOpts) {
+	nonce, err := client.PendingNonceAt(ctx, auth.From)
+	require.NoError(t, err)
+
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	require.NoError(t, err)
+
+	to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+	data := hex.DecodeBig("0x64fbb77c").Bytes()
+
+	gas, err := client.EstimateGas(ctx, ethereum.CallMsg{
+		From: auth.From,
+		To:   &to,
+		Data: data,
+	})
+	require.NoError(t, err)
+
+	tx := types.NewTx(&types.LegacyTx{
+		Nonce:    nonce,
+		To:       &to,
+		GasPrice: gasPrice,
+		Gas:      gas,
+		Data:     data,
+	})
+
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", "0x"))
+	require.NoError(t, err)
+
+	signedTx, err := types.SignTx(tx, types.HomesteadSigner{}, privateKey)
+	require.NoError(t, err)
+
+	//log.Debug("privateKey:", privateKey, ", from:", auth.From)
+	err = client.SendTransaction(ctx, signedTx)
+	require.NoError(t, err)
+
+	senderBalance, err := client.BalanceAt(ctx, to, nil)
+	log.Debug("sequencer balance:", senderBalance)
 	require.NoError(t, err)
 }
