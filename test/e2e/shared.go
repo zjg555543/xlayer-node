@@ -27,6 +27,7 @@ const (
 	invalidParamsErrorCode = -32602
 	toAddressHex           = "0x4d5Cf5032B2a844602278b01199ED191A86c93ff"
 	forkID6                = 6
+	fromPriKey             = "0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38"
 )
 
 var (

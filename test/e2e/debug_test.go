@@ -340,7 +340,7 @@ func TestDebugTraceTransaction(t *testing.T) {
 		require.NoError(t, err)
 
 		ethereumClient := operations.MustGetClient(network.URL)
-		sourceAuth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		sourceAuth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 		nonce, err := ethereumClient.NonceAt(ctx, sourceAuth.From, nil)
 		require.NoError(t, err)
@@ -616,7 +616,7 @@ func TestDebugTraceBlock(t *testing.T) {
 				debugID := fmt.Sprintf("TraceBlock[%s/%s]", tc.name, network.Name)
 				log.Debug("------------------------ ", network.Name, " ------------------------")
 				ethereumClient := operations.MustGetClient(network.URL)
-				auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+				auth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 				var customData map[string]interface{}
 				if tc.prepare != nil {

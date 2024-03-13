@@ -159,7 +159,7 @@ func Test_Filters(t *testing.T) {
 
 		ethereumClient := operations.MustGetClient(network.URL)
 		zkEVMClient := client.NewClient(network.URL)
-		auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		auth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 		// test getFilterChanges for a blockFilter ID
 		var blockBeforeFilterHash common.Hash
@@ -351,7 +351,7 @@ func Test_Block(t *testing.T) {
 		ethereumClient, err := ethclient.Dial(network.URL)
 		zkEVMClient := client.NewClient(network.URL)
 		require.NoError(t, err)
-		auth, err := operations.GetAuth(network.PrivateKey, network.ChainID)
+		auth, err := operations.GetAuth(fromPriKey, network.ChainID)
 		require.NoError(t, err)
 
 		tx, err := createTX(ethereumClient, auth, toAddress, big.NewInt(1000))
@@ -470,7 +470,7 @@ func Test_Transactions(t *testing.T) {
 		log.Infof("Network %s", network.Name)
 		ethClient, err := ethclient.Dial(network.URL)
 		require.NoError(t, err)
-		auth, err := operations.GetAuth(network.PrivateKey, network.ChainID)
+		auth, err := operations.GetAuth(fromPriKey, network.ChainID)
 		require.NoError(t, err)
 
 		// Test Case: Successful transfer

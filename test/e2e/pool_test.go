@@ -39,7 +39,7 @@ func TestRepeatedNonce(t *testing.T) {
 	for _, network := range networks {
 		log.Debugf(network.Name)
 		client := operations.MustGetClient(network.URL)
-		auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		auth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 		nonce, err := client.NonceAt(ctx, auth.From, nil)
 		require.NoError(t, err)
@@ -100,7 +100,7 @@ func TestRepeatedTx(t *testing.T) {
 	for _, network := range networks {
 		log.Debugf(network.Name)
 		client := operations.MustGetClient(network.URL)
-		auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		auth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 		nonce, err := client.NonceAt(ctx, auth.From, nil)
 		require.NoError(t, err)
@@ -157,7 +157,7 @@ func TestPendingNonce(t *testing.T) {
 	for _, network := range networks {
 		log.Debugf(network.Name)
 		client := operations.MustGetClient(network.URL)
-		auth := operations.MustGetAuth(network.PrivateKey, network.ChainID)
+		auth := operations.MustGetAuth(fromPriKey, network.ChainID)
 
 		nonce, err := client.NonceAt(ctx, auth.From, nil)
 		require.NoError(t, err)
