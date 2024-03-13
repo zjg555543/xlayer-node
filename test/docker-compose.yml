@@ -650,7 +650,7 @@ services:
 
   x1-permissionless-prover:
     container_name: x1-permissionless-prover
-    image: hermeznetwork/x1-prover:v5.0.3
+    image: hermeznetwork/zkevm-prover:v5.0.3
     ports:
       # - 50058:50058 # Prover
       - 50059:50052 # Mock prover
