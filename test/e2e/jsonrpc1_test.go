@@ -296,17 +296,22 @@ func Test_Gas(t *testing.T) {
 
 	for _, network := range networks {
 		log.Infof("Network %s", network.Name)
+		priKey := operations.DefaultSequencerAddress
+		if network.Name == "Local L2" {
+			priKey = fromPriKey
+		}
 
 		for _, value := range Values {
 			client, err := ethclient.Dial(network.URL)
 			require.NoError(t, err)
-			msg := ethereum.CallMsg{From: common.HexToAddress(operations.DefaultSequencerAddress),
+			msg := ethereum.CallMsg{From: common.HexToAddress(priKey),
 				To:    &Address1,
 				Value: value}
 
-			balance, err := client.BalanceAt(context.Background(), common.HexToAddress(operations.DefaultSequencerAddress), nil)
+			balance, err := client.BalanceAt(context.Background(), common.HexToAddress(priKey), nil)
 			require.NoError(t, err)
 
+			//log.Debug("address:", priKey, ", url:", network.URL)
 			log.Infof("Balance: %d", balance)
 			require.GreaterOrEqual(t, balance.Cmp(big.NewInt(1)), 1)
 
