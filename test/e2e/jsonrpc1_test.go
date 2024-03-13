@@ -298,7 +298,7 @@ func Test_Gas(t *testing.T) {
 		log.Infof("Network %s", network.Name)
 		from := operations.DefaultSequencerAddress
 		if network.Name == "Local L2" {
-			from = fromPriKey
+			from = fromAddressHex
 		}
 
 		for _, value := range Values {
