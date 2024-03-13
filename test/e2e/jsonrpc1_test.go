@@ -685,7 +685,7 @@ func Test_EstimateCounters(t *testing.T) {
 	defer teardown()
 	ethClient, err := ethclient.Dial(operations.DefaultL2NetworkURL)
 	require.NoError(t, err)
-	auth, err := operations.GetAuth(operations.DefaultSequencerPrivateKey, operations.DefaultL2ChainID)
+	auth, err := operations.GetAuth(fromPriKey, operations.DefaultL2ChainID)
 	require.NoError(t, err)
 
 	expectedCountersLimits := types.ZKCountersLimits{
