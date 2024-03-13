@@ -216,7 +216,7 @@ func TestHasOpCode(t *testing.T) {
 	require.NoError(t, err)
 
 	client := operations.MustGetClient(operations.DefaultL2NetworkURL)
-	auth := operations.MustGetAuth(operations.DefaultSequencerPrivateKey, operations.DefaultL2ChainID)
+	auth := operations.MustGetAuth(fromPriKey, operations.DefaultL2ChainID)
 
 	time.Sleep(2 * time.Second)
 

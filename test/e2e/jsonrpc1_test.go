@@ -35,7 +35,7 @@ func TestJSONRPC(t *testing.T) {
 	defer teardown()
 	for _, network := range networks {
 		log.Infof("Network %s", network.Name)
-		sc, err := deployContracts(network.URL, operations.DefaultSequencerPrivateKey, network.ChainID)
+		sc, err := deployContracts(network.URL, fromPriKey, network.ChainID)
 		require.NoError(t, err)
 
 		callOpts := &bind.CallOpts{Pending: false}
