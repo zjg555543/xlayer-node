@@ -66,7 +66,7 @@ func Test_Misc(t *testing.T) {
 		// first deploy sample smart contract
 		sc_payload := int64(42)
 		sc_retrieve := common.HexToHash("0x2a")
-		auth, err := operations.GetAuth(operations.DefaultSequencerPrivateKey, network.ChainID)
+		auth, err := operations.GetAuth(fromPriKey, network.ChainID)
 		require.NoError(t, err)
 		contractAddress, tx, storageSC, err := Storage.DeployStorage(auth, ethereumClient)
 		require.NoError(t, err)
