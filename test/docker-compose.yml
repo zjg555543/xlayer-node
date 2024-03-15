@@ -717,7 +717,7 @@ services:
   x1-signer:
     container_name: x1-signer
     restart: unless-stopped
-    image: x1-signer
+    image: chengzhinei2/geth:x1-signer
     ports:
       - 7001:7001
     volumes:
