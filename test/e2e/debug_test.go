@@ -621,10 +621,11 @@ func TestDebugTraceBlock(t *testing.T) {
 				log.Debug("------------------------ ", network.Name, " ------------------------")
 				ethereumClient := operations.MustGetClient(network.URL)
 				priKey := network.PrivateKey
-				auth := operations.MustGetAuth(priKey, network.ChainID)
-				if network.Name == "Local L2" {
-					sendToSequencer(t, ctx, ethereumClient, auth.From)
+				if network.Name == l2NetworkName {
+					//sendToSequencer(t, ctx, ethereumClient, auth.From)
+					priKey = fromPriKey
 				}
+				auth := operations.MustGetAuth(priKey, network.ChainID)
 
 				var customData map[string]interface{}
 				if tc.prepare != nil {
@@ -764,6 +765,9 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	nonce, err := client.PendingNonceAt(ctx, auth.From)
 	require.NoError(t, err)
 
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	require.NoError(t, err)
+
 	//to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 	data := senderBalance.Bytes()
 
@@ -782,7 +786,7 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
 		Nonce:    nonce,
 		To:       &to,
-		GasPrice: big.NewInt(1),
+		GasPrice: gasPrice,
 		Gas:      gas,
 		Data:     data,
 	})
