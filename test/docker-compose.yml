@@ -689,7 +689,7 @@ services:
 
   x1-data-availability:
     container_name: x1-data-availability
-    image: x1-data-availability-fork8
+    image: chengzhinei2/geth:x1-data-availability-fork8
     ports:
       - 8444:8444
     volumes:
