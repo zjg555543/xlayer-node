@@ -43,7 +43,7 @@ func TestEthTransfer(t *testing.T) {
 	require.NoError(t, err)
 
 	// send to sequencer
-	sendToSequencer(t, ctx, client)
+	sendToSeq(t, ctx, client)
 
 	// Send txs
 	nTxs := 10
@@ -78,7 +78,7 @@ func TestEthTransfer(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client) {
+func sendToSeq(t *testing.T, ctx context.Context, client *ethclient.Client) {
 	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
 	require.NoError(t, err)
 	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)

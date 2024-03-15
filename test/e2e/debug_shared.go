@@ -48,7 +48,7 @@ func createEthTransferSignedTx(t *testing.T, ctx context.Context, auth *bind.Tra
 	nonce, err := client.PendingNonceAt(ctx, auth.From)
 	require.NoError(t, err)
 
-	gasPrice, err := client.SuggestGasPrice(ctx)
+	_, err = client.SuggestGasPrice(ctx)
 	require.NoError(t, err)
 
 	to := common.HexToAddress("0x1275fbb540c8efc58b812ba83b0d0b8b9917ae98")
@@ -56,7 +56,7 @@ func createEthTransferSignedTx(t *testing.T, ctx context.Context, auth *bind.Tra
 	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
 		Nonce:    nonce,
 		To:       &to,
-		GasPrice: gasPrice,
+		GasPrice: big.NewInt(1),
 		Gas:      fixedTxGasLimit,
 	})
 

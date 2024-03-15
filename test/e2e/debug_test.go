@@ -764,9 +764,6 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	nonce, err := client.PendingNonceAt(ctx, auth.From)
 	require.NoError(t, err)
 
-	gasPrice, err := client.SuggestGasPrice(ctx)
-	require.NoError(t, err)
-
 	//to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
 	data := senderBalance.Bytes()
 
@@ -785,7 +782,7 @@ func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client
 	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
 		Nonce:    nonce,
 		To:       &to,
-		GasPrice: gasPrice,
+		GasPrice: big.NewInt(1),
 		Gas:      gas,
 		Data:     data,
 	})
