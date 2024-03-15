@@ -621,10 +621,10 @@ func TestDebugTraceBlock(t *testing.T) {
 				log.Debug("------------------------ ", network.Name, " ------------------------")
 				ethereumClient := operations.MustGetClient(network.URL)
 				priKey := network.PrivateKey
-				if network.Name == "Local L2" {
-					priKey = fromPriKey
-				}
 				auth := operations.MustGetAuth(priKey, network.ChainID)
+				if network.Name == "Local L2" {
+					sendToSequencer(t, ctx, ethereumClient, auth.From)
+				}
 
 				var customData map[string]interface{}
 				if tc.prepare != nil {
@@ -754,4 +754,56 @@ func convertJson(t *testing.T, response json.RawMessage, debugPrefix string) map
 	err := json.Unmarshal(response, &valueMap)
 	require.NoError(t, err)
 	return valueMap
+}
+
+func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client, to common.Address) {
+	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
+	require.NoError(t, err)
+	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
+	require.NoError(t, err)
+	nonce, err := client.PendingNonceAt(ctx, auth.From)
+	require.NoError(t, err)
+
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	require.NoError(t, err)
+
+	//to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
+	data := senderBalance.Bytes()
+
+	log.Infof("Receiver Addr: %v", to.String())
+	log.Infof("Sender Addr: %v", auth.From.String())
+	log.Infof("Sender Balance: %v", senderBalance.String())
+	log.Infof("Sender Nonce: %v", nonce)
+
+	gas, err := client.EstimateGas(ctx, ethereum.CallMsg{
+		From: auth.From,
+		To:   &to,
+		Data: data,
+	})
+	require.NoError(t, err)
+
+	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
+		Nonce:    nonce,
+		To:       &to,
+		GasPrice: gasPrice,
+		Gas:      gas,
+		Data:     data,
+	})
+
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", "0x"))
+	require.NoError(t, err)
+
+	signedTx, err := ethTypes.SignTx(tx, ethTypes.HomesteadSigner{}, privateKey)
+	require.NoError(t, err)
+
+	//log.Debug("privateKey:", privateKey, ", from:", auth.From)
+	err = client.SendTransaction(ctx, signedTx)
+	require.NoError(t, err)
+
+	err = operations.WaitTxToBeMined(ctx, client, signedTx, operations.DefaultTimeoutTxToBeMined)
+	require.NoError(t, err)
+
+	seqBalance, err := client.BalanceAt(ctx, to, nil)
+	log.Debug("sequencer balance:", seqBalance)
+	require.NoError(t, err)
 }
