@@ -103,11 +103,6 @@ var (
 	beaconUpgradedSignatureHash   = crypto.Keccak256Hash([]byte("BeaconUpgraded(address)"))
 	upgradedSignatureHash         = crypto.Keccak256Hash([]byte("Upgraded(address)"))
 
-	// methodIDSequenceBatchesEtrog: MethodID for sequenceBatches in Etrog
-	methodIDSequenceBatchesEtrog = []byte{0xec, 0xef, 0x3f, 0x99} // 0xecef3f99
-	// methodIDSequenceBatchesElderberry: MethodID for sequenceBatches in Elderberry
-	methodIDSequenceBatchesElderberry = []byte{0xde, 0xf5, 0x7e, 0x54} // 0xdef57e54 sequenceBatches((bytes,bytes32,uint64,bytes32)[],uint64,uint64,address)
-
 	// ErrNotFound is used when the object is not found
 	ErrNotFound = errors.New("not found")
 	// ErrIsReadOnlyMode is used when the EtherMan client is in read-only mode.
@@ -376,7 +371,7 @@ func (etherMan *Client) GetForks(ctx context.Context, genBlockNumber uint64, las
 			Addresses: etherMan.SCAddresses,
 			Topics:    [][]common.Hash{{updateZkEVMVersionSignatureHash, updateRollupSignatureHash, addExistingRollupSignatureHash, createNewRollupSignatureHash}},
 		}
-		
+
 		l, err := etherMan.EthClient.FilterLogs(ctx, query)
 		log.Debug("log:", l)
 		if err != nil {
@@ -1414,90 +1409,6 @@ func decodeSequencesElderberry(txData []byte, lastBatchNumber uint64, sequencer 
 				Coinbase:                        coinbase,
 				PolygonRollupBaseEtrogBatchData: &s,
 				SequencedBatchElderberryData:    &elderberry,
-			}
-		}
-
-		return sequencedBatches, nil
-	default:
-		return nil, fmt.Errorf("unexpected method called in sequence batches transaction: %s", method.RawName)
-	}
-}
-
-func decodeSequencesEtrog(txData []byte, lastBatchNumber uint64, sequencer common.Address, txHash common.Hash, nonce uint64, l1InfoRoot common.Hash, da dataavailability.BatchDataProvider) ([]SequencedBatch, error) {
-	// Extract coded txs.
-	// Load contract ABI
-	smcAbi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumX1ABI))
-	if err != nil {
-		return nil, err
-	}
-
-	// Recover Method from signature and ABI
-	method, err := smcAbi.MethodById(txData[:4])
-	if err != nil {
-		return nil, err
-	}
-
-	// Unpack method inputs
-	data, err := method.Inputs.Unpack(txData[4:])
-	if err != nil {
-		return nil, err
-	}
-	bytedata, err := json.Marshal(data[0])
-	if err != nil {
-		return nil, err
-	}
-	var sequences []polygonzkevm.PolygonRollupBaseEtrogBatchData
-	switch method.Name {
-	case "rollup": // TODO: put correct value
-		err = json.Unmarshal(bytedata, &sequences)
-		if err != nil {
-			return nil, err
-		}
-		coinbase := (data[1]).(common.Address)
-		sequencedBatches := make([]SequencedBatch, len(sequences))
-		for i, seq := range sequences {
-			bn := lastBatchNumber - uint64(len(sequences)-(i+1))
-			s := seq
-			sequencedBatches[i] = SequencedBatch{
-				BatchNumber:                     bn,
-				L1InfoRoot:                      &l1InfoRoot,
-				SequencerAddr:                   sequencer,
-				TxHash:                          txHash,
-				Nonce:                           nonce,
-				Coinbase:                        coinbase,
-				PolygonRollupBaseEtrogBatchData: &s,
-			}
-		}
-
-		return sequencedBatches, nil
-	case "sequenceBatchesValidium":
-		var sequencesValidium []polygonzkevm.PolygonValidiumEtrogValidiumBatchData
-		err = json.Unmarshal(bytedata, &sequencesValidium)
-		if err != nil {
-			return nil, err
-		}
-		coinbase := (data[1]).(common.Address)
-		sequencedBatches := make([]SequencedBatch, len(sequencesValidium))
-		for i, seq := range sequencesValidium {
-			bn := lastBatchNumber - uint64(len(sequencesValidium)-(i+1))
-			batchL2Data, err := da.GetBatchL2Data(bn, sequencesValidium[i].TransactionsHash)
-			if err != nil {
-				return nil, err
-			}
-			s := polygonzkevm.PolygonRollupBaseEtrogBatchData{
-				Transactions:         batchL2Data,
-				ForcedGlobalExitRoot: seq.ForcedGlobalExitRoot,
-				ForcedTimestamp:      seq.ForcedTimestamp,
-				ForcedBlockHashL1:    seq.ForcedBlockHashL1,
-			}
-			sequencedBatches[i] = SequencedBatch{
-				BatchNumber:                     bn,
-				L1InfoRoot:                      &l1InfoRoot,
-				SequencerAddr:                   sequencer,
-				TxHash:                          txHash,
-				Nonce:                           nonce,
-				Coinbase:                        coinbase,
-				PolygonRollupBaseEtrogBatchData: &s,
 			}
 		}
 
