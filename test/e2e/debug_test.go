@@ -334,6 +334,7 @@ func TestDebugTraceTransaction(t *testing.T) {
 	}
 
 	privateKey, err := crypto.GenerateKey()
+	sendToSequencer(t, ctx, operations.MustGetClient(l2NetworkURL), common.HexToAddress(operations.DefaultSequencerAddress))
 	require.NoError(t, err)
 	for _, network := range networks {
 		auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(0).SetUint64(network.ChainID))
@@ -341,9 +342,6 @@ func TestDebugTraceTransaction(t *testing.T) {
 
 		ethereumClient := operations.MustGetClient(network.URL)
 		priKey := network.PrivateKey
-		if network.Name == "Local L2" {
-			priKey = fromPriKey
-		}
 		sourceAuth := operations.MustGetAuth(priKey, network.ChainID)
 
 		nonce, err := ethereumClient.NonceAt(ctx, sourceAuth.From, nil)
@@ -612,6 +610,8 @@ func TestDebugTraceBlock(t *testing.T) {
 		{name: "erc20 transfer reverted by hash", blockNumberOrHash: "hash", prepare: prepareERC20TransferReverted, createSignedTx: createERC20TransferRevertedSignedTx},
 	}
 
+	sendToSequencer(t, ctx, operations.MustGetClient(l2NetworkURL), common.HexToAddress(operations.DefaultSequencerAddress))
+
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			log.Debug("************************ ", tc.name, " ************************")
@@ -621,10 +621,6 @@ func TestDebugTraceBlock(t *testing.T) {
 				log.Debug("------------------------ ", network.Name, " ------------------------")
 				ethereumClient := operations.MustGetClient(network.URL)
 				priKey := network.PrivateKey
-				if network.Name == l2NetworkName {
-					//sendToSequencer(t, ctx, ethereumClient, auth.From)
-					priKey = fromPriKey
-				}
 				auth := operations.MustGetAuth(priKey, network.ChainID)
 
 				var customData map[string]interface{}
@@ -760,44 +756,28 @@ func convertJson(t *testing.T, response json.RawMessage, debugPrefix string) map
 func sendToSequencer(t *testing.T, ctx context.Context, client *ethclient.Client, to common.Address) {
 	auth, err := operations.GetAuth("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", operations.DefaultL2ChainID)
 	require.NoError(t, err)
-	senderBalance, err := client.BalanceAt(ctx, auth.From, nil)
+	fromBalance, err := client.BalanceAt(ctx, auth.From, nil)
+	log.Debug("from balance:", fromBalance)
+
+	nonce, err := client.NonceAt(ctx, auth.From, nil)
 	require.NoError(t, err)
-	nonce, err := client.PendingNonceAt(ctx, auth.From)
+
+	amount := fromBalance.Div(fromBalance, big.NewInt(10))
+	gasLimit, err := client.EstimateGas(ctx, ethereum.CallMsg{
+		From:  auth.From,
+		To:    &to,
+		Value: amount,
+	})
 	require.NoError(t, err)
 
 	gasPrice, err := client.SuggestGasPrice(ctx)
 	require.NoError(t, err)
 
-	//to := common.HexToAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266")
-	data := senderBalance.Bytes()
-
-	log.Infof("Receiver Addr: %v", to.String())
-	log.Infof("Sender Addr: %v", auth.From.String())
-	log.Infof("Sender Balance: %v", senderBalance.String())
-	log.Infof("Sender Nonce: %v", nonce)
-
-	gas, err := client.EstimateGas(ctx, ethereum.CallMsg{
-		From: auth.From,
-		To:   &to,
-		Data: data,
-	})
+	tx := ethTypes.NewTransaction(nonce, to, amount, gasLimit, gasPrice, nil)
+	signedTx, err := auth.Signer(auth.From, tx)
 	require.NoError(t, err)
 
-	tx := ethTypes.NewTx(&ethTypes.LegacyTx{
-		Nonce:    nonce,
-		To:       &to,
-		GasPrice: gasPrice,
-		Gas:      gas,
-		Data:     data,
-	})
-
-	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix("0xde3ca643a52f5543e84ba984c4419ff40dbabd0e483c31c1d09fee8168d68e38", "0x"))
-	require.NoError(t, err)
-
-	signedTx, err := ethTypes.SignTx(tx, ethTypes.HomesteadSigner{}, privateKey)
-	require.NoError(t, err)
-
-	//log.Debug("privateKey:", privateKey, ", from:", auth.From)
+	log.Debug("sending tx")
 	err = client.SendTransaction(ctx, signedTx)
 	require.NoError(t, err)
 
