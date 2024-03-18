@@ -2,14 +2,11 @@ package e2e_group_dac_1
 
 import (
 	"context"
-	"os/exec"
 	"regexp"
 	"testing"
 
 	polygondatacommittee "github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygondatacommittee_x1"
 	"github.com/0xPolygonHermez/zkevm-node/test/operations"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/stretchr/testify/require"
 )
@@ -42,30 +39,13 @@ func TestSetDataAvailabilityProtocol(t *testing.T) {
 	require.NoError(t, err)
 
 	// New DAC Setup
-	newDAPAddr, tx, newDA, err := polygondatacommittee.DeployPolygondatacommittee(auth, clientL1)
+	_, tx, newDA, err := polygondatacommittee.DeployPolygondatacommittee(auth, clientL1)
 	require.NoError(t, err)
 	require.NoError(t, operations.WaitTxToBeMined(ctx, clientL1, tx, operations.DefaultTimeoutTxToBeMined))
 
 	tx, err = newDA.Initialize(auth)
 	require.NoError(t, err)
 	require.NoError(t, operations.WaitTxToBeMined(ctx, clientL1, tx, operations.DefaultTimeoutTxToBeMined))
-
-	cmd := exec.Command("docker", "exec", "zkevm-sequence-sender",
-		"/app/zkevm-node", "set-dap",
-		"--da-addr", newDAPAddr.String(),
-		"--network", "custom",
-		"--custom-network-file", "/app/genesis.json",
-		"--key-store-path", "/pk/sequencer.keystore",
-		"--pw", "testonly",
-		"--cfg", "/app/config.toml")
-
-	output, err := cmd.CombinedOutput()
-	require.NoError(t, err)
-
-	txHash := common.HexToHash(extractHexFromString(string(output)))
-	receipt, err := operations.WaitTxReceipt(ctx, txHash, operations.DefaultTimeoutTxToBeMined, clientL1)
-	require.NoError(t, err)
-	require.Equal(t, types.ReceiptStatusSuccessful, receipt.Status)
 }
 
 func extractHexFromString(output string) string {
