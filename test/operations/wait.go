@@ -312,8 +312,6 @@ func l2BlockConsolidationCondition(l2Block *big.Int) (bool, error) {
 
 // l2BlockVirtualizationCondition
 func l2BlockVirtualizationCondition(l2Block *big.Int, l2NetworkURL string) (bool, error) {
-	log.Debug("l2BlockVirtualizationCondition")
-	fmt.Println("l2BlockVirtualizationCondition")
 	response, err := client.JSONRPCCall(l2NetworkURL, "zkevm_isBlockVirtualized", hex.EncodeBig(l2Block))
 	if err != nil {
 		return false, err

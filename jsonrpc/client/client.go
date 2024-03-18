@@ -28,7 +28,6 @@ func NewClient(url string) *Client {
 // the provided method and parameters, which is compatible with the Ethereum
 // JSON RPC Server.
 func JSONRPCCall(url, method string, parameters ...interface{}) (types.Response, error) {
-	fmt.Println("JSONRPCCall")
 	params, err := json.Marshal(parameters)
 	if err != nil {
 		return types.Response{}, err
@@ -41,13 +40,11 @@ func JSONRPCCall(url, method string, parameters ...interface{}) (types.Response,
 		Params:  params,
 	}
 
-	fmt.Println("sendJSONRPC_HTTPRequest")
 	httpRes, err := sendJSONRPC_HTTPRequest(url, request)
 	if err != nil {
 		return types.Response{}, err
 	}
 
-	fmt.Println("ReadAll resBody")
 	resBody, err := io.ReadAll(httpRes.Body)
 	if err != nil {
 		return types.Response{}, err
@@ -58,7 +55,6 @@ func JSONRPCCall(url, method string, parameters ...interface{}) (types.Response,
 		return types.Response{}, fmt.Errorf("%v - %v", httpRes.StatusCode, string(resBody))
 	}
 
-	fmt.Println("unmarshal")
 	var res types.Response
 	err = json.Unmarshal(resBody, &res)
 	if err != nil {
