@@ -246,7 +246,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 	pol, err := pol.NewPol(l1Config.PolAddr, ethClient)
-	if err != nil {]
+	if err != nil {
 		return nil, err
 	}
 	dapAddr, err := zkevm.DataAvailabilityProtocol(&bind.CallOpts{Pending: false})
