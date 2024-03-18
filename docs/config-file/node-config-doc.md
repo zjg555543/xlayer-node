@@ -260,7 +260,7 @@ Url=""
 
 **Description:** FrequencyToMonitorTxs frequency of the resending failed txs
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -286,7 +286,7 @@ FrequencyToMonitorTxs="1s"
 
 **Description:** WaitTxToBeMined time to wait after transaction was sent to the ethereum
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -514,7 +514,7 @@ AggregatorAddr="0x66e39a1e507af777e8c385e2d91559e20e306303"
 
 **Description:** WaitResultTimeout is the timeout to wait for the result of the custodial assets
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -692,6 +692,8 @@ SecretKey=""
 | Property                                                                        | Pattern | Type            | Deprecated | Definition | Title/Description                                                                                    |
 | ------------------------------------------------------------------------------- | ------- | --------------- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------- |
 | - [IntervalToRefreshBlockedAddresses](#Pool_IntervalToRefreshBlockedAddresses ) | No      | string          | No         | -          | Duration                                                                                             |
+| - [IntervalToRefreshWhiteAddresses](#Pool_IntervalToRefreshWhiteAddresses )     | No      | string          | No         | -          | Duration                                                                                             |
+| - [EnableWhitelist](#Pool_EnableWhitelist )                                     | No      | boolean         | No         | -          | EnableWhitelist is a flag to enable/disable the whitelist                                            |
 | - [IntervalToRefreshGasPrices](#Pool_IntervalToRefreshGasPrices )               | No      | string          | No         | -          | Duration                                                                                             |
 | - [MaxTxBytesSize](#Pool_MaxTxBytesSize )                                       | No      | integer         | No         | -          | MaxTxBytesSize is the max size of a transaction in bytes                                             |
 | - [MaxTxDataBytesSize](#Pool_MaxTxDataBytesSize )                               | No      | integer         | No         | -          | MaxTxDataBytesSize is the max size of the data field of a transaction in bytes                       |
@@ -717,7 +719,7 @@ SecretKey=""
 **Description:** IntervalToRefreshBlockedAddresses is the time it takes to sync the
 blocked address list from db to memory
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -744,7 +746,7 @@ IntervalToRefreshBlockedAddresses="5m0s"
 **Description:** IntervalToRefreshWhiteAddresses is the time it takes to sync the
 white address list from db to memory
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -784,7 +786,7 @@ EnableWhitelist=false
 
 **Description:** IntervalToRefreshGasPrices is the time to wait to refresh the gas prices
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -965,7 +967,7 @@ DefaultMinGasPriceAllowed=1000000000
 
 **Description:** MinAllowedGasPriceInterval is the interval to look back of the suggested min gas price for a tx
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -991,7 +993,7 @@ MinAllowedGasPriceInterval="5m0s"
 
 **Description:** PollMinAllowedGasPriceInterval is the interval to poll the suggested min gas price for a tx
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -1210,7 +1212,7 @@ L2GasPriceSuggesterFactor=0.5
 ForkID=0
 ```
 
-### <a name="Pool_FreeGasAddress"></a>7.13. `Pool.FreeGasAddress`
+### <a name="Pool_FreeGasAddress"></a>7.15. `Pool.FreeGasAddress`
 
 **Type:** : `array of string`
 
@@ -1225,7 +1227,7 @@ FreeGasAddress is the default free gas address
 FreeGasAddress=["0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"]
 ```
 
-### <a name="Pool_FreeClaimGasLimit"></a>7.14. `Pool.FreeClaimGasLimit`
+### <a name="Pool_FreeClaimGasLimit"></a>7.16. `Pool.FreeClaimGasLimit`
 
 **Type:** : `integer`
 
@@ -1310,7 +1312,7 @@ Port=8545
 **Description:** ReadTimeout is the HTTP server read timeout
 check net/http.server.ReadTimeout and net/http.server.ReadHeaderTimeout
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -1337,7 +1339,7 @@ ReadTimeout="1m0s"
 **Description:** WriteTimeout is the HTTP server write timeout
 check net/http.server.WriteTimeout
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2132,7 +2134,7 @@ because depending of this values is going to ask to a trusted node for trusted t
 
 **Description:** SyncInterval is the delay interval between reading new rollup information
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2255,7 +2257,7 @@ MaxPendingNoProcessedBlocks=25
 last block to L1 to known if we need to retrieve more data.
 This value only apply when the system is synchronized
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2294,7 +2296,7 @@ could wait until new data is produced. If the time is greater it emmit a log to 
 that. The idea is keep working the consumer as much as possible, so if the producer is not
 fast enought then you could increse the number of parallel clients to sync with L1
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2335,7 +2337,7 @@ ApplyAfterNumRollupReceived=10
 
 **Description:** RequestLastBlockTimeout Timeout for request LastBlock On L1
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2375,7 +2377,7 @@ RequestLastBlockMaxRetries=3
 
 **Description:** StatisticsPeriod how ofter show a log with statistics (0 is disabled)
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2401,7 +2403,7 @@ StatisticsPeriod="5m0s"
 
 **Description:** TimeOutMainLoop is the timeout for the main loop of the L1 synchronizer when is not updated
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2427,7 +2429,7 @@ TimeOutMainLoop="5m0s"
 
 **Description:** RollupInfoRetriesSpacing is the minimum time between retries to request rollup info (it will sleep for fulfill this time) to avoid spamming L1
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2553,7 +2555,7 @@ DeletePoolTxsL1BlockConfirmations=100
 
 **Description:** DeletePoolTxsCheckInterval is frequency with which txs will be checked for deleting
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2579,7 +2581,7 @@ DeletePoolTxsCheckInterval="12h0m0s"
 
 **Description:** TxLifetimeCheckInterval is the time the sequencer waits to check txs lifetime
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2605,7 +2607,7 @@ TxLifetimeCheckInterval="10m0s"
 
 **Description:** TxLifetimeMax is the time a tx can be in the sequencer/worker memory
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2631,7 +2633,7 @@ TxLifetimeMax="3h0m0s"
 
 **Description:** LoadPoolTxsCheckInterval is the time the sequencer waits to check in there are new txs in the pool
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2657,7 +2659,7 @@ LoadPoolTxsCheckInterval="500ms"
 
 **Description:** StateConsistencyCheckInterval is the time the sequencer waits to check if a state inconsistency has happened
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2705,7 +2707,7 @@ StateConsistencyCheckInterval="5s"
 
 **Description:** ForcedBatchesTimeout is the time the finalizer waits after receiving closing signal to process Forced Batches
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2731,7 +2733,7 @@ ForcedBatchesTimeout="1m0s"
 
 **Description:** NewTxsWaitInterval is the time the finalizer sleeps between each iteration, if there are no transactions to be processed
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2799,7 +2801,7 @@ L1InfoTreeL1BlockConfirmations=64
 
 **Description:** ForcedBatchesCheckInterval is used by the closing signals manager to wait for its operation
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2825,7 +2827,7 @@ ForcedBatchesCheckInterval="10s"
 
 **Description:** L1InfoTreeCheckInterval is the wait time to check if the L1InfoRoot has been updated
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2851,7 +2853,7 @@ L1InfoTreeCheckInterval="10s"
 
 **Description:** BatchMaxDeltaTimestamp is the resolution of the timestamp used to close a batch
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2877,7 +2879,7 @@ BatchMaxDeltaTimestamp="10s"
 
 **Description:** L2BlockMaxDeltaTimestamp is the resolution of the timestamp used to close a L2 block
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2949,7 +2951,7 @@ SequentialProcessL2Block=true
 **Description:** X1 config
 FullBatchSleepDuration is the time the finalizer sleeps between each full batch iteration
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -2985,7 +2987,7 @@ FullBatchSleepDuration="0s"
 
 **Description:** Interval is the interval of time to calculate sequencer metrics
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3216,7 +3218,7 @@ GasPriceMultiple=0
 **Description:** WaitPeriodSendSequence is the time the sequencer waits until
 trying to send a sequence to L1
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3242,7 +3244,7 @@ WaitPeriodSendSequence="5s"
 
 **Description:** LastBatchVirtualizationTimeMaxWaitPeriod is time since sequences should be sent
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3269,7 +3271,7 @@ LastBatchVirtualizationTimeMaxWaitPeriod="5s"
 **Description:** L1BlockTimestampMargin is the time difference (margin) that must exists between last L1 block and last L2 block in the sequence before
 to send the sequence to L1. If the difference is lower than this value then sequencesender will wait until the difference is equal or greater
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3515,7 +3517,7 @@ Port=50081
 **Description:** RetryTime is the time the aggregator main loop sleeps if there are no proofs to aggregate
 or batches to generate proofs. It is also used in the isSynced loop
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3541,7 +3543,7 @@ RetryTime="5s"
 
 **Description:** VerifyProofInterval is the interval of time to verify/send an proof in L1
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3567,7 +3569,7 @@ VerifyProofInterval="1m30s"
 
 **Description:** ProofStatePollingInterval is the interval time to polling the prover about the generation state of a proof
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3614,7 +3616,7 @@ this parameter is used for the base tx profitability checker
 
 **Description:** IntervalAfterWhichBatchConsolidateAnyway this is interval for the main sequencer, that will check if there is no transactions
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -3683,7 +3685,7 @@ SenderAddress=""
 
 **Description:** CleanupLockedProofsInterval is the interval of time to clean up locked proofs.
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -4029,7 +4031,7 @@ Percentile=0
 
 **Default:** `"10s"`
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -4053,7 +4055,7 @@ UpdatePeriod="10s"
 
 **Default:** `"1h0m0s"`
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -4077,7 +4079,7 @@ CleanHistoryPeriod="1h0m0s"
 
 **Default:** `"5m0s"`
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -4305,7 +4307,7 @@ MaxResourceExhaustedAttempts=3
 
 **Description:** WaitOnResourceExhaustion is the time to wait before retrying a transaction because of resource exhaustion
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
@@ -4812,7 +4814,7 @@ MaxResourceExhaustedAttempts=0
 
 **Description:** WaitOnResourceExhaustion is the time to wait before retrying a transaction because of resource exhaustion
 
-**Examples:**
+**Examples:** 
 
 ```json
 "1m"
