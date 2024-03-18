@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"math/big"
 	"strconv"
 	"strings"
@@ -264,8 +265,16 @@ func (e *EthEndpoints) newPendingTransactionFilterX1(wsConn *concurrentWsConn) (
 	return id, nil
 }
 
+const (
+	maxLimitSize = 32
+)
+
 // GetBlockInternalTransactionsByIndexAndLimit returns internal transactions by block hash/index/limit
 func (e *EthEndpoints) GetBlockInternalTransactionsByIndexAndLimit(hash types.ArgHash, index, limit types.Index) (interface{}, types.Error) {
+	if limit > maxLimitSize {
+		overSizeMsg := fmt.Sprintf("limit exceeds maximum size: %d", maxLimitSize)
+		return RPCErrorResponse(types.DefaultErrorCode, overSizeMsg, nil, true)
+	}
 	blockInternalTxs := make([]*evmtypes.Transaction, 0, int(limit))
 	_, err := e.txMan.NewDbTxScope(e.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
 		c, err := e.state.GetL2BlockTransactionCountByHash(ctx, hash.Hash(), dbTx)
