@@ -689,7 +689,7 @@ services:
 
   x1-data-availability:
     container_name: x1-data-availability
-    image: chengzhinei2/geth:x1-data-availability-fork8
+    image: okexchain/x1-dac:e2e_v0.2.0_20240318
     ports:
       - 8444:8444
     volumes:
