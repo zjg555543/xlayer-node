@@ -157,17 +157,23 @@ func (f *finalizer) finalizeWIPBatch(ctx context.Context, closeReason state.Clos
 
 	// Close the wip L2 block if it has transactions, otherwise we keep the wip L2 block to store it in the new wip batch
 	if !f.wipL2Block.isEmpty() {
+		startClose := time.Now()
 		f.closeWIPL2Block(ctx)
+		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.FinalizeCloseWIPL2Block, time.Since(startClose))
 	}
 
+	startCloseOpen := time.Now()
 	err := f.closeAndOpenNewWIPBatch(ctx, closeReason)
 	if err != nil {
 		f.Halt(ctx, fmt.Errorf("failed to create new WIP batch, error: %v", err), true)
 	}
+	seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.FinalizeCloseAndOpenNewWIPBatch, time.Since(startCloseOpen))
 
 	// If we have closed the wipL2Block then we open a new one
 	if f.wipL2Block == nil {
+		startOpen := time.Now()
 		f.openNewWIPL2Block(ctx, prevTimestamp, &prevL1InfoTreeIndex)
+		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.FinalizeOpenNewWIPL2Block, time.Since(startOpen))
 	}
 }
 

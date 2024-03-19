@@ -164,6 +164,9 @@ func (f *finalizer) storePendingL2Blocks(ctx context.Context) {
 // processL2Block process a L2 Block and adds it to the pendingL2BlocksToStore channel
 func (f *finalizer) processL2Block(ctx context.Context, l2Block *L2Block) error {
 	processStart := time.Now()
+	defer func() {
+		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.ProcessL2Block, time.Since(processStart))
+	}()
 
 	initialStateRoot := f.wipBatch.finalStateRoot
 
