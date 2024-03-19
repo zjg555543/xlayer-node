@@ -62,6 +62,10 @@ const (
 	// StoreL2Block is used to log L2 block storage events.
 	StoreL2Block logTag = "StoreL2Block"
 
+	// StartFlushWait is used to log start flush wait events.
+	StartFlushWait logTag = "StartFlushWait"
+	// StartFork is used to log start fork events.
+	StartFork logTag = "StartFork"
 	// PoolUpdateTxStatus is used to log pool update transaction status events.
 	PoolUpdateTxStatus logTag = "PoolUpdateTxStatus"
 	// DeletePendingTxToStore is used to log delete pending transaction to store events.
@@ -72,6 +76,8 @@ const (
 	DSSendL2Block logTag = "DSSendL2Block"
 	// StateStoreL2Block is used to log state store L2 block events.
 	StateStoreL2Block logTag = "StateStoreL2Block"
+	// BlockReceipt is used to log block receipt events.
+	BlockReceipt logTag = "BlockReceipt"
 
 	// FinalizeBatchTiming is used to log batch finalization time.
 	FinalizeBatchTiming logTag = "FinalizeBatchTiming"

@@ -77,7 +77,10 @@ func (l *logStatisticsInstance) Summary() string {
 		"OpenNewWIPL2Block<" + strconv.Itoa(int(l.statistics[OpenNewWIPL2Block])) + "ms>, "
 
 	storeL2Block := "StoreL2Block<" + strconv.Itoa(int(l.statistics[StoreL2Block])) + "ms, " +
+		"StartFlushWait<" + strconv.Itoa(int(l.statistics[StartFlushWait])) + "ms>, " +
+		"StartFork<" + strconv.Itoa(int(l.statistics[StartFork])) + "ms>, " +
 		"StateStoreL2Block<" + strconv.Itoa(int(l.statistics[StateStoreL2Block])) + "ms>, " +
+		"BlockReceipt<" + strconv.Itoa(int(l.statistics[BlockReceipt])) + "ms>, " +
 		"UpdateWIPBatch<" + strconv.Itoa(int(l.statistics[UpdateWIPBatch])) + "ms>, " +
 		"PoolUpdateTxStatus<" + strconv.Itoa(int(l.statistics[PoolUpdateTxStatus])) + "ms>, " +
 		"DSSendL2Block<" + strconv.Itoa(int(l.statistics[DSSendL2Block])) + "ms>, " +
