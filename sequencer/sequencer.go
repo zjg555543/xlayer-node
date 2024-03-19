@@ -184,11 +184,13 @@ func (s *Sequencer) expireOldWorkerTxs(ctx context.Context) {
 		time.Sleep(s.cfg.TxLifetimeCheckInterval.Duration)
 		txTrackers := s.worker.ExpireTransactions(s.cfg.TxLifetimeMax.Duration)
 		failedReason := ErrExpiredTransaction.Error()
+
+		hashes := make([]common.Hash, 0, len(txTrackers))
 		for _, txTracker := range txTrackers {
-			err := s.pool.UpdateTxStatus(ctx, txTracker.Hash, pool.TxStatusFailed, false, &failedReason)
-			if err != nil {
-				log.Errorf("failed to update tx status, error: %v", err)
-			}
+			hashes = append(hashes, txTracker.Hash)
+		}
+		if err := s.pool.BatchUpdateTxsStatus(ctx, hashes, pool.TxStatusFailed, false, &failedReason); err != nil {
+			log.Errorf("failed to update tx status, error: %v", err)
 		}
 	}
 }

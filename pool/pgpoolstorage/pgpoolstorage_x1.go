@@ -38,15 +38,25 @@ func (p *PostgresPoolStorage) GetAllAddressesWhitelisted(ctx context.Context) ([
 
 func (p *PostgresPoolStorage) BatchUpdateTxsStatus(ctx context.Context, hashes []common.Hash, newStatus pool.TxStatus,
 	isWIP bool, failedReason *string) error {
-	sql := "UPDATE pool.transaction SET status = $1, is_wip = $2, failed_reason = $3 WHERE hash = ANY ($4)"
+	sql := "UPDATE pool.transaction SET status = $1, is_wip = $2"
 
 	hh := make([]string, 0, len(hashes))
 	for _, h := range hashes {
 		hh = append(hh, h.Hex())
 	}
 
-	if _, err := p.db.Exec(ctx, sql, newStatus, isWIP, failedReason, hh); err != nil {
-		return err
+	if failedReason != nil {
+		sql += ", failed_reason = $3 WHERE hash = ANY ($4)"
+
+		if _, err := p.db.Exec(ctx, sql, newStatus, isWIP, failedReason, hh); err != nil {
+			return err
+		}
+	} else {
+		sql += " WHERE hash = ANY ($3)"
+
+		if _, err := p.db.Exec(ctx, sql, newStatus, isWIP, hh); err != nil {
+			return err
+		}
 	}
 
 	return nil
