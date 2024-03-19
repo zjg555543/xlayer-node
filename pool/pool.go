@@ -381,6 +381,7 @@ func (p *Pool) UpdateTxStatus(ctx context.Context, hash common.Hash, newStatus T
 	})
 }
 
+// BatchUpdateTxsStatus update tx status
 func (p *Pool) BatchUpdateTxsStatus(ctx context.Context, hashes []common.Hash, newStatus TxStatus, isWIP bool, failedReason *string) error {
 	return p.storage.BatchUpdateTxsStatus(ctx, hashes, newStatus, isWIP, failedReason)
 }

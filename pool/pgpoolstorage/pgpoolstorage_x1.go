@@ -3,8 +3,8 @@ package pgpoolstorage
 import (
 	"context"
 	"errors"
-	"github.com/0xPolygonHermez/zkevm-node/pool"
 
+	"github.com/0xPolygonHermez/zkevm-node/pool"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4"
 )
@@ -36,6 +36,7 @@ func (p *PostgresPoolStorage) GetAllAddressesWhitelisted(ctx context.Context) ([
 	return addrs, nil
 }
 
+// BatchUpdateTxsStatus update tx status
 func (p *PostgresPoolStorage) BatchUpdateTxsStatus(ctx context.Context, hashes []common.Hash, newStatus pool.TxStatus,
 	isWIP bool, failedReason *string) error {
 	sql := "UPDATE pool.transaction SET status = $1, is_wip = $2"
