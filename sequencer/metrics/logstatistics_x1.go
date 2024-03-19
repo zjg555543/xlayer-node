@@ -54,6 +54,9 @@ const (
 
 	// CloseWIPL2Block is used to log close WIP L2 block events.
 	CloseWIPL2Block logTag = "CloseWIPL2Block"
+	// ProcessL2Block is used to log L2 block processing events.
+	ProcessL2Block logTag = "ProcessL2Block"
+
 	// OpenNewWIPL2Block is used to log open new WIP L2 block events.
 	OpenNewWIPL2Block logTag = "OpenNewWIPL2Block"
 	// StoreL2Block is used to log L2 block storage events.
@@ -80,4 +83,10 @@ const (
 	FinalizeBatchCloseBatch logTag = "FinalizeBatchCloseBatch"
 	// FinalizeBatchOpenBatch is used to log batch open events.
 	FinalizeBatchOpenBatch logTag = "FinalizeBatchOpenBatch"
+	// FinalizeCloseWIPL2Block is used to log batch open events.
+	FinalizeCloseWIPL2Block logTag = "FinalizeBatchOpenBatch"
+	// FinalizeCloseAndOpenNewWIPBatch is used to log close and open new WIP batch events.
+	FinalizeCloseAndOpenNewWIPBatch logTag = "FinalizeBatchOpenBatch"
+	// FinalizeOpenNewWIPL2Block is used to log open new WIP L2 block events.
+	FinalizeOpenNewWIPL2Block logTag = "FinalizeBatchOpenBatch"
 )

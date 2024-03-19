@@ -66,10 +66,15 @@ func (l *logStatisticsInstance) Summary() string {
 
 	finalizeBatchTiming := "FinalizeBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchTiming])) + "ms, " +
 		"ReprocessFullBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchReprocessFullBatch])) + "ms>, " +
+		"CloseAndOpenBatch<" + strconv.Itoa(int(l.statistics[FinalizeCloseAndOpenNewWIPBatch])) + "ms>, " +
 		"CloseBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchCloseBatch])) + "ms>, " +
-		"OpenBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchOpenBatch])) + "ms>>, "
+		"OpenBatch<" + strconv.Itoa(int(l.statistics[FinalizeBatchOpenBatch])) + "ms>, " +
+		"CloseBlock<" + strconv.Itoa(int(l.statistics[FinalizeCloseWIPL2Block])) + "ms>, " +
+		"OpenL2Block<" + strconv.Itoa(int(l.statistics[FinalizeOpenNewWIPL2Block])) + "ms>>, "
 
-	wipBlock := "CloseWIPL2Block<" + strconv.Itoa(int(l.statistics[CloseWIPL2Block])) + "ms>, " + "OpenNewWIPL2Block<" + strconv.Itoa(int(l.statistics[OpenNewWIPL2Block])) + "ms>, "
+	wipBlock := "CloseWIPL2Block<" + strconv.Itoa(int(l.statistics[CloseWIPL2Block])) + "ms>," +
+		"ProcessL2Block<" + strconv.Itoa(int(l.statistics[ProcessL2Block])) + "ms>, " +
+		"OpenNewWIPL2Block<" + strconv.Itoa(int(l.statistics[OpenNewWIPL2Block])) + "ms>, "
 
 	storeL2Block := "StoreL2Block<" + strconv.Itoa(int(l.statistics[StoreL2Block])) + "ms, " +
 		"StateStoreL2Block<" + strconv.Itoa(int(l.statistics[StateStoreL2Block])) + "ms>, " +
