@@ -417,13 +417,14 @@ func (f *finalizer) storeL2Block(ctx context.Context, l2Block *L2Block) error {
 	seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.UpdateWIPBatch, time.Since(startUpdateWIPBatch))
 
 	startUpdatePool := time.Now()
+	hashes := make([]common.Hash, 0, len(blockResponse.TransactionResponses))
 	// Update txs status in the pool
 	for _, txResponse := range blockResponse.TransactionResponses {
-		// Change Tx status to selected
-		err = f.poolIntf.UpdateTxStatus(ctx, txResponse.TxHash, pool.TxStatusSelected, false, nil)
-		if err != nil {
-			return err
-		}
+		hashes = append(hashes, txResponse.TxHash)
+	}
+
+	if err := f.poolIntf.BatchUpdateTxsStatus(ctx, hashes, pool.TxStatusSelected, false, nil); err != nil {
+		return err
 	}
 	seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.PoolUpdateTxStatus, time.Since(startUpdatePool))
 

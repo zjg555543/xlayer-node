@@ -4,9 +4,15 @@ package sequencer
 
 import (
 	context "context"
+	"github.com/0xPolygonHermez/zkevm-node/pool"
+	"github.com/ethereum/go-ethereum/common"
 )
 
 // DeleteFailedTransactionsOlderThan provides a mock function with given fields: ctx, date
 func (_m *PoolMock) CountPendingTransactions(ctx context.Context) (uint64, error) {
 	return 0, nil
+}
+
+func (_m *PoolMock) BatchUpdateTxsStatus(ctx context.Context, hashes []common.Hash, newStatus pool.TxStatus, isWIP bool, failedReason *string) error {
+	return nil
 }

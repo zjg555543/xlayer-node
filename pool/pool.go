@@ -381,6 +381,10 @@ func (p *Pool) UpdateTxStatus(ctx context.Context, hash common.Hash, newStatus T
 	})
 }
 
+func (p *Pool) BatchUpdateTxsStatus(ctx context.Context, hashes []common.Hash, newStatus TxStatus, isWIP bool, failedReason *string) error {
+	return p.storage.BatchUpdateTxsStatus(ctx, hashes, newStatus, isWIP, failedReason)
+}
+
 // SetGasPrices sets the current L2 Gas Price and L1 Gas Price
 func (p *Pool) SetGasPrices(ctx context.Context, l2GasPrice uint64, l1GasPrice uint64) error {
 	return p.storage.SetGasPrices(ctx, l2GasPrice, l1GasPrice)
