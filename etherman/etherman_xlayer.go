@@ -18,13 +18,13 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/etherman/etherscan"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/ethgasstation"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/metrics"
-	dataavailabilityprotocol "github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/dataavailabilityprotocol_x1"
+	dataavailabilityprotocol "github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/dataavailabilityprotocol_xlayer"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/etrogpolygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/oldpolygonzkevm"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/oldpolygonzkevmglobalexitroot"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/pol"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonrollupmanager"
-	polygonzkevm "github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonvalidium_x1"
+	polygonzkevm "github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonvalidium_xlayer"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygonzkevmglobalexitroot"
 	ethmanTypes "github.com/0xPolygonHermez/zkevm-node/etherman/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -186,7 +186,7 @@ type Client struct {
 	EthClient                ethereumClient
 	OldZkEVM                 *oldpolygonzkevm.Polygonzkevm
 	EtrogZKEVM               *etrogpolygonzkevm.Etrogpolygonzkevm
-	ZkEVM                    *polygonzkevm.PolygonvalidiumX1
+	ZkEVM                    *polygonzkevm.PolygonvalidiumXlayer
 	RollupManager            *polygonrollupmanager.Polygonrollupmanager
 	GlobalExitRootManager    *polygonzkevmglobalexitroot.Polygonzkevmglobalexitroot
 	OldGlobalExitRootManager *oldpolygonzkevmglobalexitroot.Oldpolygonzkevmglobalexitroot
@@ -214,7 +214,7 @@ func NewClient(cfg Config, l1Config L1Config) (*Client, error) {
 		return nil, err
 	}
 	// Create smc clients
-	zkevm, err := polygonzkevm.NewPolygonvalidiumX1(l1Config.ZkEVMAddr, ethClient)
+	zkevm, err := polygonzkevm.NewPolygonvalidiumXlayer(l1Config.ZkEVMAddr, ethClient)
 	if err != nil {
 		log.Errorf("error creating Polygonzkevm client (%s). Error: %w", l1Config.ZkEVMAddr.String(), err)
 		return nil, err
@@ -1007,7 +1007,7 @@ func (etherMan *Client) sequenceBatchesX1(opts bind.TransactOpts, sequences []et
 		log.Debugf("Batches to send: %+v", batches)
 		log.Debug("l2CoinBase: ", l2Coinbase)
 		log.Debug("Sequencer address: ", opts.From)
-		a, err2 := polygonzkevm.PolygonvalidiumX1MetaData.GetAbi()
+		a, err2 := polygonzkevm.PolygonvalidiumXlayerMetaData.GetAbi()
 		if err2 != nil {
 			log.Error("error getting abi. Error: ", err2)
 		}
@@ -1150,7 +1150,7 @@ func (etherMan *Client) forcedBatchEvent(ctx context.Context, vLog types.Log, bl
 		txData := tx.Data()
 		// Extract coded txs.
 		// Load contract ABI
-		abi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumX1ABI))
+		abi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumXlayerABI))
 		if err != nil {
 			return err
 		}
@@ -1320,7 +1320,7 @@ func (etherMan *Client) sequencedBatchesPreEtrogEvent(ctx context.Context, vLog 
 func decodeSequencesElderberry(txData []byte, lastBatchNumber uint64, sequencer common.Address, txHash common.Hash, nonce uint64, l1InfoRoot common.Hash, da dataavailability.BatchDataProvider) ([]SequencedBatch, error) {
 	// Extract coded txs.
 	// Load contract ABI
-	smcAbi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumX1ABI))
+	smcAbi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumXlayerABI))
 	if err != nil {
 		return nil, err
 	}
@@ -1419,7 +1419,7 @@ func decodeSequencesElderberry(txData []byte, lastBatchNumber uint64, sequencer 
 func decodeSequencesEtrog(txData []byte, lastBatchNumber uint64, sequencer common.Address, txHash common.Hash, nonce uint64, l1InfoRoot common.Hash, da dataavailability.BatchDataProvider) ([]SequencedBatch, error) { // nolint:unused
 	// Extract coded txs.
 	// Load contract ABI
-	smcAbi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumX1ABI))
+	smcAbi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumXlayerABI))
 	if err != nil {
 		return nil, err
 	}
@@ -1655,7 +1655,7 @@ func (etherMan *Client) forceSequencedBatchesEvent(ctx context.Context, vLog typ
 func decodeSequencedForceBatches(txData []byte, lastBatchNumber uint64, sequencer common.Address, txHash common.Hash, block *types.Block, nonce uint64) ([]SequencedForceBatch, error) {
 	// Extract coded txs.
 	// Load contract ABI
-	abi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumX1ABI))
+	abi, err := abi.JSON(strings.NewReader(polygonzkevm.PolygonvalidiumXlayerABI))
 	if err != nil {
 		return nil, err
 	}
@@ -2123,7 +2123,7 @@ func (etherMan *Client) sequenceBatches(opts bind.TransactOpts, sequences []ethm
 		log.Debugf("Batches to send: %+v", batches)
 		log.Debug("l2CoinBase: ", l2Coinbase)
 		log.Debug("Sequencer address: ", opts.From)
-		a, err2 := polygonzkevm.PolygonvalidiumX1MetaData.GetAbi()
+		a, err2 := polygonzkevm.PolygonvalidiumXlayerMetaData.GetAbi()
 		if err2 != nil {
 			log.Error("error getting abi. Error: ", err2)
 		}
