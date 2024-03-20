@@ -699,7 +699,7 @@ services:
       - "/app/x1-data-availability run --cfg /app/config.toml"
 
   xlayer-data-availability-db:
-    container_name: zkevm-data-availability-db
+    container_name: xlayer-data-availability-db
     image: postgres
     ports:
       - 5438:5432
