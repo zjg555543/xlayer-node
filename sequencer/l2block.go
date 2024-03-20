@@ -225,6 +225,8 @@ func (f *finalizer) processL2Block(ctx context.Context, l2Block *L2Block) error 
 
 	f.updateFlushIDs(batchResponse.FlushID, batchResponse.StoredFlushID)
 
+	f.pullProverIdAndFlushId(ctx)
+
 	f.addPendingL2BlockToStore(ctx, l2Block)
 
 	// metrics
@@ -324,8 +326,6 @@ func (f *finalizer) executeL2Block(ctx context.Context, initialStateRoot common.
 // storeL2Block stores the L2 block in the state and updates the related batch and transactions
 func (f *finalizer) storeL2Block(ctx context.Context, l2Block *L2Block) error {
 	startStoring := time.Now()
-
-	f.pullProverIdAndFlushId(ctx)
 
 	startFlushWait := time.Now()
 	// Wait until L2 block has been flushed/stored by the executor
