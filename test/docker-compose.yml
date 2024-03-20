@@ -687,7 +687,7 @@ services:
 
   xlayer-data-availability:
     container_name: xlayer-data-availability
-    image: okexchain/x1-dac:e2e_v0.2.0_20240318
+    image: okexchain/x1-data-availability:origin_zjg_rebranding-xlayer_20240320035927_022e6a8
     ports:
       - 8444:8444
     volumes:
@@ -696,7 +696,7 @@ services:
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/x1-data-availability run --cfg /app/config.toml"
+      - "/app/xlayer-data-availability run --cfg /app/config.toml"
 
   xlayer-data-availability-db:
     container_name: xlayer-data-availability-db
