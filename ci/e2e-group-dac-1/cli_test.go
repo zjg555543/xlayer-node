@@ -39,7 +39,7 @@ func TestSetDataAvailabilityProtocol(t *testing.T) {
 	require.NoError(t, err)
 
 	// New DAC Setup
-	_, tx, newDA, err := polygondatacommittee.DeployPolygondatacommittee(auth, clientL1)
+	_, tx, newDA, err := polygondatacommittee.DeployPolygondatacommitteeXlayer(auth, clientL1)
 	require.NoError(t, err)
 	require.NoError(t, operations.WaitTxToBeMined(ctx, clientL1, tx, operations.DefaultTimeoutTxToBeMined))
 
