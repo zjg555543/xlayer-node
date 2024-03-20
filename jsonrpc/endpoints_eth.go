@@ -202,7 +202,7 @@ func (e *EthEndpoints) EstimateGas(arg *types.TxArgs, blockArg *types.BlockNumbe
 		}
 
 		// XLayer handler
-		gasEstimation = e.getGasEstimationWithFactorX1(gasEstimation)
+		gasEstimation = e.getGasEstimationWithFactorXLayer(gasEstimation)
 
 		return hex.EncodeUint64(gasEstimation), nil
 	})
@@ -979,7 +979,7 @@ func (e *EthEndpoints) NewPendingTransactionFilter() (interface{}, types.Error) 
 // internal
 func (e *EthEndpoints) newPendingTransactionFilter(wsConn *concurrentWsConn) (interface{}, types.Error) {
 	//XLayer handle
-	return e.newPendingTransactionFilterX1(wsConn)
+	return e.newPendingTransactionFilterXLayer(wsConn)
 
 	// return nil, types.NewRPCError(types.DefaultErrorCode, "not supported yet")
 	// id, err := e.storage.NewPendingTransactionFilter(wsConn)
