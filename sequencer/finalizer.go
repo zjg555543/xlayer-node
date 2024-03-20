@@ -180,30 +180,39 @@ func (f *finalizer) Start(ctx context.Context) {
 // updateProverIdAndFlushId updates the prover id and flush id
 func (f *finalizer) updateProverIdAndFlushId(ctx context.Context) {
 	for {
-		f.pendingFlushIDCond.L.Lock()
-		// f.storedFlushID is >= than f.lastPendingFlushID, this means all pending txs (flushid) are stored by the executor.
-		// We are "synced" with the flush id, therefore we need to wait for new tx (new pending flush id to be stored by the executor)
-		for f.storedFlushID >= f.lastPendingFlushID {
-			f.pendingFlushIDCond.Wait()
-		}
-		f.pendingFlushIDCond.L.Unlock()
+		f.pullProverIdAndFlushId(ctx)
+		time.Sleep(100)
+	}
+}
 
-		for f.storedFlushID < f.lastPendingFlushID { //TODO: review this loop as could be is pulling all the time, no sleep
-			storedFlushID, proverID, err := f.stateIntf.GetStoredFlushID(ctx)
-			if err != nil {
-				log.Errorf("failed to get stored flush id, error: %v", err)
-			} else {
-				if storedFlushID != f.storedFlushID {
-					// Check if prover/Executor has been restarted
-					f.checkIfProverRestarted(proverID)
+func (f *finalizer) pullProverIdAndFlushId(ctx context.Context) {
+	f.pendingFlushIDCond.L.Lock()
+	// f.storedFlushID is >= than f.lastPendingFlushID, this means all pending txs (flushid) are stored by the executor.
+	// We are "synced" with the flush id, therefore we need to wait for new tx (new pending flush id to be stored by the executor)
+	for f.storedFlushID >= f.lastPendingFlushID {
+		f.pendingFlushIDCond.Wait()
+	}
+	f.pendingFlushIDCond.L.Unlock()
 
-					// Update f.storeFlushID and signal condition f.storedFlushIDCond
-					f.storedFlushIDCond.L.Lock()
-					f.storedFlushID = storedFlushID
-					f.storedFlushIDCond.Broadcast()
-					f.storedFlushIDCond.L.Unlock()
-				}
+	for f.storedFlushID < f.lastPendingFlushID { //TODO: review this loop as could be is pulling all the time, no sleep
+		storedFlushID, proverID, err := f.stateIntf.GetStoredFlushID(ctx)
+		if err != nil {
+			log.Errorf("failed to get stored flush id, error: %v", err)
+		} else {
+			if storedFlushID != f.storedFlushID {
+				// Check if prover/Executor has been restarted
+				f.checkIfProverRestarted(proverID)
+
+				// Update f.storeFlushID and signal condition f.storedFlushIDCond
+				f.storedFlushIDCond.L.Lock()
+				f.storedFlushID = storedFlushID
+				f.storedFlushIDCond.Broadcast()
+				f.storedFlushIDCond.L.Unlock()
 			}
+		}
+
+		if f.storedFlushID < f.lastPendingFlushID {
+			time.Sleep(10)
 		}
 	}
 }

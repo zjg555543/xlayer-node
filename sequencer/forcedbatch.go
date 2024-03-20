@@ -164,6 +164,8 @@ func (f *finalizer) handleProcessForcedBatchResponse(ctx context.Context, newBat
 
 	f.updateFlushIDs(batchResponse.FlushID, batchResponse.StoredFlushID)
 
+	f.pullProverIdAndFlushId(ctx)
+
 	// Wait until forced batch has been flushed/stored by the executor
 	f.storedFlushIDCond.L.Lock()
 	for f.storedFlushID < batchResponse.FlushID {

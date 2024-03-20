@@ -225,6 +225,8 @@ func (f *finalizer) processL2Block(ctx context.Context, l2Block *L2Block) error 
 
 	f.updateFlushIDs(batchResponse.FlushID, batchResponse.StoredFlushID)
 
+	f.pullProverIdAndFlushId(ctx)
+
 	f.addPendingL2BlockToStore(ctx, l2Block)
 
 	// metrics
