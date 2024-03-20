@@ -696,7 +696,7 @@ services:
     command:
       - "/bin/sh"
       - "-c"
-      - "/app/xlayer-data-availability run --cfg /app/config.toml"
+      - "/app/x1-data-availability run --cfg /app/config.toml"
 
   xlayer-data-availability-db:
     container_name: zkevm-data-availability-db
