@@ -33,12 +33,12 @@ To orchestrate multiple deployments of the different ZKEVM Node components, a `d
 The container alone needs some parameters configured, access to certain configuration files and the appropriate ports exposed.
 
 - volumes:
-    - `your Account Keystore file`: /pk/keystore (note, this `/pk/keystore` value is the default path that's written in the Public Configuration files on this repo, meant to expedite deployments, it can be superseded via an env flag `X1_NODE_ETHERMAN_PRIVATEKEYPATH`.)
+    - `your Account Keystore file`: /pk/keystore (note, this `/pk/keystore` value is the default path that's written in the Public Configuration files on this repo, meant to expedite deployments, it can be superseded via an env flag `XLAYER_NODE_ETHERMAN_PRIVATEKEYPATH`.)
     - `your config.toml file`: /app/config.toml
     - `your genesis.json file`: /app/genesis.json
 
 - environment: Env variables that supersede the config file
-    - `X1_NODE_STATE_DB_HOST`: Name of StateDB Database Host
+    - `XLAYER_NODE_STATE_DB_HOST`: Name of StateDB Database Host
 
 ### The Account Keystore file:
 

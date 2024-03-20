@@ -31,7 +31,7 @@ To orchestrate multiple deployments of the different XLayer Node components, a `
 The container alone needs some parameters configured, access to certain configuration files and the appropriate ports exposed.
 
 - environment: Env variables that supersede the config file
-    - `X1_NODE_STATE_DB_HOST`: Name of StateDB Database Host
+    - `XLAYER_NODE_STATE_DB_HOST`: Name of StateDB Database Host
 - volumes:
     - `your config.toml file`: /app/config.toml
     - `your genesis.json file`: /app/genesis.json

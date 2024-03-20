@@ -37,9 +37,9 @@ The container alone needs some parameters configured, access to certain configur
     - `8545:8545`: RPC Port
     - `9091:9091`: Needed if Prometheus metrics are enabled
 - environment: Env variables that supersede the config file
-    - `X1_NODE_STATE_DB_HOST`: Name of StateDB Database Host
-    - `X1_NODE_POOL_HOST`: Name of PoolDB Database Host
-    - `X1_NODE_RPC_DB_HOST`: Name of RPCDB Database Host
+    - `XLAYER_NODE_STATE_DB_HOST`: Name of StateDB Database Host
+    - `XLAYER_NODE_POOL_HOST`: Name of PoolDB Database Host
+    - `XLAYER_NODE_RPC_DB_HOST`: Name of RPCDB Database Host
 - volumes:
     - `your config.toml file`: /app/config.toml
     - `your genesis file`: /app/genesis.json

@@ -9,4 +9,4 @@ docker run --rm okx/xlayer-node:latest sh -c "/app/xlayer-node encryptKey --pk=[
 **NOTE**:
 
 - Replace `[your private key]` with your Ethereum L1 account private key
-- Replace `[password to encrypt file]` with a password used for file encryption. This password must be passed to the Node later on via env variable (`X1_NODE_ETHERMAN_PRIVATEKEYPASSWORD`)
+- Replace `[password to encrypt file]` with a password used for file encryption. This password must be passed to the Node later on via env variable (`XLAYER_NODE_ETHERMAN_PRIVATEKEYPASSWORD`)
