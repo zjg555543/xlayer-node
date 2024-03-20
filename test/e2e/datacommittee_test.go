@@ -72,7 +72,7 @@ func TestDataCommittee(t *testing.T) {
 	require.NoError(t, err)
 	clientL1, err := ethclient.Dial(operations.DefaultL1NetworkURL)
 	require.NoError(t, err)
-	dacSC, err := polygondatacommittee.NewPolygondatacommittee(
+	dacSC, err := polygondatacommittee.NewPolygondatacommitteeXlayer(
 		common.HexToAddress(operations.DefaultL1DataCommitteeContract),
 		clientL1,
 	)
