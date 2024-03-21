@@ -70,7 +70,11 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 		log.Infof("result: %v", result)
 
 		// Add inner txs to the pool
-		if innerTxBlob, err := json.Marshal(result); err != nil {
+		innerTxBlob, myerr := json.Marshal(result)
+		log.Infof("result: %v", string(innerTxBlob))
+		if myerr != nil {
+			log.Errorf("failed to marshal inner txs: %v", err)
+		} else {
 			if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), innerTxBlob); err != nil {
 				log.Errorf("failed to add inner txs to the pool: %v", err)
 			}
