@@ -41,7 +41,7 @@ type storage interface {
 	MinL2GasPriceSince(ctx context.Context, timestamp time.Time) (uint64, error)
 	GetEarliestProcessedTx(ctx context.Context) (common.Hash, error)
 	AddInnerTx(ctx context.Context, txHash common.Hash, innerTx []byte) error
-	GetInnerTx(ctx context.Context, txHash common.Hash) ([]byte, error)
+	GetInnerTx(ctx context.Context, txHash common.Hash) (string, error)
 }
 
 type stateInterface interface {

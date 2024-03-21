@@ -39,7 +39,7 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 		log.Errorf("failed to get inner txs from the pool: %v", err)
 	} else {
 		var innerTxs []*InnerTx
-		err = json.Unmarshal(ret, &innerTxs)
+		err = json.Unmarshal([]byte(ret), &innerTxs)
 		if err == nil {
 			return innerTxs, nil
 		} else {

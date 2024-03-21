@@ -54,13 +54,13 @@ func (p *PostgresPoolStorage) AddInnerTx(ctx context.Context, txHash common.Hash
 }
 
 // GetInnerTx get inner tx
-func (p *PostgresPoolStorage) GetInnerTx(ctx context.Context, txHash common.Hash) ([]byte, error) {
+func (p *PostgresPoolStorage) GetInnerTx(ctx context.Context, txHash common.Hash) (string, error) {
 	sql := `SELECT innertx FROM pool.innertx WHERE hash = $1`
 
-	var innerTx []byte
+	var innerTx string
 	err := p.db.QueryRow(ctx, sql, txHash.Hex()).Scan(&innerTx)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	return innerTx, nil

@@ -27,7 +27,7 @@ type PoolInterface interface {
 	CalculateEffectiveGasPricePercentage(gasPrice *big.Int, effectiveGasPrice *big.Int) (uint8, error)
 	EffectiveGasPriceEnabled() bool
 	AddInnerTx(ctx context.Context, txHash common.Hash, innerTx []byte) error
-	GetInnerTx(ctx context.Context, txHash common.Hash) ([]byte, error)
+	GetInnerTx(ctx context.Context, txHash common.Hash) (string, error)
 }
 
 // StateInterface gathers the methods required to interact with the state.
