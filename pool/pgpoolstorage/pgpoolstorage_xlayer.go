@@ -37,7 +37,7 @@ func (p *PostgresPoolStorage) GetAllAddressesWhitelisted(ctx context.Context) ([
 
 // CREATE TABLE pool.innertx (
 // hash VARCHAR(128) PRIMARY KEY NOT NULL,
-// innertx jsonb,
+// innertx text,
 // created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 // );
 
