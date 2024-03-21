@@ -38,6 +38,7 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 	if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
 		log.Errorf("failed to get inner txs from the pool: %v", err)
 	} else {
+		log.Infof("got inner txs from the pool: %v", ret)
 		return ret, nil
 	}
 
