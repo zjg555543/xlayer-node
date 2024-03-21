@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 	"github.com/0xPolygonHermez/zkevm-node/log"
@@ -32,6 +33,14 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			state: e.state,
 		}
 	})
+	dbCtx, cancel := context.WithTimeout(context.Background(), 300*time.Microsecond)
+	defer cancel()
+	if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
+		log.Errorf("failed to get inner txs from the pool: %v", err)
+	} else {
+		return ret, nil
+	}
+
 	return debugEndPoints.txMan.NewDbTxScope(debugEndPoints.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
 		ret, err := debugEndPoints.buildInnerTransaction(ctx, hash.Hash(), dbTx)
 		if err != nil {
@@ -52,6 +61,11 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			return nil, types.NewRPCError(types.ParserErrorCode, stderr.Error())
 		}
 		result := internalTxTraceToInnerTxs(of)
+
+		// Add inner txs to the pool
+		if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), string(r)); err != nil {
+			log.Errorf("failed to add inner txs to the pool: %v", err)
+		}
 
 		return result, nil
 	})
