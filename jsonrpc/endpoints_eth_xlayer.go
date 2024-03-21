@@ -35,15 +35,17 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 	})
 	dbCtx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
 	defer cancel()
-	if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
-		log.Errorf("failed to get inner txs from the pool: %v", err)
-	} else {
-		var innerTxs []*InnerTx
-		err = json.Unmarshal([]byte(ret), &innerTxs)
-		if err == nil {
-			return innerTxs, nil
+	if e.cfg.EnableInnerTxCacheDB {
+		if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
+			log.Errorf("failed to get inner txs from the pool: %v", err)
 		} else {
-			log.Errorf("failed to unmarshal inner txs: %v", err)
+			var innerTxs []*InnerTx
+			err = json.Unmarshal([]byte(ret), &innerTxs)
+			if err == nil {
+				return innerTxs, nil
+			} else {
+				log.Errorf("failed to unmarshal inner txs: %v", err)
+			}
 		}
 	}
 
@@ -67,16 +69,17 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			return nil, types.NewRPCError(types.ParserErrorCode, stderr.Error())
 		}
 		result := internalTxTraceToInnerTxs(of)
-		log.Infof("result: %v", result)
 
-		// Add inner txs to the pool
-		innerTxBlob, myerr := json.Marshal(result)
-		log.Infof("result: %v", string(innerTxBlob))
-		if myerr != nil {
-			log.Errorf("failed to marshal inner txs: %v", err)
-		} else {
-			if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), innerTxBlob); err != nil {
-				log.Errorf("failed to add inner txs to the pool: %v", err)
+		if e.cfg.EnableInnerTxCacheDB {
+			// Add inner txs to the pool
+			innerTxBlob, myerr := json.Marshal(result)
+			log.Infof("result: %v", string(innerTxBlob))
+			if myerr != nil {
+				log.Errorf("failed to marshal inner txs: %v", err)
+			} else {
+				if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), innerTxBlob); err != nil {
+					log.Errorf("failed to add inner txs to the pool: %v", err)
+				}
 			}
 		}
 
