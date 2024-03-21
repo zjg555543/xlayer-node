@@ -25,6 +25,10 @@ var once sync.Once
 
 // GetInternalTransactions returns a transaction by his hash
 func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{}, types.Error) {
+	ts := time.Now()
+	defer func() {
+		log.Info("GetInternalTransactions took: ", time.Since(ts))
+	}()
 	if e.isDisabled("eth_getInternalTransactions") {
 		return RPCErrorResponse(types.DefaultErrorCode, "not supported yet", nil, true)
 	}
@@ -42,6 +46,7 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			var innerTxs []*InnerTx
 			err = json.Unmarshal([]byte(ret), &innerTxs)
 			if err == nil {
+				log.Info("GetInnerTx from cache")
 				return innerTxs, nil
 			} else {
 				log.Errorf("failed to unmarshal inner txs: %v", err)
