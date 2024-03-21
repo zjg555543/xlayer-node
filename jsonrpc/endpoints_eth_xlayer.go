@@ -38,8 +38,13 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 	if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
 		log.Errorf("failed to get inner txs from the pool: %v", err)
 	} else {
-		log.Infof("got inner txs from the pool: %v", ret)
-		return ret, nil
+		var innerTxs []*InnerTx
+		err = json.Unmarshal(ret, &innerTxs)
+		if err == nil {
+			return innerTxs, nil
+		} else {
+			log.Errorf("failed to unmarshal inner txs: %v", err)
+		}
 	}
 
 	return debugEndPoints.txMan.NewDbTxScope(debugEndPoints.state, func(ctx context.Context, dbTx pgx.Tx) (interface{}, types.Error) {
@@ -64,8 +69,10 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 		result := internalTxTraceToInnerTxs(of)
 
 		// Add inner txs to the pool
-		if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), string(r)); err != nil {
-			log.Errorf("failed to add inner txs to the pool: %v", err)
+		if innerTxBlob, err := json.Marshal(result); err != nil {
+			if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), innerTxBlob); err != nil {
+				log.Errorf("failed to add inner txs to the pool: %v", err)
+			}
 		}
 
 		return result, nil
