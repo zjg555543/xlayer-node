@@ -67,6 +67,7 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			return nil, types.NewRPCError(types.ParserErrorCode, stderr.Error())
 		}
 		result := internalTxTraceToInnerTxs(of)
+		log.Infof("result: %v", result)
 
 		// Add inner txs to the pool
 		if innerTxBlob, err := json.Marshal(result); err != nil {
