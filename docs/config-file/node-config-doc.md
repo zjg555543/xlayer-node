@@ -1272,6 +1272,7 @@ FreeClaimGasLimit=150000
 | - [DisableAPIs](#RPC_DisableAPIs )                                           | No      | array of string  | No         | -          | DisableAPIs disable some API                                                                                                                                                                                                                                                                                                                       |
 | - [RateLimit](#RPC_RateLimit )                                               | No      | object           | No         | -          | RateLimit enable rate limit                                                                                                                                                                                                                                                                                                                        |
 | - [DynamicGP](#RPC_DynamicGP )                                               | No      | object           | No         | -          | DynamicGP defines the config of dynamic gas price                                                                                                                                                                                                                                                                                                  |
+| - [EnableInnerTxCacheDB](#RPC_EnableInnerTxCacheDB )                         | No      | boolean          | No         | -          | EnableInnerTxCacheDB enables the inner tx cache db                                                                                                                                                                                                                                                                                                 |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -2107,6 +2108,20 @@ MaxPrice=0
 ```
 [RPC.DynamicGP]
 MinPrice=0
+```
+
+### <a name="RPC_EnableInnerTxCacheDB"></a>8.25. `RPC.EnableInnerTxCacheDB`
+
+**Type:** : `boolean`
+
+**Default:** `false`
+
+**Description:** EnableInnerTxCacheDB enables the inner tx cache db
+
+**Example setting the default value** (false):
+```
+[RPC]
+EnableInnerTxCacheDB=false
 ```
 
 ## <a name="Synchronizer"></a>9. `[Synchronizer]`

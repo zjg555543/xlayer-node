@@ -34,12 +34,10 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			state: e.state,
 		}
 	})
-	dbCtx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond)
-	defer cancel()
 	if e.cfg.EnableInnerTxCacheDB {
-		if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err != nil {
-			log.Errorf("failed to get inner txs from the pool: %v", err)
-		} else {
+		dbCtx, cancel := context.WithTimeout(context.Background(), 300*time.Millisecond) //nolint:gomnd
+		defer cancel()
+		if ret, err := e.pool.GetInnerTx(dbCtx, hash.Hash()); err == nil {
 			var innerTxs []*InnerTx
 			err = json.Unmarshal([]byte(ret), &innerTxs)
 			if err == nil {
@@ -75,15 +73,12 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 
 		if e.cfg.EnableInnerTxCacheDB {
 			// Add inner txs to the pool
-			innerTxBlob, myerr := json.Marshal(result)
-			if myerr != nil {
-				log.Errorf("failed to marshal inner txs: %v", err)
-			} else {
+			if innerTxBlob, err := json.Marshal(result); err == nil {
 				go func() {
-					dbContext, c := context.WithTimeout(context.Background(), 3*time.Second)
+					dbContext, c := context.WithTimeout(context.Background(), 3*time.Second) //nolint:gomnd
 					defer c()
 					if err := e.pool.AddInnerTx(dbContext, hash.Hash(), innerTxBlob); err != nil {
-						log.Errorf("failed to add inner txs to the pool: %v", err)
+						metrics.RequestInnerTxAddErrorCount()
 					}
 				}()
 			}

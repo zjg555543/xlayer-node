@@ -8,10 +8,11 @@ import (
 )
 
 var (
-	requestMethodName          = requestPrefix + "method"
-	requestMethodDurationName  = requestPrefix + "method_duration"
-	requestInnerTxCachedName   = requestPrefix + "inner_tx_cached"
-	requestInnerTxExecutedName = requestPrefix + "inner_tx_executed"
+	requestMethodName           = requestPrefix + "method"
+	requestMethodDurationName   = requestPrefix + "method_duration"
+	requestInnerTxCachedName    = requestPrefix + "inner_tx_cached"
+	requestInnerTxExecutedName  = requestPrefix + "inner_tx_executed"
+	requestInnerTxAddErrorCount = requestPrefix + "inner_tx_error_count"
 
 	wsRequestPrefix             = prefix + "ws_request_"
 	requestWsMethodName         = wsRequestPrefix + "method"
@@ -89,4 +90,9 @@ func RequestInnerTxExecutedCount() {
 // RequestInnerTxCachedCount increments the inner tx cached counter vector by one.
 func RequestInnerTxCachedCount() {
 	metrics.CounterInc(requestInnerTxCachedName)
+}
+
+// RequestInnerTxAddErrorCount increments the inner tx add error counter vector by one.
+func RequestInnerTxAddErrorCount() {
+	metrics.CounterInc(requestInnerTxAddErrorCount)
 }
