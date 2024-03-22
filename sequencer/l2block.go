@@ -225,8 +225,6 @@ func (f *finalizer) processL2Block(ctx context.Context, l2Block *L2Block) error 
 
 	f.updateFlushIDs(batchResponse.FlushID, batchResponse.StoredFlushID)
 
-	go f.pullProverIdAndFlushId(ctx)
-
 	f.addPendingL2BlockToStore(ctx, l2Block)
 
 	// metrics
@@ -328,12 +326,14 @@ func (f *finalizer) storeL2Block(ctx context.Context, l2Block *L2Block) error {
 	startStoring := time.Now()
 
 	startFlushWait := time.Now()
-	// Wait until L2 block has been flushed/stored by the executor
-	f.storedFlushIDCond.L.Lock()
-	for f.storedFlushID < l2Block.batchResponse.FlushID {
-		f.storedFlushIDCond.Wait()
+	if l2Block.batchResponse.BlockResponses[0].BlockNumber%10 == 0 {
+		// Wait until L2 block has been flushed/stored by the executor
+		f.storedFlushIDCond.L.Lock()
+		for f.storedFlushID < l2Block.batchResponse.FlushID {
+			f.storedFlushIDCond.Wait()
+		}
+		f.storedFlushIDCond.L.Unlock()
 	}
-	f.storedFlushIDCond.L.Unlock()
 	seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.StartFlushWait, time.Since(startFlushWait))
 
 	startFork := time.Now()
