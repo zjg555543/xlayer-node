@@ -412,6 +412,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 		currentBatchNumber += limit
 
 		for b, batch := range fullBatches {
+			log.Info("Processing batch: ", batch.BatchNumber)
 			if batch.BatchNumber <= lastAddedBatchNumber && lastAddedBatchNumber != 0 {
 				continue
 			} else {
@@ -465,6 +466,7 @@ func GenerateDataStreamerFile(ctx context.Context, streamServer *datastreamer.St
 				}
 			} else {
 				for blockIndex, l2Block := range batch.L2Blocks {
+					log.Infof("Processing L2 block: %d, l2Block.ForkID:%v", l2Block.L2BlockNumber, l2Block.ForkID)
 					if l2Block.L2BlockNumber <= lastAddedL2BlockNumber && lastAddedL2BlockNumber != 0 {
 						continue
 					} else {
