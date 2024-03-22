@@ -79,9 +79,13 @@ func (e *EthEndpoints) GetInternalTransactions(hash types.ArgHash) (interface{},
 			if myerr != nil {
 				log.Errorf("failed to marshal inner txs: %v", err)
 			} else {
-				if err := e.pool.AddInnerTx(dbCtx, hash.Hash(), innerTxBlob); err != nil {
-					log.Errorf("failed to add inner txs to the pool: %v", err)
-				}
+				go func() {
+					dbContext, c := context.WithTimeout(context.Background(), 3*time.Second)
+					defer c()
+					if err := e.pool.AddInnerTx(dbContext, hash.Hash(), innerTxBlob); err != nil {
+						log.Errorf("failed to add inner txs to the pool: %v", err)
+					}
+				}()
 			}
 		}
 

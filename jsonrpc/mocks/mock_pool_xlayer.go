@@ -24,6 +24,7 @@ func (_m *PoolMock) AddInnerTx(ctx context.Context, txHash common.Hash, innerTx 
 	return r0
 }
 
+// GetInnerTx provides a mock function with given fields: ctx, txHash
 func (_m *PoolMock) GetInnerTx(ctx context.Context, txHash common.Hash) (string, error) {
 	ret := _m.Called(ctx, txHash)
 
