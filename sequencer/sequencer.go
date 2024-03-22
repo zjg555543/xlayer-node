@@ -202,7 +202,7 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 		if err != nil && err != pool.ErrNotFound {
 			log.Errorf("error loading txs from pool, error: %v", err)
 		}
-
+		log.Info("########GetNonWIPPendingTxs time elapsed: ", time.Since(start).String())
 		seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.GetNonWIPPendingTxsCount)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetNonWIPPendingTxs, time.Since(start))
 
