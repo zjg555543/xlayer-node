@@ -80,4 +80,10 @@ const (
 	FinalizeBatchCloseBatch logTag = "FinalizeBatchCloseBatch"
 	// FinalizeBatchOpenBatch is used to log batch open events.
 	FinalizeBatchOpenBatch logTag = "FinalizeBatchOpenBatch"
+
+	GetNonWIPPendingTxs      logTag = "GetNonWIPPendingTxs"
+	GetNonWIPPendingTxsCount logTag = "GetNonWIPPendingTxsCount"
+
+	AddTxToWorker      logTag = "AddTxToWorker"
+	AddTxToWorkerCount logTag = "AddTxToWorkerCount"
 )
