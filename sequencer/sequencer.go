@@ -205,7 +205,7 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 
 		seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.GetNonWIPPendingTxsCount)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetNonWIPPendingTxs, time.Since(start))
-
+		start = time.Now()
 		for _, tx := range poolTransactions {
 			start := time.Now()
 			err := s.addTxToWorker(ctx, tx)
