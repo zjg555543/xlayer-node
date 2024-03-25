@@ -53,7 +53,7 @@ type DynamicGPManager struct {
 func (e *EthEndpoints) runDynamicGPSuggester() {
 	ctx := context.Background()
 	// initialization
-	updateTimer := time.NewTimer(10 * time.Second)
+	updateTimer := time.NewTimer(10 * time.Second) //nolint:gomnd
 	for {
 		select {
 		case <-ctx.Done():
