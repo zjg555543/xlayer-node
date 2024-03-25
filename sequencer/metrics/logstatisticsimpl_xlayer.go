@@ -71,11 +71,6 @@ func (l *logStatisticsInstance) Summary() string {
 
 	wipBlock := "CloseWIPL2Block<" + strconv.Itoa(int(l.statistics[CloseWIPL2Block])) + "ms>, " + "OpenNewWIPL2Block<" + strconv.Itoa(int(l.statistics[OpenNewWIPL2Block])) + "ms>, "
 
-	loadTime := "GetNonWIPPendingTxsCount<" + strconv.Itoa(int(l.statistics[GetNonWIPPendingTxsCount])) + ">, " +
-		"GetNonWIPPendingTxs<" + strconv.Itoa(int(l.statistics[GetNonWIPPendingTxs])) + "ms>, " +
-		"AddTxToWorkerCount<" + strconv.Itoa(int(l.statistics[AddTxToWorkerCount])) + ">, " +
-		"AddTxToWorker<" + strconv.Itoa(int(l.statistics[AddTxToWorker])) + "ms>, "
-
 	storeL2Block := "StoreL2Block<" + strconv.Itoa(int(l.statistics[StoreL2Block])) + "ms, " +
 		"StateStoreL2Block<" + strconv.Itoa(int(l.statistics[StateStoreL2Block])) + "ms>, " +
 		"UpdateWIPBatch<" + strconv.Itoa(int(l.statistics[UpdateWIPBatch])) + "ms>, " +
@@ -98,7 +93,6 @@ func (l *logStatisticsInstance) Summary() string {
 		finalizeBatchTiming +
 		wipBlock +
 		storeL2Block +
-		loadTime +
 		"BatchCloseReason<" + l.tags[BatchCloseReason] + ">"
 
 	return result

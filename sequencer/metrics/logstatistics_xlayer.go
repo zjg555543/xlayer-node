@@ -80,13 +80,4 @@ const (
 	FinalizeBatchCloseBatch logTag = "FinalizeBatchCloseBatch"
 	// FinalizeBatchOpenBatch is used to log batch open events.
 	FinalizeBatchOpenBatch logTag = "FinalizeBatchOpenBatch"
-
-	// GetNonWIPPendingTxs is used to log get non wip pending txs events.
-	GetNonWIPPendingTxs logTag = "GetNonWIPPendingTxs"
-	// GetNonWIPPendingTxsCount is used to log get non wip pending txs count events.
-	GetNonWIPPendingTxsCount logTag = "GetNonWIPPendingTxsCount"
-	// AddTxToWorker is used to log add to worker events.
-	AddTxToWorker logTag = "AddTxToWorker"
-	// AddTxToWorkerCount is used to log add to worker count events.
-	AddTxToWorkerCount logTag = "AddTxToWorkerCount"
 )
