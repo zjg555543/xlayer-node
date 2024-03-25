@@ -98,6 +98,8 @@ func (s *Sequencer) Start(ctx context.Context) {
 
 	go s.loadFromPool(ctx)
 
+	go s.countPendingTx()
+
 	if s.streamServer != nil {
 		go s.sendDataToStreamer(s.cfg.StreamServer.ChainID)
 	}
