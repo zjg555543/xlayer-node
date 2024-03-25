@@ -228,8 +228,8 @@ func (s *Sequencer) addTxToWorker(ctx context.Context, tx pool.Transaction) erro
 		return err
 	}
 
-	if txTracker.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
-		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 addTxToWorker start: %s", time.Now().String())
+	if txTracker.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
+		log.Infof("0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 addTxToWorker start: %s", time.Now().String())
 	}
 
 	addrs := getPackBatchSpacialList(s.cfg.PackBatchSpacialList)
@@ -240,8 +240,8 @@ func (s *Sequencer) addTxToWorker(ctx context.Context, tx pool.Transaction) erro
 	}
 
 	replacedTx, dropReason := s.worker.AddTxTracker(ctx, txTracker)
-	if txTracker.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
-		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 AddTxTracker done: %s", time.Now().String())
+	if txTracker.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
+		log.Infof("0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 AddTxTracker done: %s", time.Now().String())
 	}
 	if dropReason != nil {
 		failedReason := dropReason.Error()
