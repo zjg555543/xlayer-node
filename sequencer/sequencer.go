@@ -203,7 +203,7 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 		}
 
 		if time.Since(start).Seconds() > 10 {
-			log.Infof("loadFromPool %s > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
+			log.Infof("loadFromPool %f > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
 		}
 		start1 := time.Now()
 		for _, tx := range poolTransactions {
@@ -213,7 +213,7 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 			}
 		}
 		if time.Since(start1).Seconds() > 10 {
-			log.Infof("addTxToWorker %s > 10s: %d", time.Since(start1).Seconds(), len(poolTransactions))
+			log.Infof("addTxToWorker %f > 10s: %d", time.Since(start1).Seconds(), len(poolTransactions))
 		}
 
 		if len(poolTransactions) == 0 {
