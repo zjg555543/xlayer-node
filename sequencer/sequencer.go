@@ -11,7 +11,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/event"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/pool"
-	seqMetrics "github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -203,20 +202,15 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 			log.Errorf("error loading txs from pool, error: %v", err)
 		}
 
-		seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.GetNonWIPPendingTxsCount)
-		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetNonWIPPendingTxs, time.Since(start))
 		if time.Since(start).Seconds() > 10 {
 			log.Infof("loadFromPool %s > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
 		}
 		start1 := time.Now()
 		for _, tx := range poolTransactions {
-			start := time.Now()
 			err := s.addTxToWorker(ctx, tx)
 			if err != nil {
 				log.Errorf("error adding transaction to worker, error: %v", err)
 			}
-			seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.AddTxToWorker)
-			seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.AddTxToWorkerCount, time.Since(start))
 		}
 		if time.Since(start1).Seconds() > 10 {
 			log.Infof("addTxToWorker %s > 10s: %d", time.Since(start1).Seconds(), len(poolTransactions))
