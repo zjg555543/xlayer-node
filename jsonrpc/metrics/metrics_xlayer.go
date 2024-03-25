@@ -55,6 +55,27 @@ var (
 			},
 			Labels: []string{requestMethodLabelName},
 		},
+		{
+			CounterOpts: prometheus.CounterOpts{
+				Name: requestInnerTxCachedName,
+				Help: "[JSONRPC] number of cached innertx requests",
+			},
+			Labels: []string{},
+		},
+		{
+			CounterOpts: prometheus.CounterOpts{
+				Name: requestInnerTxExecutedName,
+				Help: "[JSONRPC] number of executed innertx requests",
+			},
+			Labels: []string{},
+		},
+		{
+			CounterOpts: prometheus.CounterOpts{
+				Name: requestInnerTxAddErrorCount,
+				Help: "[JSONRPC] number of add innertx count",
+			},
+			Labels: []string{},
+		},
 	}
 )
 
