@@ -65,7 +65,7 @@ func (e *EthEndpoints) runDynamicGPSuggester() {
 				e.cfg.DynamicGP = getApolloConfig().DynamicGP
 				getApolloConfig().RUnlock()
 			}
-			log.Info("Dynamic gas price update period is ", e.cfg.DynamicGP.UpdatePeriod.Duration.String())
+			//log.Info("Dynamic gas price update period is ", e.cfg.DynamicGP.UpdatePeriod.Duration.String())
 			e.calcDynamicGP(ctx)
 			updateTimer.Reset(e.cfg.DynamicGP.UpdatePeriod.Duration)
 		}
