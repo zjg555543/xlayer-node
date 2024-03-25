@@ -283,9 +283,6 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 		start := now()
 		tx, err := f.workerIntf.GetBestFittingTx(f.wipBatch.imRemainingResources)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetTx, time.Since(start))
-		if tx.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
-			log.Infof("0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 GetBestFittingTx start: %s, done: %s", start.String(), time.Now().String())
-		}
 
 		// If we have txs pending to process but none of them fits into the wip batch, we close the wip batch and open a new one
 		if err == ErrNoFittingTransaction {
@@ -297,6 +294,9 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 		f.tryToSleep()
 
 		if tx != nil {
+			if tx.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
+				log.Infof("0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 GetBestFittingTx start: %s, done: %s", start.String(), time.Now().String())
+			}
 			seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.TxCounter)
 
 			log.Debugf("processing tx %s", tx.HashStr)
