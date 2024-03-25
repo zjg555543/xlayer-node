@@ -15,7 +15,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/hex"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/pool"
-	pmetrics "github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	seqMetrics "github.com/0xPolygonHermez/zkevm-node/sequencer/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	stateMetrics "github.com/0xPolygonHermez/zkevm-node/state/metrics"
@@ -801,7 +800,7 @@ func (f *finalizer) Halt(ctx context.Context, err error, isFatal bool) {
 		log.Fatalf("fatal error on finalizer, error: %v", err)
 	} else {
 		for {
-			pmetrics.HaltCount()
+			seqMetrics.HaltCount()
 			log.Errorf("halting finalizer, error: %v", err)
 			time.Sleep(5 * time.Second) //nolint:gomnd
 		}
