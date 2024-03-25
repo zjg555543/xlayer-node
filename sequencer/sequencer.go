@@ -205,7 +205,10 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 
 		seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.GetNonWIPPendingTxsCount)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetNonWIPPendingTxs, time.Since(start))
-		start = time.Now()
+		if time.Since(start).Seconds() > 10 {
+			log.Infof("loadFromPool %s > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
+		}
+		start1 := time.Now()
 		for _, tx := range poolTransactions {
 			start := time.Now()
 			err := s.addTxToWorker(ctx, tx)
@@ -215,8 +218,8 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 			seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.AddTxToWorker)
 			seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.AddTxToWorkerCount, time.Since(start))
 		}
-		if time.Since(start).Seconds() > 10 {
-			log.Infof("loadFromPool and addTxToWorker %s > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
+		if time.Since(start1).Seconds() > 10 {
+			log.Infof("addTxToWorker %s > 10s: %d", time.Since(start1).Seconds(), len(poolTransactions))
 		}
 
 		if len(poolTransactions) == 0 {
