@@ -215,6 +215,9 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 			seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.AddTxToWorker)
 			seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.AddTxToWorkerCount, time.Since(start))
 		}
+		if time.Since(start).Seconds() > 10 {
+			log.Infof("loadFromPool and addTxToWorker %s > 10s: %d", time.Since(start).Seconds(), len(poolTransactions))
+		}
 
 		if len(poolTransactions) == 0 {
 			time.Sleep(s.cfg.LoadPoolTxsCheckInterval.Duration)
