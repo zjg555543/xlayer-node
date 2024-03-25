@@ -17,6 +17,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/state/runtime/executor"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/actions"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/common/syncinterfaces"
+	metrics2 "github.com/0xPolygonHermez/zkevm-node/synchronizer/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	ethTypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/jackc/pgx/v4"
@@ -291,6 +292,7 @@ func (g *ProcessorL1SequenceBatches) processSequenceBatches(ctx context.Context,
 			log.Errorf("error storing virtualBatch. BatchNumber: %d, BlockNumber: %d, error: %v", virtualBatch.BatchNumber, blockNumber, err)
 			return err
 		}
+		metrics2.VirtualBatchNum(virtualBatch.BatchNumber)
 	}
 	// Insert the sequence to allow the aggregator verify the sequence batches
 	seq := state.Sequence{
