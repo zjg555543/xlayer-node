@@ -175,17 +175,30 @@ func (p *Pool) StartPollingMinSuggestedGasPrice(ctx context.Context) {
 // AddTx adds a transaction to the pool with the pending state
 func (p *Pool) AddTx(ctx context.Context, tx types.Transaction, ip string) error {
 	poolTx := NewTransaction(tx, ip, false, p)
+	from, err := state.GetSender(poolTx.Transaction)
+	if err != nil {
+		return ErrInvalidSender
+	}
+	if from.String() == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 Start AddTx: %s", time.Now().String())
+	}
 	if err := p.validateTx(ctx, *poolTx); err != nil {
 		return err
 	}
+	if from.String() == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 validateTx done: %s", time.Now().String())
+	}
 
-	return p.StoreTx(ctx, tx, ip, false)
+	return p.StoreTx(ctx, tx, ip, false, from.String())
 }
 
 // StoreTx adds a transaction to the pool with the pending state
-func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isWIP bool) error {
+func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isWIP bool, from string) error {
 	// Execute transaction to calculate its zkCounters
 	preExecutionResponse, err := p.preExecuteTx(ctx, tx)
+	if from == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 preExecuteTx done: %s", time.Now().String())
+	}
 	if errors.Is(err, runtime.ErrIntrinsicInvalidBatchGasLimit) {
 		return ErrGasLimit
 	} else if preExecutionResponse.isExecutorLevelError {
@@ -239,12 +252,19 @@ func (p *Pool) StoreTx(ctx context.Context, tx types.Transaction, ip string, isW
 	if err != nil {
 		return err
 	}
+	if from == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 ValidateBreakEvenGasPrice done: %s", time.Now().String())
+	}
 
 	poolTx := NewTransaction(tx, ip, isWIP, p)
 	poolTx.ZKCounters = preExecutionResponse.usedZKCounters
 	poolTx.ReservedZKCounters = preExecutionResponse.reservedZKCounters
 
-	return p.storage.AddTx(ctx, *poolTx)
+	err = p.storage.AddTx(ctx, *poolTx)
+	if from == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 storage.AddTx done: %s", time.Now().String())
+	}
+	return err
 }
 
 // ValidateBreakEvenGasPrice validates the effective gas price

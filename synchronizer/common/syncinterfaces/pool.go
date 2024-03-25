@@ -8,5 +8,5 @@ import (
 
 type PoolInterface interface {
 	DeleteReorgedTransactions(ctx context.Context, txs []*ethTypes.Transaction) error
-	StoreTx(ctx context.Context, tx ethTypes.Transaction, ip string, isWIP bool) error
+	StoreTx(ctx context.Context, tx ethTypes.Transaction, ip string, isWIP bool, from string) error
 }

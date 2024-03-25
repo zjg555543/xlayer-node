@@ -283,6 +283,9 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 		start := now()
 		tx, err := f.workerIntf.GetBestFittingTx(f.wipBatch.imRemainingResources)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetTx, time.Since(start))
+		if tx.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+			log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 GetBestFittingTx start: %s, done: %s", start.String(), time.Now().String())
+		}
 
 		// If we have txs pending to process but none of them fits into the wip batch, we close the wip batch and open a new one
 		if err == ErrNoFittingTransaction {
@@ -303,7 +306,11 @@ func (f *finalizer) finalizeBatches(ctx context.Context) {
 
 			for {
 				var err error
+				start := now()
 				_, err = f.processTransaction(ctx, tx, firstTxProcess)
+				if tx.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+					log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 processTransaction start: %s, done: %s", start.String(), time.Now().String())
+				}
 				if err != nil {
 					if err == ErrEffectiveGasPriceReprocess {
 						firstTxProcess = false

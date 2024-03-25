@@ -202,7 +202,7 @@ func (s *Sequencer) loadFromPool(ctx context.Context) {
 		if err != nil && err != pool.ErrNotFound {
 			log.Errorf("error loading txs from pool, error: %v", err)
 		}
-		
+
 		seqMetrics.GetLogStatistics().CumulativeCounting(seqMetrics.GetNonWIPPendingTxsCount)
 		seqMetrics.GetLogStatistics().CumulativeTiming(seqMetrics.GetNonWIPPendingTxs, time.Since(start))
 
@@ -228,6 +228,10 @@ func (s *Sequencer) addTxToWorker(ctx context.Context, tx pool.Transaction) erro
 		return err
 	}
 
+	if txTracker.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 addTxToWorker start: %s", time.Now().String())
+	}
+
 	addrs := getPackBatchSpacialList(s.cfg.PackBatchSpacialList)
 	if addrs[txTracker.FromStr] {
 		_, l2gp := s.pool.GetL1AndL2GasPrice()
@@ -236,6 +240,9 @@ func (s *Sequencer) addTxToWorker(ctx context.Context, tx pool.Transaction) erro
 	}
 
 	replacedTx, dropReason := s.worker.AddTxTracker(ctx, txTracker)
+	if txTracker.FromStr == "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" {
+		log.Infof("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 AddTxTracker done: %s", time.Now().String())
+	}
 	if dropReason != nil {
 		failedReason := dropReason.Error()
 		return s.pool.UpdateTxStatus(ctx, txTracker.Hash, pool.TxStatusFailed, false, &failedReason)

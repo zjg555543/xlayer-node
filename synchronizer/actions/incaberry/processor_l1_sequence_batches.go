@@ -41,7 +41,7 @@ type ethermanProcessSequenceBatches interface {
 
 type poolProcessSequenceBatchesInterface interface {
 	DeleteReorgedTransactions(ctx context.Context, txs []*ethTypes.Transaction) error
-	StoreTx(ctx context.Context, tx ethTypes.Transaction, ip string, isWIP bool) error
+	StoreTx(ctx context.Context, tx ethTypes.Transaction, ip string, isWIP bool, from string) error
 }
 
 type syncProcessSequenceBatchesInterface interface {
@@ -338,7 +338,7 @@ func (g *ProcessorL1SequenceBatches) reorgPool(ctx context.Context, dbTx pgx.Tx)
 	for _, tx := range txs {
 		// Insert tx in WIP status to avoid the sequencer to grab them before it gets restarted
 		// When the sequencer restarts, it will update the status to pending non-wip
-		err = g.pool.StoreTx(ctx, *tx, "", true)
+		err = g.pool.StoreTx(ctx, *tx, "", true, "")
 		if err != nil {
 			log.Errorf("error storing tx into the pool again. TxHash: %s. BatchNumber: %d, error: %v", tx.Hash().String(), batchNumber, err)
 			return err
