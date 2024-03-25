@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/0xPolygonHermez/zkevm-node/log"
 )
@@ -120,6 +121,10 @@ func (e *txSortedList) addSort(tx *TxTracker) {
 	e.sorted = append(e.sorted, nil)
 	copy(e.sorted[i+1:], e.sorted[i:])
 	e.sorted[i] = tx
+
+	if tx.FromStr == "0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225" {
+		log.Infof("0x2ECF31eCe36ccaC2d3222A303b1409233ECBB225 addSort done: %s", time.Now().String())
+	}
 	log.Debugf("added tx %s with  gasPrice %d to txSortedList at index %d from total %d", tx.HashStr, tx.GasPrice, i, len(e.sorted))
 }
 
