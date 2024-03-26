@@ -71,8 +71,8 @@ func (l *logStatisticsInstance) Summary() string {
 
 	wipBlock := "CloseWIPL2Block<" + strconv.Itoa(int(l.statistics[CloseWIPL2Block])) + "ms>, " + "OpenNewWIPL2Block<" + strconv.Itoa(int(l.statistics[OpenNewWIPL2Block])) + "ms>, "
 
-	processingL2Block := "ProcessBlock<" + strconv.Itoa(int(l.statistics[ProcessingBlockTiming])) + ">ms, "
-	storeL2Block := "StoreBlock<" + strconv.Itoa(int(l.statistics[StoreBlockTiming])) + ">ms, "
+	processingL2Block := "ProcessBlock<" + strconv.Itoa(int(l.statistics[ProcessingBlockTiming])) + "ms>, "
+	storeL2Block := "StoreBlock<" + strconv.Itoa(int(l.statistics[StoreBlockTiming])) + "ms>, "
 
 	result := "Batch<" + l.tags[FinalizeBatchNumber] + ">, " +
 		"TotalDuration<" + batchTotalDuration + "ms>, " +
