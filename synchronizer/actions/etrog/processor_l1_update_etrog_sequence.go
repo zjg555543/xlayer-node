@@ -11,6 +11,7 @@ import (
 	stateMetrics "github.com/0xPolygonHermez/zkevm-node/state/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/actions"
 	syncCommon "github.com/0xPolygonHermez/zkevm-node/synchronizer/common"
+	metrics2 "github.com/0xPolygonHermez/zkevm-node/synchronizer/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4"
 )
@@ -125,6 +126,7 @@ func (g *ProcessorL1UpdateEtrogSequence) processUpdateEtrogSequence(ctx context.
 		log.Errorf("error storing virtualBatch. BatchNumber: %d, BlockNumber: %d, error: %v", virtualBatch.BatchNumber, blockNumber, err)
 		return err
 	}
+	metrics2.VirtualBatchNum(virtualBatch.BatchNumber)
 	// Insert the sequence to allow the aggregator verify the sequence batches
 	seq := state.Sequence{
 		FromBatchNumber: updateEtrogSequence.BatchNumber,
