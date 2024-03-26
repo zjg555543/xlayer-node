@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/0xPolygonHermez/zkevm-node/encoding"
+	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/jsonrpc/types"
 )
 
@@ -23,5 +24,8 @@ func NewNetEndpoints(cfg Config, chainID uint64) *NetEndpoints {
 
 // Version returns the current network id
 func (n *NetEndpoints) Version() (interface{}, types.Error) {
+	metrics.RequestInnerTxCachedCount()
+	metrics.RequestInnerTxExecutedCount()
+	metrics.RequestInnerTxAddErrorCount()
 	return strconv.FormatUint(n.chainID, encoding.Base10), nil
 }
