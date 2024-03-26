@@ -8,7 +8,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/0xPolygonHermez/zkevm-node/state"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/actions"
-	metrics2 "github.com/0xPolygonHermez/zkevm-node/synchronizer/metrics"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -104,7 +103,6 @@ func (p *ProcessorL1VerifyBatch) processVerifyBatches(ctx context.Context, lastV
 			log.Errorf("error storing the verifiedB in processVerifyBatches. BlockNumber: %d, error: %v", lastVerifiedBatch.BlockNumber, err)
 			return err
 		}
-		metrics2.VerifiedBatchNum(verifiedB.BatchNumber)
 	}
 	return nil
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/state/metrics"
 	stateMetrics "github.com/0xPolygonHermez/zkevm-node/state/metrics"
 	"github.com/0xPolygonHermez/zkevm-node/synchronizer/actions"
-	metrics2 "github.com/0xPolygonHermez/zkevm-node/synchronizer/metrics"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/jackc/pgx/v4"
 )
@@ -164,7 +163,6 @@ func (s *ProcessL1SequenceForcedBatches) processSequenceForceBatch(ctx context.C
 			log.Errorf("error storing virtualBatch in processSequenceForceBatch. BatchNumber: %d, BlockNumber: %d, error: %v", virtualBatch.BatchNumber, block.BlockNumber, err)
 			return err
 		}
-		metrics2.VirtualBatchNum(virtualBatch.BatchNumber)
 	}
 	// Insert the sequence to allow the aggregator verify the sequence batches
 	seq := state.Sequence{
