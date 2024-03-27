@@ -1273,6 +1273,7 @@ FreeClaimGasLimit=150000
 | - [RateLimit](#RPC_RateLimit )                                               | No      | object           | No         | -          | RateLimit enable rate limit                                                                                                                                                                                                                                                                                                                        |
 | - [DynamicGP](#RPC_DynamicGP )                                               | No      | object           | No         | -          | DynamicGP defines the config of dynamic gas price                                                                                                                                                                                                                                                                                                  |
 | - [EnableInnerTxCacheDB](#RPC_EnableInnerTxCacheDB )                         | No      | boolean          | No         | -          | EnableInnerTxCacheDB enables the inner tx cache db                                                                                                                                                                                                                                                                                                 |
+| - [BridgeAddress](#RPC_BridgeAddress )                                       | No      | array of integer | No         | -          | BridgeAddress is the address of the bridge contract                                                                                                                                                                                                                                                                                                |
 
 ### <a name="RPC_Host"></a>8.1. `RPC.Host`
 
@@ -2150,6 +2151,11 @@ UpdatePeriod="0s"
 [RPC]
 EnableInnerTxCacheDB=false
 ```
+
+### <a name="RPC_BridgeAddress"></a>8.26. `RPC.BridgeAddress`
+
+**Type:** : `array of integer`
+**Description:** BridgeAddress is the address of the bridge contract
 
 ## <a name="Synchronizer"></a>9. `[Synchronizer]`
 
