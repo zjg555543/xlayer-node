@@ -809,6 +809,15 @@
 					"type": "boolean",
 					"description": "EnableInnerTxCacheDB enables the inner tx cache db",
 					"default": false
+				},
+				"BridgeAddress": {
+					"items": {
+						"type": "integer"
+					},
+					"type": "array",
+					"maxItems": 20,
+					"minItems": 20,
+					"description": "BridgeAddress is the address of the bridge contract"
 				}
 			},
 			"additionalProperties": false,

@@ -274,6 +274,11 @@ func (e *EthEndpoints) GetBalance(address types.ArgAddress, blockArg *types.Bloc
 			return nil, rpcErr
 		}
 
+		// In order not to confuse users, set the balance of the bridge to 0
+		if address.Address() == e.cfg.BridgeAddress {
+			return hex.EncodeUint64(0), nil
+		}
+
 		balance, err := e.state.GetBalance(ctx, address.Address(), block.Root())
 		if errors.Is(err, state.ErrNotFound) {
 			return hex.EncodeUint64(0), nil
