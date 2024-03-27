@@ -100,6 +100,9 @@ type Config struct {
 
 	// EnableInnerTxCacheDB enables the inner tx cache db
 	EnableInnerTxCacheDB bool `mapstructure:"EnableInnerTxCacheDB"`
+
+	// BridgeAddress is the address of the bridge contract
+	BridgeAddress common.Address `mapstructure:"BridgeAddress"`
 }
 
 // ZKCountersLimits defines the ZK Counter limits
